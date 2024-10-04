@@ -1,5 +1,5 @@
 # Chạy Server Backend
-*Hướng dẫn chạy server backend Veltra:
+## Hướng dẫn chạy server backend Veltra:
 1. Dẫn vào thư mục backend và cài đặt npm: 
     ```bash
     npm i
