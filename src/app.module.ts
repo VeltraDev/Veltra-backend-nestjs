@@ -7,7 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
-import { JwtModule } from '@nestjs/jwt';
 import ms from 'ms';
 
 @Module({

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, Matches } from 'class-validator';
 
 export class RegisterUserDto {
   @IsNotEmpty({ message: 'Email là bắt buộc' })
@@ -7,10 +7,13 @@ export class RegisterUserDto {
 
   @IsNotEmpty({ message: 'Mật khẩu là bắt buộc' })
   @IsString({ message: 'Mật khẩu phải là chuỗi' })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
-    message:
-      'Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt',
-  })
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+    {
+      message:
+        'Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt',
+    },
+  )
   password: string;
 
   @IsNotEmpty({ message: 'Tên là bắt buộc' })
@@ -20,4 +23,14 @@ export class RegisterUserDto {
   @IsNotEmpty({ message: 'Họ là bắt buộc' })
   @IsString({ message: 'Họ phải là chuỗi' })
   lastName: string;
+
+  @IsOptional()
+  @IsString({ message: 'Avatar phải là chuỗi.' })
+  avatar?: string;
+
+  @IsOptional()
+  @IsPhoneNumber('VN', {
+    message: 'Số điện thoại phải là số hợp lệ tại Việt Nam',
+  })
+  phone?: string;
 }

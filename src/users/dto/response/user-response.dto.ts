@@ -14,10 +14,13 @@ export class UserResponseDto {
   lastName: string;
 
   @Expose()
+  avatar: string;
+
+  @Expose()
   phone: string;
 
   @Expose()
-  isVerified: boolean;
+  displayStatus: string;
 
   @Expose()
   createdAt: Date;

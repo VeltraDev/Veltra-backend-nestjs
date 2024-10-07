@@ -32,12 +32,6 @@ export class AuthService {
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
     const { email } = forgotPasswordDto;
     const user: User = await this.usersService.findOneByEmail(email);
-    if (!user) {
-      throw new BadRequestException(
-        `Người dùng với email ${email} đã tồn tại trên hệ thống.`,
-      );
-    }
-
     return this.mailService.sendForgotPasswordEmail(user);
   }
 
@@ -84,8 +78,7 @@ export class AuthService {
       }
     }
 
-    const user: User = await this.usersService.findOneById(decodedToken.sub);
-    if (!user) throw new BadRequestException('Người dùng không tồn tại.');
+    const user: User = await this.usersService.getUserById(decodedToken.sub);
     return user;
   }
 
@@ -96,6 +89,14 @@ export class AuthService {
       );
     }
 
+    const phoneExists = await this.usersService.findOneByPhone(
+      registerDto.phone,
+    );
+    if (phoneExists)
+      throw new BadRequestException(
+        `Số điện thoại ${registerDto.phone} đã được sử dụng trên hệ thống.`,
+      );
+
     const newUser = plainToClass(User, registerDto);
     newUser.password = getHashPassword(registerDto.password);
     const savedUser = await this.usersService.create(newUser);
@@ -105,10 +106,11 @@ export class AuthService {
 
   async resendVerifyEmail(email: string): Promise<void> {
     const user = await this.usersService.findOneByEmail(email);
-    if (!user) throw new BadRequestException('Người dùng không tồn tại.');
 
     if (user.isVerified)
-      throw new BadRequestException('Tài khoản đã được xác thực trước đó.');
+      throw new BadRequestException(
+        `Tài khoản của bạn với email ${email} đã được xác thực trước đó.`,
+      );
 
     await this.mailService.sendVerifyEmail(user);
   }
@@ -157,7 +159,7 @@ export class AuthService {
   async validateUser(username: string, pass: string): Promise<User | null> {
     const user: User = await this.usersService.findOneByEmail(username);
     if (user) {
-      const isValid = isValidPassword(pass, user.password);
+      const isValid = await isValidPassword(pass, user.password);
       if (isValid) return user;
     }
     return null;
@@ -184,7 +186,6 @@ export class AuthService {
       );
 
       return await this.createAuthResponse(user, response);
-      
     } catch (error) {
       throw new BadRequestException(
         'Refresh token không hợp lệ. Vui lòng đăng nhập lại!',

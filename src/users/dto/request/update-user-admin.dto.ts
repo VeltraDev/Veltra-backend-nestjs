@@ -1,34 +1,34 @@
 import {
   IsOptional,
   IsString,
+  IsBoolean,
   IsPhoneNumber,
-  IsIn,
-  IsEmail,
 } from 'class-validator';
 
-export class UpdateUserDtoForAdmin {
+export class UpdateUserAdminDto {
   @IsOptional()
-  @IsString({ message: 'Họ và tên phải là chuỗi' })
-  fullName?: string;
+  @IsString({ message: 'Họ bắt buộc phải là chuỗi ký tự' })
+  firstName?: string;
 
   @IsOptional()
-  @IsEmail({}, { message: 'Email phải là một địa chỉ email hợp lệ' })
-  email?: string;
+  @IsString({ message: 'Tên bắt buộc phải là chuỗi ký tự' })
+  lastName?: string;
 
   @IsOptional()
-  @IsString({ message: 'Mật khẩu phải là chuỗi' })
-  password?: string;
+  @IsString({ message: 'Ảnh đại diện bắt buộc phải là chuỗi ký tự' })
+  avatar?: string;
 
   @IsOptional()
-  @IsString({ message: 'Số điện thoại phải là chuỗi' })
   @IsPhoneNumber('VN', {
-    message: 'Số điện thoại phải là số điện thoại hợp lệ tại Việt Nam',
+    message: 'Số điện thoại phải là số hợp lệ tại Việt Nam',
   })
   phone?: string;
 
-  // @IsOptional()
-  // @IsString({ message: 'Vai trò phải là chuỗi' })
-  // @IsIn(['USER', 'ADMIN'], { message: 'Vai trò phải là USER hoặc ADMIN' })
-  // role?: string;
-}
+  @IsOptional()
+  @IsString({ message: 'Trạng thái hiển thị phải là chuỗi ký tự' })
+  displayStatus?: string;
 
+  @IsOptional()
+  @IsBoolean({ message: 'Trạng thái xác thực phải là boolean' })
+  isVerified?: boolean;
+}
