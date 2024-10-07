@@ -83,20 +83,6 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterUserDto): Promise<void> {
-    if (await this.usersService.isUserExistsByEmail(registerDto.email)) {
-      throw new BadRequestException(
-        `Người dùng với email ${registerDto.email} đã tồn tại trên hệ thống.`,
-      );
-    }
-
-    const phoneExists = await this.usersService.findOneByPhone(
-      registerDto.phone,
-    );
-    if (phoneExists)
-      throw new BadRequestException(
-        `Số điện thoại ${registerDto.phone} đã được sử dụng trên hệ thống.`,
-      );
-
     const newUser = plainToClass(User, registerDto);
     newUser.password = getHashPassword(registerDto.password);
     const savedUser = await this.usersService.create(newUser);
