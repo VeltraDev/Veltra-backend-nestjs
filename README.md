@@ -8,3 +8,7 @@
     ```bash
     npm run dev
     ```
+3. Debug với server Nest.js: 
+    ```bash
+    npm run start:debug
+    ```
