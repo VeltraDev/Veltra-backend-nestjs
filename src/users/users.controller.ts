@@ -7,10 +7,6 @@ import {
   Put,
   Query,
   Delete,
-  UseInterceptors,
-  ParseIntPipe,
-  UsePipes,
-  ValidationPipe,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -23,11 +19,10 @@ import { UserResponseDto } from './dto/response/user-response.dto';
 import { plainToClass } from 'class-transformer';
 import { GetUsersDto } from './dto/request/get-user.dto';
 import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
-import { UserInterceptor } from 'src/common/interceptors/user.interceptor';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
+import { PaginatedUsersDto } from './dto/response/paginate-user-response.dto';
 
 @Controller('users')
-@UseInterceptors(UserInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -84,12 +79,12 @@ export class UsersController {
         }),
       );
 
-      return {
+      return plainToClass(PaginatedUsersDto, {
         total: paginatedUsers.total,
         page: paginatedUsers.page,
         limit: paginatedUsers.limit,
         results,
-      };
+      });
     } catch (error) {
       throw new InternalServerErrorException(ErrorMessages.FETCH_USERS_FAILED);
     }

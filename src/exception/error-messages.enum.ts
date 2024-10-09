@@ -78,6 +78,7 @@ export enum ErrorMessages {
   PERMISSION_METHOD_STRING = 'Method phải là chuỗi ký tự',
   PERMISSION_MODULE_REQUIRED = 'Module là bắt buộc',
   PERMISSION_MODULE_STRING = 'Module phải là chuỗi ký tự',
+  PERMISSION_SAME_API_MODULE = 'Quyền hạn với {methodAndPath} đã tồn tại trong module {module}',
 
   ROLE_NOT_FOUND = 'Role với ID {id} không tồn tại',
   ROLE_NAME_REQUIRED = 'Tên vai trò là bắt buộc',

@@ -6,11 +6,18 @@ import {
   Patch,
   Param,
   Delete,
+  InternalServerErrorException,
+  Query,
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { CreatePermissionDto } from './dto/create-permission.dto';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { MessageResponse } from 'src/common/decorators/message_response.decorator';
+import { CreatePermissionDto } from './dto/request/create-permission.dto';
+import { UpdatePermissionDto } from './dto/request/update-permission.dto';
+import { plainToClass } from 'class-transformer';
+import { PaginatedPermissionsDto } from './dto/response/paginate-permission-response.dto';
+import { PermissionResponseDto } from './dto/response/permission-response.dto';
+import { GetPermissionsDto } from './dto/request/get-permission.dto';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Controller('permissions')
 export class PermissionsController {
@@ -26,8 +33,26 @@ export class PermissionsController {
     'Lấy thông tin tất cả quyền hạn với điều kiện truy vấn thành công',
   )
   @Get()
-  async findAll() {
-    return await this.permissionsService.findAll();
+  async getAllPermissions(@Query() query: GetPermissionsDto) {
+    try {
+      const paginatedPermissions =
+        await this.permissionsService.getAllPermissions(query);
+
+      const results = paginatedPermissions.results.map((permission) =>
+        plainToClass(PermissionResponseDto, permission, {
+          excludeExtraneousValues: true,
+        }),
+      );
+
+      return plainToClass(PaginatedPermissionsDto, {
+        total: paginatedPermissions.total,
+        page: paginatedPermissions.page,
+        limit: paginatedPermissions.limit,
+        results,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(ErrorMessages.FETCH_USERS_FAILED);
+    }
   }
 
   @MessageResponse('Lấy thông tin quyền hạn thành công')
