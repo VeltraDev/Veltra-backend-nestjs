@@ -19,6 +19,7 @@ import { AuthenticationResponse } from './dto/response/authentication-response.d
 import { UsersInterface } from 'src/users/users.interface';
 import { ForgotPasswordDto } from './dto/request/forgot-password.dto';
 import { ResetPasswordDto } from './dto/request/reset-password.dto';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Injectable()
 export class AuthService {
@@ -38,9 +39,7 @@ export class AuthService {
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
     const { token, newPassword, confirmPassword } = resetPasswordDto;
     if (newPassword !== confirmPassword)
-      throw new BadRequestException(
-        'Mật khẩu không khớp với xác nhận mật khẩu.',
-      );
+      throw new BadRequestException(ErrorMessages.CONFIRM_PASSWORD_MATCH);
 
     const user: User = await this.validateTokenAndGetUser(token);
     user.password = getHashPassword(newPassword);
@@ -53,7 +52,7 @@ export class AuthService {
     const user: User = await this.validateTokenAndGetUser(token);
 
     if (user.isVerified)
-      throw new BadRequestException('Tài khoản đã được xác thực trước đó.');
+      throw new BadRequestException(ErrorMessages.IS_VERIFIED);
 
     user.isVerified = true;
     await this.usersService.update(user.id, { isVerified: true });
@@ -62,7 +61,7 @@ export class AuthService {
   }
 
   async validateTokenAndGetUser(token: string): Promise<User> {
-    if (!token) throw new BadRequestException('Token xác thực là bắt buộc.');
+    if (!token) throw new BadRequestException(ErrorMessages.TOKEN_REQUIRED);
 
     let decodedToken: any;
 
@@ -72,9 +71,9 @@ export class AuthService {
       });
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        throw new UnauthorizedException('Token đã hết hạn.');
+        throw new UnauthorizedException(ErrorMessages.TOKEN_EXPIRED);
       } else {
-        throw new UnauthorizedException('Token không hợp lệ.');
+        throw new UnauthorizedException(ErrorMessages.TOKEN_INVALID);
       }
     }
 
@@ -94,9 +93,7 @@ export class AuthService {
     const user = await this.usersService.findOneByEmail(email);
 
     if (user.isVerified)
-      throw new BadRequestException(
-        `Tài khoản của bạn với email ${email} đã được xác thực trước đó.`,
-      );
+      throw new BadRequestException(ErrorMessages.IS_VERIFIED);
 
     await this.mailService.sendVerifyEmail(user);
   }
@@ -173,9 +170,7 @@ export class AuthService {
 
       return await this.createAuthResponse(user, response);
     } catch (error) {
-      throw new BadRequestException(
-        'Refresh token không hợp lệ. Vui lòng đăng nhập lại!',
-      );
+      throw new BadRequestException(ErrorMessages.REFRESH_TOKEN_INVALID);
     }
   };
 

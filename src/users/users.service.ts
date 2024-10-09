@@ -292,7 +292,10 @@ export class UsersService {
 
     if (!user) {
       throw new NotFoundException(
-        ErrorMessages.REFRESH_TOKEN_INVALID.replace('{id}', id),
+        ErrorMessages.USER_NOT_EXISTED_OR_REFRESH_TOKEN_INVALID.replace(
+          '{id}',
+          id,
+        ),
       );
     }
 

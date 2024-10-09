@@ -15,6 +15,12 @@ export enum ErrorMessages {
   CURRENT_PASSWORD_INCORRECT = 'Mật khẩu hiện tại không đúng',
   TOKEN_REQUIRED = 'Token là bắt buộc',
   TOKEN_STRING = 'Token phải là chuỗi',
+  TOKEN_EXPIRED = 'Token đã hết hạn',
+  TOKEN_INVALID = 'Token không hợp lệ',
+  TOKEN_INVALID_OR_NO_TOKEN = 'Token không hợp lệ hoặc không có token trong Bearer Token',
+  EMAIL_OR_PASSWORD_INVALID = 'Email hoặc mật khẩu không hợp lệ. Hãy thử lại!',
+  IS_VERIFIED = 'Tài khoản của bạn đã được xác thực trước đó',
+  REFRESH_TOKEN_INVALID = 'Refresh token không hợp lệ',
 
   // Specific Field Validations
   FIRST_NAME_REQUIRED = 'Tên là bắt buộc',
@@ -25,14 +31,14 @@ export enum ErrorMessages {
   PHONE_NUMBER_VN_INVALID = 'Số điện thoại phải là số hợp lệ tại Việt Nam',
 
   // Password Specific Errors
-  PASSWORD_SAME_AS_CURRENT = 'Mật khẩu mới không được trùng với mật khẩu hiện tại.',
+  PASSWORD_SAME_AS_CURRENT = 'Mật khẩu mới không được trùng với mật khẩu hiện tại',
 
   // DTO Specific Errors
-  VERIFY_EMAIL_TOKEN_REQUIRED = 'Mã xác thực email là bắt buộc',
-  VERIFY_EMAIL_TOKEN_STRING = 'Mã xác thực email phải là chuỗi',
-  RESET_PASSWORD_TOKEN_REQUIRED = 'Mã xác thực tạo mới mật khẩu là bắt buộc',
-  RESET_PASSWORD_TOKEN_STRING = 'Mã xác thực tạo mới mật khẩu phải là chuỗi',
-  REGISTER_USER_AVATAR_STRING = 'Avatar phải là chuỗi.',
+  VERIFY_EMAIL_TOKEN_REQUIRED = 'Token email là bắt buộc',
+  VERIFY_EMAIL_TOKEN_STRING = 'Token email phải là chuỗi',
+  RESET_PASSWORD_TOKEN_REQUIRED = 'Token tạo mới mật khẩu là bắt buộc',
+  RESET_PASSWORD_TOKEN_STRING = 'Token tạo mới mật khẩu phải là chuỗi',
+  REGISTER_USER_AVATAR_STRING = 'Avatar phải là chuỗi',
   REGISTER_USER_PHONE_INVALID = 'Số điện thoại phải là số hợp lệ tại Việt Nam',
   IS_VERIFIED_BOOLEAN = 'Tình trạng xác thực phải là boolean',
 
@@ -42,16 +48,12 @@ export enum ErrorMessages {
   ORDER_INVALID = 'Thứ tự sắp xếp không hợp lệ',
 
   // User Errors
-  EMAIL_ALREADY_USED = 'Email {email} đã được sử dụng.',
-  PHONE_ALREADY_USED = 'Số điện thoại {phone} đã được sử dụng.',
-  USER_NOT_FOUND_ID = 'Người dùng với id {id} không tồn tại.',
-  USER_NOT_FOUND_EMAIL = 'Người dùng với email {email} không tồn tại trên hệ thống.',
-  USER_NOT_FOUND_PHONE = 'Người dùng với số điện thoại {phone} không tồn tại trên hệ thống.',
-  REFRESH_TOKEN_INVALID = 'Người dùng với id {id} không tồn tại hoặc refresh token không hợp lệ.',
-
-  // Auth errors
-  TOKEN_INVALID = 'Token không hợp lệ hoặc không có token trong Bearer Token',
-  EMAIL_OR_PASSWORD_INVALID = 'Email hoặc mật khẩu không hợp lệ. Hãy thử lại!',
+  EMAIL_ALREADY_USED = 'Email {email} đã được sử dụng',
+  PHONE_ALREADY_USED = 'Số điện thoại {phone} đã được sử dụng',
+  USER_NOT_FOUND_ID = 'Người dùng với id {id} không tồn tại',
+  USER_NOT_FOUND_EMAIL = 'Người dùng với email {email} không tồn tại trên hệ thống',
+  USER_NOT_FOUND_PHONE = 'Người dùng với số điện thoại {phone} không tồn tại trên hệ thống',
+  USER_NOT_EXISTED_OR_REFRESH_TOKEN_INVALID = 'Người dùng với id {id} không tồn tại hoặc refresh token không hợp lệ',
 
   // Email Errors
   SEND_EMAIL_FAIL = 'Gửi email không thành công',

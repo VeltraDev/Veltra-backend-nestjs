@@ -29,7 +29,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
 
     if (err || !user)
-      throw err || new UnauthorizedException(ErrorMessages.TOKEN_INVALID);
+      throw (
+        err ||
+        new UnauthorizedException(ErrorMessages.TOKEN_INVALID_OR_NO_TOKEN)
+      );
 
     return user;
   }
