@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { EntityBase } from '../../base/entities/base.entity';
 import { Exclude } from 'class-transformer';
+import { Role } from 'src/roles/entities/role.entity';
 
 @Entity()
 export class User extends EntityBase {
@@ -40,4 +41,7 @@ export class User extends EntityBase {
 
   @Column({ default: false })
   isVerified: boolean;
+
+  @ManyToOne(() => Role, (role) => role.users)
+  role: Role;
 }

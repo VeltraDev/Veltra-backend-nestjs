@@ -70,7 +70,9 @@ export class UsersController {
     });
   }
 
-  @MessageResponse('Lấy thông tin tất cả người dùng với điều kiện thành công')
+  @MessageResponse(
+    'Lấy thông tin tất cả người dùng với điều kiện truy vấn thành công',
+  )
   @Get()
   async getAllUsers(@Query() query: GetUsersDto) {
     try {
