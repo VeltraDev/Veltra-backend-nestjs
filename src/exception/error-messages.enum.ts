@@ -49,6 +49,10 @@ export enum ErrorMessages {
   USER_NOT_FOUND_PHONE = 'Người dùng với số điện thoại {phone} không tồn tại trên hệ thống.',
   REFRESH_TOKEN_INVALID = 'Người dùng với id {id} không tồn tại hoặc refresh token không hợp lệ.',
 
+  // Auth errors
+  TOKEN_INVALID = 'Token không hợp lệ hoặc không có token trong Bearer Token',
+  EMAIL_OR_PASSWORD_INVALID = 'Email hoặc mật khẩu không hợp lệ. Hãy thử lại!',
+
   // Email Errors
   SEND_EMAIL_FAIL = 'Gửi email không thành công',
 

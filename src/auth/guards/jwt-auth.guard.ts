@@ -6,6 +6,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -28,12 +29,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
 
     if (err || !user)
-      throw (
-        err ||
-        new UnauthorizedException(
-          'Token không hợp lệ hoặc không có token trong Bearer Token',
-        )
-      );
+      throw err || new UnauthorizedException(ErrorMessages.TOKEN_INVALID);
 
     return user;
   }
