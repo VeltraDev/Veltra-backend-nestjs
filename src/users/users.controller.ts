@@ -8,6 +8,10 @@ import {
   Query,
   Delete,
   UseInterceptors,
+  ParseIntPipe,
+  UsePipes,
+  ValidationPipe,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { MessageResponse } from '../common/decorators/message_response.decorator';
@@ -20,6 +24,7 @@ import { plainToClass } from 'class-transformer';
 import { GetUsersDto } from './dto/request/get-user.dto';
 import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
 import { UserInterceptor } from 'src/common/interceptors/user.interceptor';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Controller('users')
 @UseInterceptors(UserInterceptor)
@@ -67,21 +72,25 @@ export class UsersController {
 
   @MessageResponse('Lấy thông tin tất cả người dùng với điều kiện thành công')
   @Get()
-  async getAllUsers(@User() user: UsersInterface, @Query() query: GetUsersDto) {
-    const paginatedUsers = await this.usersService.getAllUsers(query);
+  async getAllUsers(@Query() query: GetUsersDto) {
+    try {
+      const paginatedUsers = await this.usersService.getAllUsers(query);
 
-    const results = paginatedUsers.results.map((user) =>
-      plainToClass(UserResponseDto, user, {
-        excludeExtraneousValues: true,
-      }),
-    );
+      const results = paginatedUsers.results.map((user) =>
+        plainToClass(UserResponseDto, user, {
+          excludeExtraneousValues: true,
+        }),
+      );
 
-    return {
-      total: paginatedUsers.total,
-      page: paginatedUsers.page,
-      limit: paginatedUsers.limit,
-      results,
-    };
+      return {
+        total: paginatedUsers.total,
+        page: paginatedUsers.page,
+        limit: paginatedUsers.limit,
+        results,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(ErrorMessages.FETCH_USERS_FAILED);
+    }
   }
 
   @MessageResponse('Cập nhật thông tin người dùng thành công')

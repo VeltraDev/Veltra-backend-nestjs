@@ -6,13 +6,6 @@ export enum ErrorMessages {
   // Common Field Validations
   EMAIL_REQUIRED = 'Email là bắt buộc',
   EMAIL_INVALID = 'Email phải là một địa chỉ email hợp lệ',
-  PASSWORD_REQUIRED = 'Mật khẩu hiện tại là bắt buộc',
-  PASSWORD_STRING = 'Mật khẩu hiện tại phải là chuỗi',
-  PASSWORD_RULES = 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt',
-  CONFIRM_PASSWORD_REQUIRED = 'Xác nhận mật khẩu là bắt buộc',
-  CONFIRM_PASSWORD_STRING = 'Xác nhận mật khẩu phải là chuỗi',
-  CONFIRM_PASSWORD_MATCH = 'Mật khẩu mới và xác nhận mật khẩu không khớp',
-  CURRENT_PASSWORD_INCORRECT = 'Mật khẩu hiện tại không đúng',
   TOKEN_REQUIRED = 'Token là bắt buộc',
   TOKEN_STRING = 'Token phải là chuỗi',
   TOKEN_EXPIRED = 'Token đã hết hạn',
@@ -21,6 +14,7 @@ export enum ErrorMessages {
   EMAIL_OR_PASSWORD_INVALID = 'Email hoặc mật khẩu không hợp lệ. Hãy thử lại!',
   IS_VERIFIED = 'Tài khoản của bạn đã được xác thực trước đó',
   REFRESH_TOKEN_INVALID = 'Refresh token không hợp lệ',
+  INVALID_DATE = 'Ngày phải đúng định dạng',
 
   // Specific Field Validations
   FIRST_NAME_REQUIRED = 'Tên là bắt buộc',
@@ -31,6 +25,13 @@ export enum ErrorMessages {
   PHONE_NUMBER_VN_INVALID = 'Số điện thoại phải là số hợp lệ tại Việt Nam',
 
   // Password Specific Errors
+  PASSWORD_REQUIRED = 'Mật khẩu hiện tại là bắt buộc',
+  PASSWORD_STRING = 'Mật khẩu hiện tại phải là chuỗi',
+  PASSWORD_RULES = 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt',
+  CONFIRM_PASSWORD_REQUIRED = 'Xác nhận mật khẩu là bắt buộc',
+  CONFIRM_PASSWORD_STRING = 'Xác nhận mật khẩu phải là chuỗi',
+  CONFIRM_PASSWORD_MATCH = 'Mật khẩu mới và xác nhận mật khẩu không khớp',
+  CURRENT_PASSWORD_INCORRECT = 'Mật khẩu hiện tại không đúng',
   PASSWORD_SAME_AS_CURRENT = 'Mật khẩu mới không được trùng với mật khẩu hiện tại',
 
   // DTO Specific Errors
@@ -44,8 +45,10 @@ export enum ErrorMessages {
 
   // Paginate, Filter, Sort Errors
   PAGE_NUMBER_MIN = 'Số trang phải lớn hơn hoặc bằng 1',
+  LIMIT_RECORDS_MIN = 'Số lượng bản ghi muốn lấy phải lớn hơn hoặc bằng 1',
   SORT_BY_INVALID = 'Trường sắp xếp không hợp lệ',
   ORDER_INVALID = 'Thứ tự sắp xếp không hợp lệ',
+  FETCH_USERS_FAILED = 'Không thể lấy thông tin người dùng, hãy kiểm tra truy vấn của bạn',
 
   // User Errors
   EMAIL_ALREADY_USED = 'Email {email} đã được sử dụng',

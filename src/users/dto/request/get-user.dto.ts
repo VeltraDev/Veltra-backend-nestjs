@@ -1,22 +1,37 @@
-import { IsOptional, IsInt, Min, IsString, IsIn } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  IsString,
+  IsIn,
+  IsDateString,
+  IsPhoneNumber,
+  IsEmail,
+} from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class GetUsersDto {
   @IsOptional()
   @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   @Min(1, { message: ErrorMessages.PAGE_NUMBER_MIN })
   page?: number;
 
   @IsOptional()
   @IsInt()
-  @Min(1, { message: ErrorMessages.PAGE_NUMBER_MIN })
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(1, { message: ErrorMessages.LIMIT_RECORDS_MIN })
   limit?: number;
 
   @IsOptional()
   @IsString({ message: ErrorMessages.SORT_BY_STRING })
-  @IsIn(['createdAt', 'email', 'firstName', 'lastName', 'phone'], {
-    message: ErrorMessages.SORT_BY_INVALID,
-  })
+  @IsIn(
+    ['createdAt', 'email', 'firstName', 'lastName', 'phone', 'displayStatus'],
+    {
+      message: ErrorMessages.SORT_BY_INVALID,
+    },
+  )
   sortBy?: string;
 
   @IsOptional()
@@ -27,14 +42,6 @@ export class GetUsersDto {
   order?: string;
 
   @IsOptional()
-  @IsString({ message: ErrorMessages.SEARCH_STRING })
-  search?: string;
-
-  @IsOptional()
-  @IsString({ message: ErrorMessages.EMAIL_INVALID })
-  email?: string;
-
-  @IsOptional()
   @IsString({ message: ErrorMessages.FIRST_NAME_STRING })
   firstName?: string;
 
@@ -43,6 +50,20 @@ export class GetUsersDto {
   lastName?: string;
 
   @IsOptional()
-  @IsString({ message: ErrorMessages.PHONE_NUMBER_VN_INVALID })
+  @IsPhoneNumber('VN', {
+    message: ErrorMessages.PHONE_NUMBER_VN_INVALID,
+  })
   phone?: string;
+
+  @IsOptional()
+  @IsEmail({}, { message: ErrorMessages.EMAIL_INVALID })
+  email?: string;
+
+  @IsOptional()
+  @IsDateString({}, { message: ErrorMessages.INVALID_DATE })
+  createdAt?: string;
+
+  @IsOptional()
+  @IsString({ message: ErrorMessages.DISPLAY_STATUS_STRING })
+  displayStatus?: string;
 }

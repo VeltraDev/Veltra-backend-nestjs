@@ -127,25 +127,30 @@ export class UsersService {
       limit = 10,
       sortBy = 'createdAt',
       order = 'ASC',
-      search,
-      email,
       firstName,
       lastName,
       phone,
+      email,
+      createdAt,
+      displayStatus,
     } = query;
 
+    // Validate sortBy field
     const validSortFields = [
       'createdAt',
       'email',
       'firstName',
       'lastName',
       'phone',
+      'displayStatus',
     ];
     if (!validSortFields.includes(sortBy)) {
       throw new BadRequestException(ErrorMessages.SORT_BY_INVALID);
     }
 
-    if (!['ASC', 'DESC'].includes(order.toUpperCase())) {
+    // Normalize order to uppercase
+    const orderUpperCase = order.toUpperCase();
+    if (!['ASC', 'DESC'].includes(orderUpperCase)) {
       throw new BadRequestException(ErrorMessages.ORDER_INVALID);
     }
 
@@ -153,35 +158,43 @@ export class UsersService {
 
     const queryBuilder = this.userRepository.createQueryBuilder('user');
 
-    if (search) {
-      queryBuilder.andWhere(
-        `(user.email ILIKE :search OR user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.phone ILIKE :search)`,
-        { search: `%${search}%` },
-      );
-    }
-
-    if (email) {
-      queryBuilder.andWhere('user.email ILIKE :email', { email: `%${email}%` });
-    }
-
+    // Field-specific filters
     if (firstName) {
-      queryBuilder.andWhere('user.firstName ILIKE :firstName', {
+      queryBuilder.andWhere('LOWER(user.firstName) LIKE LOWER(:firstName)', {
         firstName: `%${firstName}%`,
       });
     }
 
     if (lastName) {
-      queryBuilder.andWhere('user.lastName ILIKE :lastName', {
+      queryBuilder.andWhere('LOWER(user.lastName) LIKE LOWER(:lastName)', {
         lastName: `%${lastName}%`,
       });
     }
 
     if (phone) {
-      queryBuilder.andWhere('user.phone ILIKE :phone', { phone: `%${phone}%` });
+      queryBuilder.andWhere('user.phone LIKE :phone', { phone: `%${phone}%` });
     }
 
+    if (email) {
+      queryBuilder.andWhere('user.email LIKE :email', { email: `%${email}%` });
+    }
+
+    if (createdAt) {
+      queryBuilder.andWhere('user.createdAt = :createdAt', { createdAt });
+    }
+
+    if (displayStatus) {
+      queryBuilder.andWhere(
+        'LOWER(user.displayStatus) LIKE LOWER(:displayStatus)',
+        {
+          displayStatus: `%${displayStatus}%`,
+        },
+      );
+    }
+
+    // Sort and pagination
     queryBuilder
-      .orderBy(`user.${sortBy}`, order.toUpperCase() as 'ASC' | 'DESC')
+      .orderBy(`user.${sortBy}`, orderUpperCase as 'ASC' | 'DESC')
       .skip(skip)
       .take(limit);
 
