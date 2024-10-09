@@ -26,7 +26,12 @@ export class PermissionsController {
   @MessageResponse('Tạo mới quyền hạn thành công')
   @Post()
   async create(@Body() createPermissionDto: CreatePermissionDto) {
-    return await this.permissionsService.create(createPermissionDto);
+    const permission =
+      await this.permissionsService.create(createPermissionDto);
+
+    return plainToClass(PermissionResponseDto, permission, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @MessageResponse(
@@ -58,7 +63,11 @@ export class PermissionsController {
   @MessageResponse('Lấy thông tin quyền hạn thành công')
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.permissionsService.findOne(id);
+    const permission = await this.permissionsService.findOne(id);
+
+    return plainToClass(PermissionResponseDto, permission, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @MessageResponse('Cập nhật thông tin quyền hạn thành công')
@@ -67,7 +76,14 @@ export class PermissionsController {
     @Param('id') id: string,
     @Body() updatePermissionDto: UpdatePermissionDto,
   ) {
-    return await this.permissionsService.update(id, updatePermissionDto);
+    const permission = await this.permissionsService.update(
+      id,
+      updatePermissionDto,
+    );
+
+    return plainToClass(PermissionResponseDto, permission, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @MessageResponse('Xóa thông tin quyền hạn thành công')

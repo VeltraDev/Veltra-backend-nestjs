@@ -64,6 +64,7 @@ export enum ErrorMessages {
   USER_NOT_FOUND_ID = 'Người dùng với id {id} không tồn tại',
   USER_NOT_FOUND_EMAIL = 'Người dùng với email {email} không tồn tại trên hệ thống',
   USER_NOT_EXISTED_OR_REFRESH_TOKEN_INVALID = 'Người dùng với id {id} không tồn tại hoặc refresh token không hợp lệ',
+  USER_ID_ARRAY = 'Danh sách ID người dùng phải là một mảng chuỗi hợp lệ',
 
   // Email Errors
   SEND_EMAIL_FAIL = 'Gửi email không thành công',
@@ -79,10 +80,12 @@ export enum ErrorMessages {
   PERMISSION_MODULE_REQUIRED = 'Module là bắt buộc',
   PERMISSION_MODULE_STRING = 'Module phải là chuỗi ký tự',
   PERMISSION_SAME_API_MODULE = 'Quyền hạn với {methodAndPath} đã tồn tại trong module {module}',
+  PERMISSION_ID_ARRAY = 'Danh sách ID quyền hạn phải là một mảng chuỗi hợp lệ',
 
   ROLE_NOT_FOUND = 'Role với ID {id} không tồn tại',
   ROLE_NAME_REQUIRED = 'Tên vai trò là bắt buộc',
   ROLE_NAME_STRING = 'Tên vai trò phải là chuỗi ký tự',
   ROLE_DESCRIPTION_STRING = 'Mô tả vai trò phải là chuỗi ký tự',
   ROLE_IS_ACTIVE_BOOLEAN = 'Trạng thái hoạt động phải là boolean',
+  ROLE_ALREADY_EXISTS = 'Vai trò với tên {name} đã tồn tại',
 }
