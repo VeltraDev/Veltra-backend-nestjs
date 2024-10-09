@@ -22,7 +22,7 @@ export class RoleResponseDto {
   @Type(() => PermissionResponseDto)
   permissions: PermissionResponseDto[];
 
-  @Expose()
-  @Type(() => UserResponseDto)
-  users: UserResponseDto[];
+  // @Expose()
+  // @Type(() => UserResponseDto)
+  // users: UserResponseDto[];
 }

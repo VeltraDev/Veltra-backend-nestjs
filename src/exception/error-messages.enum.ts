@@ -88,4 +88,5 @@ export enum ErrorMessages {
   ROLE_DESCRIPTION_STRING = 'Mô tả vai trò phải là chuỗi ký tự',
   ROLE_IS_ACTIVE_BOOLEAN = 'Trạng thái hoạt động phải là boolean',
   ROLE_ALREADY_EXISTS = 'Vai trò với tên {name} đã tồn tại',
+  ROLEID_NOT_UUID_4 = 'Role ID không hợp lệ, phải là UUID phiên bản 4',
 }

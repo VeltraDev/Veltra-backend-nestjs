@@ -17,7 +17,7 @@ import { UpdateProfilePasswordDto } from './dto/request/update-password.dto';
 import { UpdateProfileInformationDto } from './dto/request/update-profile.dto';
 import { UserResponseDto } from './dto/response/user-response.dto';
 import { plainToClass } from 'class-transformer';
-import { GetUsersDto } from './dto/request/get-user.dto';
+import { FilterUsersDto } from './dto/request/filter-user.dto';
 import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { PaginatedUsersDto } from './dto/response/paginate-user-response.dto';
@@ -69,21 +69,19 @@ export class UsersController {
     'Lấy thông tin tất cả người dùng với điều kiện truy vấn thành công',
   )
   @Get()
-  async getAllUsers(@Query() query: GetUsersDto) {
+  async getAllUsers(@Query() query: FilterUsersDto) {
     try {
       const paginatedUsers = await this.usersService.getAllUsers(query);
-
-      const results = paginatedUsers.results.map((user) =>
-        plainToClass(UserResponseDto, user, {
-          excludeExtraneousValues: true,
-        }),
-      );
 
       return plainToClass(PaginatedUsersDto, {
         total: paginatedUsers.total,
         page: paginatedUsers.page,
         limit: paginatedUsers.limit,
-        results,
+        results: paginatedUsers.results.map((user) =>
+          plainToClass(UserResponseDto, user, {
+            excludeExtraneousValues: true,
+          }),
+        ),
       });
     } catch (error) {
       throw new InternalServerErrorException(ErrorMessages.FETCH_USERS_FAILED);

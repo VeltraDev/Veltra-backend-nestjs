@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePermissionDto } from './dto/request/create-permission.dto';
 import { UpdatePermissionDto } from './dto/request/update-permission.dto';
-import { GetPermissionsDto } from './dto/request/get-permission.dto';
+import { FilterPermissionsDto } from './dto/request/filter-permission.dto';
 
 @Injectable()
 export class PermissionsService {
@@ -53,7 +53,7 @@ export class PermissionsService {
     return this.permissionRepository.save(permission);
   }
 
-  async getAllPermissions(query: GetPermissionsDto): Promise<{
+  async getAllPermissions(query: FilterPermissionsDto): Promise<{
     total: number;
     page: number;
     limit: number;

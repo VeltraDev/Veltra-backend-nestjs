@@ -3,6 +3,7 @@ import {
   IsString,
   IsBoolean,
   IsPhoneNumber,
+  IsUUID,
 } from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
@@ -32,4 +33,8 @@ export class UpdateUserAdminDto {
   @IsOptional()
   @IsBoolean({ message: ErrorMessages.IS_VERIFIED_BOOLEAN })
   isVerified?: boolean;
+
+  @IsOptional()
+  @IsUUID('4', { message: ErrorMessages.ROLEID_NOT_UUID_4 })
+  roleId?: string;
 }

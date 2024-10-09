@@ -1,4 +1,4 @@
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsOptional,
   IsInt,
@@ -6,12 +6,10 @@ import {
   IsString,
   IsIn,
   IsDateString,
-  IsPhoneNumber,
-  IsEmail,
 } from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
-export class GetUsersDto {
+export class FilterPermissionsDto {
   @IsOptional()
   @IsInt()
   @Transform(({ value }) => parseInt(value, 10))
@@ -26,12 +24,9 @@ export class GetUsersDto {
 
   @IsOptional()
   @IsString({ message: ErrorMessages.SORT_BY_STRING })
-  @IsIn(
-    ['createdAt', 'email', 'firstName', 'lastName', 'phone', 'displayStatus'],
-    {
-      message: ErrorMessages.SORT_BY_INVALID,
-    },
-  )
+  @IsIn(['name', 'apiPath', 'method', 'module', 'createdAt'], {
+    message: ErrorMessages.SORT_BY_INVALID,
+  })
   sortBy?: string;
 
   @IsOptional()
@@ -42,28 +37,22 @@ export class GetUsersDto {
   order?: string;
 
   @IsOptional()
-  @IsString({ message: ErrorMessages.FIRST_NAME_STRING })
-  firstName?: string;
+  @IsString({ message: ErrorMessages.PERMISSION_NAME_STRING })
+  name?: string;
 
   @IsOptional()
-  @IsString({ message: ErrorMessages.LAST_NAME_STRING })
-  lastName?: string;
+  @IsString({ message: ErrorMessages.PERMISSION_API_PATH_STRING })
+  apiPath?: string;
 
   @IsOptional()
-  @IsPhoneNumber('VN', {
-    message: ErrorMessages.PHONE_NUMBER_VN_INVALID,
-  })
-  phone?: string;
+  @IsString({ message: ErrorMessages.PERMISSION_METHOD_STRING })
+  method?: string;
 
   @IsOptional()
-  @IsEmail({}, { message: ErrorMessages.EMAIL_INVALID })
-  email?: string;
+  @IsString({ message: ErrorMessages.PERMISSION_MODULE_STRING })
+  module?: string;
 
   @IsOptional()
   @IsDateString({}, { message: ErrorMessages.INVALID_DATE })
   createdAt?: string;
-
-  @IsOptional()
-  @IsString({ message: ErrorMessages.DISPLAY_STATUS_STRING })
-  displayStatus?: string;
 }

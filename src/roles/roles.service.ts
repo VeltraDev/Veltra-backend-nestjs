@@ -10,7 +10,7 @@ import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { Role } from './entities/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { GetRolesDto } from './dto/request/get-role.dto';
+import { FilterRolesDto } from './dto/request/filter-role.dto';
 import { Permission } from 'src/permissions/entities/permission.entity';
 import { User } from 'src/users/entities/user.entity';
 
@@ -131,7 +131,7 @@ export class RolesService {
   }
 
   async getAllRoles(
-    query: GetRolesDto,
+    query: FilterRolesDto,
   ): Promise<{ total: number; page: number; limit: number; results: Role[] }> {
     const {
       page = 1,
@@ -243,7 +243,7 @@ export class RolesService {
       await this.roleRepository.save(role);
     } catch (error) {
       throw new InternalServerErrorException(
-        'Không thể vô hiệu hóa vai trò do lỗi hệ thống.',
+        'Không thể vô hiệu hóa vai trò do lỗi hệ thống',
       );
     }
   }

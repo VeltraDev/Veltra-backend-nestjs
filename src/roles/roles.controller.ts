@@ -17,7 +17,7 @@ import { PaginatedRolesDto } from './dto/response/paginate-role-response.dto';
 import { plainToClass } from 'class-transformer';
 import { MessageResponse } from 'src/common/decorators/message_response.decorator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
-import { GetRolesDto } from './dto/request/get-role.dto';
+import { FilterRolesDto } from './dto/request/filter-role.dto';
 
 @Controller('roles')
 export class RolesController {
@@ -37,7 +37,7 @@ export class RolesController {
     'Lấy thông tin tất cả vai trò với điều kiện truy vấn thành công',
   )
   @Get()
-  async getAllRoles(@Query() query: GetRolesDto) {
+  async getAllRoles(@Query() query: FilterRolesDto) {
     try {
       const paginatedRoles = await this.rolesService.getAllRoles(query);
 

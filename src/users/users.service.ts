@@ -14,14 +14,16 @@ import {
 } from 'src/common/utils/hashPassword';
 import { UpdateProfileInformationDto } from './dto/request/update-profile.dto';
 import { RegisterUserDto } from 'src/auth/dto/request/register-user.dto';
-import { GetUsersDto } from './dto/request/get-user.dto';
+import { FilterUsersDto } from './dto/request/filter-user.dto';
 import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
+import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly roleService: RolesService,
   ) {}
 
   private async validatePasswordMatch(
@@ -116,7 +118,7 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
-  async getAllUsers(query: GetUsersDto): Promise<{
+  async getAllUsers(query: FilterUsersDto): Promise<{
     total: number;
     page: number;
     limit: number;
@@ -156,7 +158,10 @@ export class UsersService {
 
     const skip = (page - 1) * limit;
 
-    const queryBuilder = this.userRepository.createQueryBuilder('user');
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('role.permissions', 'permissions');
 
     // Field-specific filters
     if (firstName) {
@@ -214,8 +219,12 @@ export class UsersService {
   ): Promise<User> {
     const user = await this.getUserById(id);
 
-    Object.assign(user, updateUserAdminDto);
+    if (updateUserAdminDto.roleId) {
+      const role = await this.roleService.findOne(updateUserAdminDto.roleId);
+      user.role = role;
+    }
 
+    Object.assign(user, updateUserAdminDto);
     await this.userRepository.save(user);
 
     return user;
@@ -229,6 +238,7 @@ export class UsersService {
   async getUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
+      relations: ['role', 'role.permissions'],
     });
 
     if (!user) {
@@ -243,6 +253,7 @@ export class UsersService {
   async findOneByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { email },
+      relations: ['role', 'role.permissions'],
     });
 
     if (!user) {
@@ -257,6 +268,7 @@ export class UsersService {
   async findOneByPhone(phone: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { phone },
+      relations: ['role', 'role.permissions'],
     });
 
     if (!user) {
@@ -301,6 +313,7 @@ export class UsersService {
         id,
         refreshToken,
       },
+      relations: ['role', 'role.permissions'],
     });
 
     if (!user) {

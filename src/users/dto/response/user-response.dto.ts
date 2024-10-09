@@ -1,4 +1,6 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { RoleResponseDto } from 'src/roles/dto/response/role-response.dto';
+import { Role } from 'src/roles/entities/role.entity';
 
 export class UserResponseDto {
   @Expose()
@@ -24,4 +26,8 @@ export class UserResponseDto {
 
   @Expose()
   createdAt: Date;
+
+  @Expose()
+  @Type(() => RoleResponseDto)
+  role: RoleResponseDto;
 }

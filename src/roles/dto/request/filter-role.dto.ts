@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
-export class GetRolesDto {
+export class FilterRolesDto {
   @IsOptional()
   @IsInt()
   @Transform(({ value }) => parseInt(value, 10))
