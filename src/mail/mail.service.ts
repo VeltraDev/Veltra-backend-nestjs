@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as handlebars from 'handlebars';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Injectable()
 export class MailService {
@@ -51,7 +52,7 @@ export class MailService {
         html,
       });
     } catch (error) {
-      throw new InternalServerErrorException('Gửi email thất bại.');
+      throw new InternalServerErrorException(ErrorMessages.SEND_EMAIL_FAIL);
     }
   }
 

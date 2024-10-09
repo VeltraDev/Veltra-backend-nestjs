@@ -4,31 +4,32 @@ import {
   IsBoolean,
   IsPhoneNumber,
 } from 'class-validator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class UpdateUserAdminDto {
   @IsOptional()
-  @IsString({ message: 'Họ bắt buộc phải là chuỗi ký tự' })
+  @IsString({ message: ErrorMessages.FIRST_NAME_STRING })
   firstName?: string;
 
   @IsOptional()
-  @IsString({ message: 'Tên bắt buộc phải là chuỗi ký tự' })
+  @IsString({ message: ErrorMessages.LAST_NAME_STRING })
   lastName?: string;
 
   @IsOptional()
-  @IsString({ message: 'Ảnh đại diện bắt buộc phải là chuỗi ký tự' })
+  @IsString({ message: ErrorMessages.AVATAR_STRING })
   avatar?: string;
 
   @IsOptional()
   @IsPhoneNumber('VN', {
-    message: 'Số điện thoại phải là số hợp lệ tại Việt Nam',
+    message: ErrorMessages.PHONE_NUMBER_VN_INVALID,
   })
   phone?: string;
 
   @IsOptional()
-  @IsString({ message: 'Trạng thái hiển thị phải là chuỗi ký tự' })
+  @IsString({ message: ErrorMessages.DISPLAY_STATUS_STRING })
   displayStatus?: string;
 
   @IsOptional()
-  @IsBoolean({ message: 'Trạng thái xác thực phải là boolean' })
+  @IsBoolean({ message: ErrorMessages.IS_VERIFIED_BOOLEAN })
   isVerified?: boolean;
 }

@@ -1,25 +1,26 @@
 import { IsOptional, IsString, IsPhoneNumber } from 'class-validator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class UpdateProfileInformationDto {
   @IsOptional()
-  @IsString({ message: 'Tên phải là chuỗi ký tự' })
+  @IsString({ message: ErrorMessages.FIRST_NAME_STRING })
   firstName?: string;
 
   @IsOptional()
-  @IsString({ message: 'Họ phải là chuỗi ký tự' })
+  @IsString({ message: ErrorMessages.LAST_NAME_STRING })
   lastName?: string;
 
   @IsOptional()
-  @IsString({ message: 'Avatar phải là chuỗi ký tự' })
+  @IsString({ message: ErrorMessages.AVATAR_STRING })
   avatar?: string;
 
   @IsOptional()
   @IsPhoneNumber('VN', {
-    message: 'Số điện thoại phải là số hợp lệ tại Việt Nam',
+    message: ErrorMessages.PHONE_NUMBER_VN_INVALID,
   })
   phone?: string;
 
   @IsOptional()
-  @IsString({ message: 'Trạng thái hiển thị phải là chuỗi ký tự' })
+  @IsString({ message: ErrorMessages.DISPLAY_STATUS_STRING })
   displayStatus?: string;
 }

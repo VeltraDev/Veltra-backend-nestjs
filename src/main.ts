@@ -12,18 +12,25 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import helmet from 'helmet';
+import { GlobalExceptionFilter } from './exception/global-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Access variables in .env
   const configService = app.get(ConfigService);
+
+  // Validate and chain errors in DTO (default 400 error, format response by NestJS)
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      // forbidNonWhitelisted: true,
+      forbidNonWhitelisted: true,
       transform: true,
     }),
   );
+
+  // Global Exception Filter (errors in service file)
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Config versioning for APIs
   app.setGlobalPrefix('api'); // api/v1/route
@@ -51,7 +58,7 @@ async function bootstrap() {
   app.useGlobalGuards(new JwtAuthGuard(reflector));
 
   // Interceptor
-  app.useGlobalInterceptors(new TransformInterceptor(reflector));
+  app.useGlobalInterceptors(new TransformInterceptor(reflector)); // response when success (status code 200)
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   // Config helmet to enhance security

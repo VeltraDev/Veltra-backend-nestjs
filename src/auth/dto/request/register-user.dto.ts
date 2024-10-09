@@ -1,36 +1,41 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  Matches,
+} from 'class-validator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class RegisterUserDto {
-  @IsNotEmpty({ message: 'Email là bắt buộc' })
-  @IsEmail({}, { message: 'Email phải là một địa chỉ email hợp lệ' })
+  @IsNotEmpty({ message: ErrorMessages.EMAIL_REQUIRED })
+  @IsEmail({}, { message: ErrorMessages.EMAIL_INVALID })
   email: string;
 
-  @IsNotEmpty({ message: 'Mật khẩu là bắt buộc' })
-  @IsString({ message: 'Mật khẩu phải là chuỗi' })
+  @IsNotEmpty({ message: ErrorMessages.PASSWORD_REQUIRED })
+  @IsString({ message: ErrorMessages.PASSWORD_STRING })
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     {
-      message:
-        'Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt',
+      message: ErrorMessages.PASSWORD_RULES,
     },
   )
   password: string;
 
-  @IsNotEmpty({ message: 'Tên là bắt buộc' })
-  @IsString({ message: 'Tên phải là chuỗi' })
+  @IsNotEmpty({ message: ErrorMessages.FIRST_NAME_STRING })
+  @IsString({ message: ErrorMessages.FIRST_NAME_STRING })
   firstName: string;
 
-  @IsNotEmpty({ message: 'Họ là bắt buộc' })
-  @IsString({ message: 'Họ phải là chuỗi' })
+  @IsNotEmpty({ message: ErrorMessages.LAST_NAME_STRING })
+  @IsString({ message: ErrorMessages.LAST_NAME_STRING })
   lastName: string;
 
   @IsOptional()
-  @IsString({ message: 'Avatar phải là chuỗi.' })
+  @IsString({ message: ErrorMessages.AVATAR_STRING })
   avatar?: string;
 
   @IsOptional()
-  @IsPhoneNumber('VN', {
-    message: 'Số điện thoại phải là số hợp lệ tại Việt Nam',
-  })
+  @IsPhoneNumber('VN', { message: ErrorMessages.PHONE_NUMBER_VN_INVALID })
   phone?: string;
 }

@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,12 +16,36 @@ import { UpdateProfileInformationDto } from './dto/request/update-profile.dto';
 import { RegisterUserDto } from 'src/auth/dto/request/register-user.dto';
 import { GetUsersDto } from './dto/request/get-user.dto';
 import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
+
+  private async validatePasswordMatch(
+    currentPassword: string,
+    foundUser: User,
+  ) {
+    const validPassword = await isValidPassword(
+      currentPassword,
+      foundUser.password,
+    );
+    if (!validPassword) {
+      throw new BadRequestException(ErrorMessages.CURRENT_PASSWORD_INCORRECT);
+    }
+  }
+
+  private async checkNewPassword(newPassword: string, foundUser: User) {
+    const isNewPasswordSameAsCurrent = await isValidPassword(
+      newPassword,
+      foundUser.password,
+    );
+    if (isNewPasswordSameAsCurrent) {
+      throw new BadRequestException(ErrorMessages.PASSWORD_SAME_AS_CURRENT);
+    }
+  }
 
   async updatePassword(
     user: UsersInterface,
@@ -32,32 +55,15 @@ export class UsersService {
       updateProfilePasswordDto;
 
     if (newPassword !== confirmPassword) {
-      throw new ForbiddenException(
-        'Mật khẩu mới và xác nhận mật khẩu không khớp.',
-      );
+      throw new BadRequestException(ErrorMessages.CONFIRM_PASSWORD_MATCH);
     }
 
     const foundUser = await this.getUserById(user.id);
 
-    const validPassword = await isValidPassword(
-      currentPassword,
-      foundUser.password,
-    );
-    if (!validPassword)
-      throw new ForbiddenException('Mật khẩu hiện tại không chính xác.');
+    await this.validatePasswordMatch(currentPassword, foundUser);
+    await this.checkNewPassword(newPassword, foundUser);
 
-    const isNewPasswordSameAsCurrent = await isValidPassword(
-      newPassword,
-      foundUser.password,
-    );
-    if (isNewPasswordSameAsCurrent)
-      throw new ForbiddenException(
-        'Mật khẩu mới không được trùng với mật khẩu hiện tại.',
-      );
-
-    const hashedNewPassword = getHashPassword(newPassword);
-    foundUser.password = hashedNewPassword;
-
+    foundUser.password = getHashPassword(newPassword);
     await this.userRepository.save(foundUser);
 
     return foundUser;
@@ -76,19 +82,30 @@ export class UsersService {
     return foundUser;
   }
 
+  private async validateUserUniqueness(email: string, phone: string) {
+    const [emailExists, phoneExists] = await Promise.all([
+      this.isUserExistsByEmail(email),
+      this.isUserExistsByPhone(phone),
+    ]);
+
+    if (emailExists) {
+      throw new BadRequestException(
+        ErrorMessages.EMAIL_ALREADY_USED.replace('{email}', email),
+      );
+    }
+
+    if (phoneExists) {
+      throw new BadRequestException(
+        ErrorMessages.PHONE_ALREADY_USED.replace('{phone}', phone),
+      );
+    }
+  }
+
   async create(registerUserDto: RegisterUserDto): Promise<User> {
-    const emailExists = await this.isUserExistsByEmail(registerUserDto.email);
-    if (emailExists)
-      throw new BadRequestException(
-        `Email ${registerUserDto.email} đã được sử dụng.`,
-      );
-
-    const phoneExists = await this.isUserExistsByPhone(registerUserDto.phone);
-    if (phoneExists)
-      throw new BadRequestException(
-        `Số điện thoại ${registerUserDto.phone} đã được sử dụng.`,
-      );
-
+    await this.validateUserUniqueness(
+      registerUserDto.email,
+      registerUserDto.phone,
+    );
     const newUser = this.userRepository.create(registerUserDto);
     return await this.userRepository.save(newUser);
   }
@@ -125,26 +142,16 @@ export class UsersService {
       'phone',
     ];
     if (!validSortFields.includes(sortBy)) {
-      throw new BadRequestException(
-        `Trường sắp xếp không hợp lệ. Chỉ được phép sắp xếp theo: ${validSortFields.join(', ')}`,
-      );
+      throw new BadRequestException(ErrorMessages.SORT_BY_INVALID);
     }
 
     if (!['ASC', 'DESC'].includes(order.toUpperCase())) {
-      throw new BadRequestException(
-        "Thứ tự sắp xếp không hợp lệ. Chỉ được phép sử dụng 'ASC' hoặc 'DESC'.",
-      );
+      throw new BadRequestException(ErrorMessages.ORDER_INVALID);
     }
-
-    if (page <= 0) throw new BadRequestException('Số trang phải lớn hơn 0.');
-    if (limit <= 0)
-      throw new BadRequestException('Giới hạn số lượng phải lớn hơn 0.');
 
     const skip = (page - 1) * limit;
 
     const queryBuilder = this.userRepository.createQueryBuilder('user');
-
-    queryBuilder.where('user.isDeleted = :isDeleted', { isDeleted: false });
 
     if (search) {
       queryBuilder.andWhere(
@@ -203,20 +210,18 @@ export class UsersService {
 
   async deleteUserById(id: string): Promise<void> {
     const user = await this.getUserById(id);
-
-    user.isDeleted = true;
-    user.deletedAt = new Date();
-
-    await this.userRepository.save(user);
+    await this.userRepository.remove(user);
   }
 
   async getUserById(id: string): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { id, isDeleted: false },
+      where: { id },
     });
 
     if (!user) {
-      throw new NotFoundException(`Người dùng với id ${id} không tồn tại.`);
+      throw new NotFoundException(
+        ErrorMessages.USER_NOT_FOUND_ID.replace('{id}', id),
+      );
     }
 
     return user;
@@ -224,12 +229,12 @@ export class UsersService {
 
   async findOneByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { email, isDeleted: false },
+      where: { email },
     });
 
     if (!user) {
       throw new NotFoundException(
-        `Người dùng với email ${email} không tồn tại trên hệ thống.`,
+        ErrorMessages.USER_NOT_FOUND_EMAIL.replace('{email}', email),
       );
     }
 
@@ -238,12 +243,12 @@ export class UsersService {
 
   async findOneByPhone(phone: string): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { phone, isDeleted: false },
+      where: { phone },
     });
 
     if (!user) {
       throw new NotFoundException(
-        `Người dùng với số điện thoại ${phone} không tồn tại trên hệ thống.`,
+        ErrorMessages.USER_NOT_FOUND_PHONE.replace('{phone}', phone),
       );
     }
 
@@ -252,14 +257,14 @@ export class UsersService {
 
   async isUserExistsByEmail(email: string): Promise<boolean> {
     const userCount = await this.userRepository.count({
-      where: { email, isDeleted: false },
+      where: { email },
     });
     return userCount > 0;
   }
 
   async isUserExistsByPhone(phone: string): Promise<boolean> {
     const userCount = await this.userRepository.count({
-      where: { phone, isDeleted: false },
+      where: { phone },
     });
 
     return userCount > 0;
@@ -282,13 +287,12 @@ export class UsersService {
       where: {
         id,
         refreshToken,
-        isDeleted: false,
       },
     });
 
     if (!user) {
       throw new NotFoundException(
-        `Người dùng với id ${id} không tồn tại hoặc refresh token không hợp lệ.`,
+        ErrorMessages.REFRESH_TOKEN_INVALID.replace('{id}', id),
       );
     }
 

@@ -1,7 +1,8 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class ResendEmailDto {
-  @IsEmail({}, { message: 'Email phải là một địa chỉ email hợp lệ' })
-  @IsNotEmpty({ message: 'Email là bắt buộc' })
+  @IsEmail({}, { message: ErrorMessages.EMAIL_INVALID })
+  @IsNotEmpty({ message: ErrorMessages.EMAIL_REQUIRED })
   email: string;
 }

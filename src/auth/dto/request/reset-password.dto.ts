@@ -1,29 +1,28 @@
-import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class ResetPasswordDto {
-  @IsNotEmpty({ message: 'Mật khẩu là bắt buộc' })
-  @IsString({ message: 'Mật khẩu phải là chuỗi' })
+  @IsNotEmpty({ message: ErrorMessages.PASSWORD_REQUIRED })
+  @IsString({ message: ErrorMessages.PASSWORD_STRING })
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     {
-      message:
-        'Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt',
+      message: ErrorMessages.PASSWORD_RULES,
     },
   )
   newPassword: string;
 
-  @IsNotEmpty({ message: 'Xác nhận mật khẩu là bắt buộc' })
-  @IsString({ message: 'Xác nhận mật khẩu phải là chuỗi' })
+  @IsNotEmpty({ message: ErrorMessages.CONFIRM_PASSWORD_REQUIRED })
+  @IsString({ message: ErrorMessages.CONFIRM_PASSWORD_STRING })
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     {
-      message:
-        'Xác nhận mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt',
+      message: ErrorMessages.CONFIRM_PASSWORD_MATCH,
     },
   )
   confirmPassword: string;
 
-  @IsNotEmpty({ message: 'Token là bắt buộc' })
-  @IsString({ message: 'Token phải là chuỗi' })
+  @IsNotEmpty({ message: ErrorMessages.TOKEN_REQUIRED })
+  @IsString({ message: ErrorMessages.TOKEN_STRING })
   token: string;
 }

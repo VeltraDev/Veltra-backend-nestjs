@@ -7,6 +7,7 @@ import {
   Put,
   Query,
   Delete,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { MessageResponse } from '../common/decorators/message_response.decorator';
@@ -18,8 +19,10 @@ import { UserResponseDto } from './dto/response/user-response.dto';
 import { plainToClass } from 'class-transformer';
 import { GetUsersDto } from './dto/request/get-user.dto';
 import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
+import { UserInterceptor } from 'src/common/interceptors/user.interceptor';
 
 @Controller('users')
+@UseInterceptors(UserInterceptor)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

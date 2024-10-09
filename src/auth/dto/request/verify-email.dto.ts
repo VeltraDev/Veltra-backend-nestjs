@@ -1,7 +1,8 @@
-import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class VerifyEmailDto {
-  @IsNotEmpty({ message: 'Mã xác thực là bắt buộc' })
-  @IsString({ message: 'Mã xác thực phải là chuỗi' })
+  @IsNotEmpty({ message: ErrorMessages.VERIFY_EMAIL_TOKEN_REQUIRED })
+  @IsString({ message: ErrorMessages.VERIFY_EMAIL_TOKEN_STRING })
   token: string;
 }

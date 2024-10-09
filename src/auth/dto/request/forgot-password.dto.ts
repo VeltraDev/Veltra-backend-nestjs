@@ -1,7 +1,8 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class ForgotPasswordDto {
-  @IsNotEmpty({ message: 'Email là bắt buộc' })
-  @IsEmail({}, { message: 'Email phải là một địa chỉ email hợp lệ' })
+  @IsNotEmpty({ message: ErrorMessages.EMAIL_REQUIRED })
+  @IsEmail({}, { message: ErrorMessages.EMAIL_INVALID })
   email: string;
 }
