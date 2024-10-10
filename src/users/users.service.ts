@@ -18,13 +18,16 @@ import { FilterUsersDto } from './dto/request/filter-user.dto';
 import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { RolesService } from 'src/roles/roles.service';
+import { BaseService } from 'src/base/base.service';
 
 @Injectable()
-export class UsersService {
+export class UsersService extends BaseService<User> {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly roleService: RolesService,
-  ) {}
+  ) {
+    super(userRepository);
+  }
 
   private async validatePasswordMatch(
     currentPassword: string,
@@ -118,26 +121,7 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
-  async getAllUsers(query: FilterUsersDto): Promise<{
-    total: number;
-    page: number;
-    limit: number;
-    results: User[];
-  }> {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = 'createdAt',
-      order = 'ASC',
-      firstName,
-      lastName,
-      phone,
-      email,
-      createdAt,
-      displayStatus,
-    } = query;
-
-    // Validate sortBy field
+  async getAllUsers(query: FilterUsersDto) {
     const validSortFields = [
       'createdAt',
       'email',
@@ -146,71 +130,8 @@ export class UsersService {
       'phone',
       'displayStatus',
     ];
-    if (!validSortFields.includes(sortBy)) {
-      throw new BadRequestException(ErrorMessages.SORT_BY_INVALID);
-    }
 
-    // Normalize order to uppercase
-    const orderUpperCase = order.toUpperCase();
-    if (!['ASC', 'DESC'].includes(orderUpperCase)) {
-      throw new BadRequestException(ErrorMessages.ORDER_INVALID);
-    }
-
-    const skip = (page - 1) * limit;
-
-    const queryBuilder = this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.role', 'role')
-      .leftJoinAndSelect('role.permissions', 'permissions');
-
-    // Field-specific filters
-    if (firstName) {
-      queryBuilder.andWhere('LOWER(user.firstName) LIKE LOWER(:firstName)', {
-        firstName: `%${firstName}%`,
-      });
-    }
-
-    if (lastName) {
-      queryBuilder.andWhere('LOWER(user.lastName) LIKE LOWER(:lastName)', {
-        lastName: `%${lastName}%`,
-      });
-    }
-
-    if (phone) {
-      queryBuilder.andWhere('user.phone LIKE :phone', { phone: `%${phone}%` });
-    }
-
-    if (email) {
-      queryBuilder.andWhere('user.email LIKE :email', { email: `%${email}%` });
-    }
-
-    if (createdAt) {
-      queryBuilder.andWhere('user.createdAt = :createdAt', { createdAt });
-    }
-
-    if (displayStatus) {
-      queryBuilder.andWhere(
-        'LOWER(user.displayStatus) LIKE LOWER(:displayStatus)',
-        {
-          displayStatus: `%${displayStatus}%`,
-        },
-      );
-    }
-
-    // Sort and pagination
-    queryBuilder
-      .orderBy(`user.${sortBy}`, orderUpperCase as 'ASC' | 'DESC')
-      .skip(skip)
-      .take(limit);
-
-    const [users, total] = await queryBuilder.getManyAndCount();
-
-    return {
-      total,
-      page: Number(page),
-      limit: Number(limit),
-      results: users,
-    };
+    return this.getAll(query, validSortFields, 'user', ['role', 'permissions']);
   }
 
   async updateUserById(

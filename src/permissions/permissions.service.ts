@@ -11,13 +11,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePermissionDto } from './dto/request/create-permission.dto';
 import { UpdatePermissionDto } from './dto/request/update-permission.dto';
 import { FilterPermissionsDto } from './dto/request/filter-permission.dto';
+import { BaseService } from 'src/base/base.service';
 
 @Injectable()
-export class PermissionsService {
+export class PermissionsService extends BaseService<Permission> {
   constructor(
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
-  ) {}
+  ) {
+    super(permissionRepository);
+  }
 
   private async checkPermissionExists(
     apiPath: string,
@@ -53,25 +56,7 @@ export class PermissionsService {
     return this.permissionRepository.save(permission);
   }
 
-  async getAllPermissions(query: FilterPermissionsDto): Promise<{
-    total: number;
-    page: number;
-    limit: number;
-    results: Permission[];
-  }> {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = 'createdAt',
-      order = 'ASC',
-      name,
-      apiPath,
-      method,
-      module,
-      createdAt,
-    } = query;
-
-    // Validate sortBy field
+  async getAllPermissions(query: FilterPermissionsDto) {
     const validSortFields = [
       'name',
       'apiPath',
@@ -79,64 +64,8 @@ export class PermissionsService {
       'module',
       'createdAt',
     ];
-    if (!validSortFields.includes(sortBy)) {
-      throw new BadRequestException(ErrorMessages.SORT_BY_INVALID);
-    }
 
-    // Normalize order to uppercase
-    const orderUpperCase = order.toUpperCase();
-    if (!['ASC', 'DESC'].includes(orderUpperCase)) {
-      throw new BadRequestException(ErrorMessages.ORDER_INVALID);
-    }
-
-    const skip = (page - 1) * limit;
-
-    const queryBuilder =
-      this.permissionRepository.createQueryBuilder('permission');
-
-    // Field-specific filters
-    if (name) {
-      queryBuilder.andWhere('LOWER(permission.name) LIKE LOWER(:name)', {
-        name: `%${name}%`,
-      });
-    }
-
-    if (apiPath) {
-      queryBuilder.andWhere('permission.apiPath LIKE :apiPath', {
-        apiPath: `%${apiPath}%`,
-      });
-    }
-
-    if (method) {
-      queryBuilder.andWhere('LOWER(permission.method) = LOWER(:method)', {
-        method,
-      });
-    }
-
-    if (module) {
-      queryBuilder.andWhere('LOWER(permission.module) LIKE LOWER(:module)', {
-        module: `%${module}%`,
-      });
-    }
-
-    if (createdAt) {
-      queryBuilder.andWhere('permission.createdAt = :createdAt', { createdAt });
-    }
-
-    // Sort and pagination
-    queryBuilder
-      .orderBy(`permission.${sortBy}`, orderUpperCase as 'ASC' | 'DESC')
-      .skip(skip)
-      .take(limit);
-
-    const [permissions, total] = await queryBuilder.getManyAndCount();
-
-    return {
-      total,
-      page: Number(page),
-      limit: Number(limit),
-      results: permissions,
-    };
+    return this.getAll(query, validSortFields, 'permission');
   }
 
   async findOne(id: string): Promise<Permission> {

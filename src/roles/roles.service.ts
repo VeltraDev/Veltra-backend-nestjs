@@ -13,9 +13,10 @@ import { Repository } from 'typeorm';
 import { FilterRolesDto } from './dto/request/filter-role.dto';
 import { Permission } from 'src/permissions/entities/permission.entity';
 import { User } from 'src/users/entities/user.entity';
+import { BaseService } from 'src/base/base.service';
 
 @Injectable()
-export class RolesService {
+export class RolesService extends BaseService<Role> {
   constructor(
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
@@ -23,7 +24,9 @@ export class RolesService {
     private readonly permissionRepository: Repository<Permission>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) {
+    super(roleRepository);
+  }
 
   private async checkRoleExists(
     name: string,
@@ -130,73 +133,13 @@ export class RolesService {
     return this.roleRepository.save(role);
   }
 
-  async getAllRoles(
-    query: FilterRolesDto,
-  ): Promise<{ total: number; page: number; limit: number; results: Role[] }> {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = 'createdAt',
-      order = 'ASC',
-      name,
-      description,
-      isActive = true,
-      createdAt,
-    } = query;
-
+  async getAllRoles(query: FilterRolesDto) {
     const validSortFields = ['name', 'description', 'isActive', 'createdAt'];
-    if (!validSortFields.includes(sortBy)) {
-      throw new BadRequestException(ErrorMessages.SORT_BY_INVALID);
-    }
 
-    const orderUpperCase = order.toUpperCase();
-    if (!['ASC', 'DESC'].includes(orderUpperCase)) {
-      throw new BadRequestException(ErrorMessages.ORDER_INVALID);
-    }
-
-    const skip = (page - 1) * limit;
-
-    const queryBuilder = this.roleRepository
-      .createQueryBuilder('role')
-      .leftJoinAndSelect('role.permissions', 'permissions')
-      .leftJoinAndSelect('role.users', 'users');
-
-    if (name) {
-      queryBuilder.andWhere('LOWER(role.name) LIKE LOWER(:name)', {
-        name: `%${name}%`,
-      });
-    }
-
-    if (description) {
-      queryBuilder.andWhere(
-        'LOWER(role.description) LIKE LOWER(:description)',
-        {
-          description: `%${description}%`,
-        },
-      );
-    }
-
-    if (isActive !== undefined) {
-      queryBuilder.andWhere('role.isActive = :isActive', { isActive });
-    }
-
-    if (createdAt) {
-      queryBuilder.andWhere('DATE(role.createdAt) = :createdAt', { createdAt });
-    }
-
-    queryBuilder
-      .orderBy(`role.${sortBy}`, orderUpperCase as 'ASC' | 'DESC')
-      .skip(skip)
-      .take(limit);
-
-    const [roles, total] = await queryBuilder.getManyAndCount();
-
-    return {
-      total,
-      page: Number(page),
-      limit: Number(limit),
-      results: roles,
-    };
+    return this.getAll(query, validSortFields, 'role', [
+      'permissions',
+      'users',
+    ]);
   }
 
   async findOne(id: string): Promise<Role> {

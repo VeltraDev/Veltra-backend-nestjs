@@ -1,49 +1,79 @@
-import { Repository, FindOptionsWhere, Like } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
+import { BadRequestException } from '@nestjs/common';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class BaseService<T> {
   constructor(protected readonly repository: Repository<T>) {}
 
-  async findAll(
-    currentPage = 1,
-    limit = 10,
-    sort: string,
-    filter: Record<string, any>,
-  ) {
-    const skip = (currentPage - 1) * limit;
-    const where: FindOptionsWhere<T> = {};
+  protected async getAll(
+    query: any,
+    validSortFields: string[],
+    alias: string,
+    relations: string[] = [],
+  ): Promise<{ total: number; page: number; limit: number; results: T[] }> {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      order = 'ASC',
+      ...filters
+    } = query;
 
-    if (filter) {
-      Object.keys(filter).forEach((key) => {
-        where[key] = Like(`%${filter[key]}%`);
-      });
+    // Validate sortBy field
+    if (!validSortFields.includes(sortBy)) {
+      throw new BadRequestException(ErrorMessages.SORT_BY_INVALID);
     }
 
-    const order = {};
-    if (sort) {
-      const [field, direction] = sort.split(':');
-      order[field] = direction.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
-    } else {
-      order['createdAt'] = 'DESC';
+    // Normalize order to uppercase
+    const orderUpperCase = order.toUpperCase();
+    if (!['ASC', 'DESC'].includes(orderUpperCase)) {
+      throw new BadRequestException(ErrorMessages.ORDER_INVALID);
     }
 
-    const [result, total] = await this.repository.findAndCount({
-      where,
-      order,
-      take: limit,
-      skip,
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.repository.createQueryBuilder(alias);
+    // Add relations if provided
+    relations.forEach((relation) => {
+      queryBuilder.leftJoinAndSelect(`${alias}.${relation}`, relation);
     });
 
-    const totalPages = Math.ceil(total / limit);
+    // Apply filters
+    this.applyFilters(queryBuilder, filters, alias);
+
+    // Sort and pagination
+    queryBuilder
+      .orderBy(`${alias}.${sortBy}`, orderUpperCase as 'ASC' | 'DESC')
+      .skip(skip)
+      .take(limit);
+
+    const [results, total] = await queryBuilder.getManyAndCount();
 
     return {
-      meta: {
-        current: currentPage,
-        pageSize: limit,
-        pages: totalPages,
-        total: total,
-      },
-      result,
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      results,
     };
   }
 
+  // Helper to apply filters
+  protected applyFilters(
+    queryBuilder: SelectQueryBuilder<T>,
+    filters: any,
+    alias: string,
+  ) {
+    Object.keys(filters).forEach((key) => {
+      const value = filters[key];
+      if (value) {
+        if (typeof value === 'string') {
+          queryBuilder.andWhere(`LOWER(${alias}.${key}) LIKE LOWER(:${key})`, {
+            [key]: `%${value}%`,
+          });
+        } else {
+          queryBuilder.andWhere(`${alias}.${key} = :${key}`, { [key]: value });
+        }
+      }
+    });
+  }
 }
