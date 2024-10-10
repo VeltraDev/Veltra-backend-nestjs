@@ -1,6 +1,7 @@
 export enum ErrorMessages {
   // General Errors
   INTERNAL_SERVER_ERROR = 'Internal server error',
+  NO_ACCESS_ENDPOINT = 'Bạn không có quyền để truy cập endpoint này',
 
   // Field Validations
   // -- Email Validations

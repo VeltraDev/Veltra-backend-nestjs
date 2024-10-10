@@ -109,12 +109,15 @@ export class AuthService {
     });
 
     // Create access token
+    const { id, email, firstName, lastName, role } = currentUser;
     const payload: UsersInterface = {
-      id: currentUser.id,
-      email: currentUser.email,
-      firstName: currentUser.firstName,
-      lastName: currentUser.lastName,
+      id,
+      email,
+      firstName,
+      lastName,
+      role: { id: role.id, name: role.name },
     };
+
     const accessToken = await this.jwtService.sign(payload);
     authResponse.access_token = accessToken;
 

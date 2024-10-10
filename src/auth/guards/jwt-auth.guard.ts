@@ -1,5 +1,6 @@
 import {
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -33,6 +34,20 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         err ||
         new UnauthorizedException(ErrorMessages.TOKEN_INVALID_OR_NO_TOKEN)
       );
+
+    // Authorization (check permissions)
+    const targetMethod = request.method;
+    const targetEndpoint = request.route.path;
+
+    const permissions = user?.permissions ?? [];
+    const isExist = permissions.find(
+      (permission) =>
+        targetMethod === permission.method &&
+        targetEndpoint === permission.apiPath,
+    );
+
+    if (!isExist)
+      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
 
     return user;
   }
