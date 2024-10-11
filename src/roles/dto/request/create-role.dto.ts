@@ -25,9 +25,4 @@ export class CreateRoleDto {
   @IsArray({ message: ErrorMessages.PERMISSION_ID_ARRAY })
   @Type(() => String)
   permissions?: string[];
-
-  @IsOptional()
-  @IsArray({ message: ErrorMessages.USER_ID_ARRAY })
-  @Type(() => String)
-  users?: string[];
 }

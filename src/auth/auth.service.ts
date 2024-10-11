@@ -20,6 +20,7 @@ import { UsersInterface } from 'src/users/users.interface';
 import { ForgotPasswordDto } from './dto/request/forgot-password.dto';
 import { ResetPasswordDto } from './dto/request/reset-password.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
+import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +28,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private mailService: MailService,
+    private roleService: RolesService,
     private configService: ConfigService,
   ) {}
 
@@ -84,6 +86,7 @@ export class AuthService {
   async register(registerDto: RegisterUserDto): Promise<void> {
     const newUser = plainToClass(User, registerDto);
     newUser.password = getHashPassword(registerDto.password);
+
     const savedUser = await this.usersService.create(newUser);
 
     return this.mailService.sendVerifyEmail(savedUser);

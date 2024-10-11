@@ -9,7 +9,7 @@ import { UpdateRoleDto } from './dto/request/update-role.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { Role } from './entities/role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { FilterRolesDto } from './dto/request/filter-role.dto';
 import { Permission } from 'src/permissions/entities/permission.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -22,8 +22,6 @@ export class RolesService extends BaseService<Role> {
     private readonly roleRepository: Repository<Role>,
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
   ) {
     super(roleRepository);
   }
@@ -36,9 +34,7 @@ export class RolesService extends BaseService<Role> {
       .createQueryBuilder('role')
       .where('LOWER(role.name) = LOWER(:name)', { name });
 
-    if (excludeId) {
-      query.andWhere('role.id != :id', { id: excludeId });
-    }
+    if (excludeId) query.andWhere('role.id != :id', { id: excludeId });
 
     const role = await query.getOne();
     if (role) {
@@ -67,10 +63,7 @@ export class RolesService extends BaseService<Role> {
     }
   }
 
-  private async validatePermissionsAndUsers(
-    permissions?: string[],
-    users?: string[],
-  ): Promise<void> {
+  private async validatePermission(permissions?: string[]): Promise<void> {
     if (permissions) {
       await this.validateEntityExistence(
         permissions,
@@ -78,20 +71,11 @@ export class RolesService extends BaseService<Role> {
         ErrorMessages.PERMISSION_NOT_FOUND,
       );
     }
-
-    if (users) {
-      await this.validateEntityExistence(
-        users,
-        this.userRepository,
-        ErrorMessages.USER_NOT_FOUND_ID,
-      );
-    }
   }
 
-  private async assignPermissionsAndUsersToRole(
+  private async assignPermissionsToRole(
     role: Role,
     permissions?: string[],
-    users?: string[],
   ): Promise<Role> {
     if (permissions) {
       role.permissions = await this.permissionRepository.find({
@@ -99,36 +83,31 @@ export class RolesService extends BaseService<Role> {
       });
     }
 
-    if (users) {
-      role.users = await this.userRepository.find({
-        where: users.map((id) => ({ id })),
-      });
-    }
-
     return role;
   }
 
   async create(createRoleDto: CreateRoleDto): Promise<Role> {
-    const {
-      name,
-      description,
-      isActive = true,
-      permissions,
-      users,
-    } = createRoleDto;
+    const { name, description, isActive = true, permissions } = createRoleDto;
 
     const lowercaseName = name.toLowerCase();
 
     await this.checkRoleExists(lowercaseName);
-    await this.validatePermissionsAndUsers(permissions, users);
+    await this.validatePermission(permissions);
+
+    const permissionEntities = await this.permissionRepository.find({
+      where: {
+        id: In(permissions),
+      },
+    });
 
     let role = this.roleRepository.create({
       name,
       description,
       isActive,
+      permissions: permissionEntities,
     });
 
-    role = await this.assignPermissionsAndUsersToRole(role, permissions, users);
+    role = await this.assignPermissionsToRole(role, permissions);
 
     return this.roleRepository.save(role);
   }
@@ -136,16 +115,13 @@ export class RolesService extends BaseService<Role> {
   async getAllRoles(query: FilterRolesDto) {
     const validSortFields = ['name', 'description', 'isActive', 'createdAt'];
 
-    return this.getAll(query, validSortFields, 'role', [
-      'permissions',
-      'users',
-    ]);
+    return this.getAll(query, validSortFields, 'role', ['permissions']);
   }
 
   async findOne(id: string): Promise<Role> {
     const role = await this.roleRepository.findOne({
       where: { id, isActive: true },
-      relations: ['permissions', 'users'],
+      relations: ['permissions'],
     });
     if (!role) {
       throw new NotFoundException(
@@ -156,7 +132,7 @@ export class RolesService extends BaseService<Role> {
   }
 
   async update(id: string, updateRoleDto: UpdateRoleDto): Promise<Role> {
-    const { name, permissions, users, isActive } = updateRoleDto;
+    const { name, permissions, isActive } = updateRoleDto;
 
     const role = await this.findOne(id);
 
@@ -170,8 +146,8 @@ export class RolesService extends BaseService<Role> {
       role.isActive = isActive;
     }
 
-    await this.validatePermissionsAndUsers(permissions, users);
-    await this.assignPermissionsAndUsersToRole(role, permissions, users);
+    await this.validatePermission(permissions);
+    await this.assignPermissionsToRole(role, permissions);
 
     Object.assign(role, updateRoleDto);
     return this.roleRepository.save(role);
@@ -185,9 +161,7 @@ export class RolesService extends BaseService<Role> {
     try {
       await this.roleRepository.save(role);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Không thể vô hiệu hóa vai trò do lỗi hệ thống',
-      );
+      throw new InternalServerErrorException(ErrorMessages.NOT_DISABLE_ROLE);
     }
   }
 }
