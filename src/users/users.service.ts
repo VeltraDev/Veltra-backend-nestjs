@@ -86,27 +86,18 @@ export class UsersService extends BaseService<User> {
     return foundUser;
   }
 
-  private async validateUserUniqueness(email: string, phone: string) {
-    const [emailExists, phoneExists] = await Promise.all([
-      this.isUserExistsByEmail(email),
-      this.isUserExistsByPhone(phone),
-    ]);
+  private async validateUserUniqueness(email: string) {
+    const [emailExists] = await Promise.all([this.isUserExistsByEmail(email)]);
 
     if (emailExists) {
       throw new BadRequestException(
         ErrorMessages.EMAIL_ALREADY_USED.replace('{email}', email),
       );
     }
-
-    if (phoneExists) {
-      throw new BadRequestException(
-        ErrorMessages.PHONE_ALREADY_USED.replace('{phone}', phone),
-      );
-    }
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    await this.validateUserUniqueness(createUserDto.email, createUserDto.phone);
+    await this.validateUserUniqueness(createUserDto.email);
     const newUser = this.userRepository.create(createUserDto);
     return await this.userRepository.save(newUser);
   }
@@ -123,7 +114,6 @@ export class UsersService extends BaseService<User> {
       'email',
       'firstName',
       'lastName',
-      'phone',
       'displayStatus',
     ];
 
@@ -182,33 +172,10 @@ export class UsersService extends BaseService<User> {
     return user;
   }
 
-  async findOneByPhone(phone: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { phone },
-      relations: ['role', 'role.permissions'],
-    });
-
-    if (!user) {
-      throw new NotFoundException(
-        ErrorMessages.USER_NOT_FOUND_PHONE.replace('{phone}', phone),
-      );
-    }
-
-    return user;
-  }
-
   async isUserExistsByEmail(email: string): Promise<boolean> {
     const userCount = await this.userRepository.count({
       where: { email },
     });
-    return userCount > 0;
-  }
-
-  async isUserExistsByPhone(phone: string): Promise<boolean> {
-    const userCount = await this.userRepository.count({
-      where: { phone },
-    });
-
     return userCount > 0;
   }
 

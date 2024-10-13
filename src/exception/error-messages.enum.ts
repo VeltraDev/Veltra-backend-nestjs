@@ -29,12 +29,6 @@ export enum ErrorMessages {
   LAST_NAME_REQUIRED = 'Họ là bắt buộc',
   LAST_NAME_STRING = 'Họ phải là chuỗi ký tự',
 
-  // -- Phone Number Validations
-  PHONE_NUMBER_VN_INVALID = 'Số điện thoại phải là số hợp lệ tại Việt Nam',
-  REGISTER_USER_PHONE_INVALID = 'Số điện thoại phải là số hợp lệ tại Việt Nam',
-  PHONE_ALREADY_USED = 'Số điện thoại {phone} đã được sử dụng',
-  USER_NOT_FOUND_PHONE = 'Người dùng với số điện thoại {phone} không tồn tại trên hệ thống',
-
   // -- Password Validations
   PASSWORD_REQUIRED = 'Mật khẩu hiện tại là bắt buộc',
   PASSWORD_STRING = 'Mật khẩu hiện tại phải là chuỗi',

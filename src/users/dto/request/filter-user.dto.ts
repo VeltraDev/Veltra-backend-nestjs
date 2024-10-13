@@ -6,7 +6,6 @@ import {
   IsString,
   IsIn,
   IsDateString,
-  IsPhoneNumber,
   IsEmail,
 } from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
@@ -48,12 +47,6 @@ export class FilterUsersDto {
   @IsOptional()
   @IsString({ message: ErrorMessages.LAST_NAME_STRING })
   lastName?: string;
-
-  @IsOptional()
-  @IsPhoneNumber('VN', {
-    message: ErrorMessages.PHONE_NUMBER_VN_INVALID,
-  })
-  phone?: string;
 
   @IsOptional()
   @IsEmail({}, { message: ErrorMessages.EMAIL_INVALID })

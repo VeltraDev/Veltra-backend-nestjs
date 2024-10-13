@@ -24,9 +24,6 @@ export class User extends EntityBase {
   @Column({ nullable: true })
   avatar: string;
 
-  @Column({ nullable: true, unique: true })
-  phone: string;
-
   @Column({ type: 'text', nullable: true })
   displayStatus: string;
 

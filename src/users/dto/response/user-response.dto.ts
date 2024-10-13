@@ -1,6 +1,5 @@
 import { Expose, Type } from 'class-transformer';
 import { RoleResponseDto } from 'src/roles/dto/response/role-response.dto';
-import { Role } from 'src/roles/entities/role.entity';
 
 export class UserResponseDto {
   @Expose()
@@ -17,9 +16,6 @@ export class UserResponseDto {
 
   @Expose()
   avatar: string;
-
-  @Expose()
-  phone: string;
 
   @Expose()
   displayStatus: string;

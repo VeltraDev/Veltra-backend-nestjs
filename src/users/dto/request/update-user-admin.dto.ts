@@ -2,7 +2,6 @@ import {
   IsOptional,
   IsString,
   IsBoolean,
-  IsPhoneNumber,
   IsUUID,
 } from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
@@ -19,12 +18,6 @@ export class UpdateUserAdminDto {
   @IsOptional()
   @IsString({ message: ErrorMessages.AVATAR_STRING })
   avatar?: string;
-
-  @IsOptional()
-  @IsPhoneNumber('VN', {
-    message: ErrorMessages.PHONE_NUMBER_VN_INVALID,
-  })
-  phone?: string;
 
   @IsOptional()
   @IsString({ message: ErrorMessages.DISPLAY_STATUS_STRING })

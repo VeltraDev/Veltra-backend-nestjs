@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsPhoneNumber } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class UpdateProfileInformationDto {
@@ -13,12 +13,6 @@ export class UpdateProfileInformationDto {
   @IsOptional()
   @IsString({ message: ErrorMessages.AVATAR_STRING })
   avatar?: string;
-
-  @IsOptional()
-  @IsPhoneNumber('VN', {
-    message: ErrorMessages.PHONE_NUMBER_VN_INVALID,
-  })
-  phone?: string;
 
   @IsOptional()
   @IsString({ message: ErrorMessages.DISPLAY_STATUS_STRING })

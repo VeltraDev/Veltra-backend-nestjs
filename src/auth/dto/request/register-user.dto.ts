@@ -2,7 +2,6 @@ import {
   IsEmail,
   IsNotEmpty,
   IsOptional,
-  IsPhoneNumber,
   IsString,
   Matches,
 } from 'class-validator';
@@ -34,8 +33,4 @@ export class RegisterUserDto {
   @IsOptional()
   @IsString({ message: ErrorMessages.AVATAR_STRING })
   avatar?: string;
-
-  @IsOptional()
-  @IsPhoneNumber('VN', { message: ErrorMessages.PHONE_NUMBER_VN_INVALID })
-  phone?: string;
 }
