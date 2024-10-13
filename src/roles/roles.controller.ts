@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   InternalServerErrorException,
+  Put,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/request/create-role.dto';
@@ -18,6 +19,7 @@ import { plainToClass } from 'class-transformer';
 import { MessageResponse } from 'src/common/decorators/message_response.decorator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { FilterRolesDto } from './dto/request/filter-role.dto';
+import { UpdatePermissionsToRoleDto } from './dto/request/update-permissions-role.dto';
 
 @Controller('roles')
 export class RolesController {
@@ -62,6 +64,22 @@ export class RolesController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const role = await this.rolesService.findOne(id);
+
+    return plainToClass(RoleResponseDto, role, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  @MessageResponse('Cập nhật quyền hạn cho vai trò thành công')
+  @Put(':id/permissions')
+  async updatePermissions(
+    @Param('id') roleId: string,
+    @Body() updatePermissionsToRoleDto: UpdatePermissionsToRoleDto,
+  ) {
+    const role = await this.rolesService.updatePermissionsToRole(
+      roleId,
+      updatePermissionsToRoleDto.permissions,
+    );
 
     return plainToClass(RoleResponseDto, role, {
       excludeExtraneousValues: true,

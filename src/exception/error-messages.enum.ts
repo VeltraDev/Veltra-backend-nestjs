@@ -10,6 +10,7 @@ export enum ErrorMessages {
   EMAIL_INVALID = 'Email phải là một địa chỉ email hợp lệ',
   EMAIL_OR_PASSWORD_INVALID = 'Email hoặc mật khẩu không hợp lệ. Hãy thử lại!',
   EMAIL_ALREADY_USED = 'Email {email} đã được sử dụng',
+  MISSING_EMAIL = 'Email bị thiếu, hãy bổ sung thêm email',
 
   // -- Token Validations
   TOKEN_REQUIRED = 'Token là bắt buộc',
@@ -38,6 +39,7 @@ export enum ErrorMessages {
   CONFIRM_PASSWORD_MATCH = 'Mật khẩu mới và xác nhận mật khẩu không khớp',
   CURRENT_PASSWORD_INCORRECT = 'Mật khẩu hiện tại không đúng',
   PASSWORD_SAME_AS_CURRENT = 'Mật khẩu mới không được trùng với mật khẩu hiện tại',
+  MISSING_PASSWORD = 'Mật khẩu bị thiếu, hãy bổ sung thêm mật khẩu',
 
   // -- Other Field Validations
   AVATAR_STRING = 'Ảnh đại diện phải là chuỗi ký tự',
@@ -76,9 +78,10 @@ export enum ErrorMessages {
   PERMISSION_MODULE_REQUIRED = 'Module là bắt buộc',
   PERMISSION_MODULE_STRING = 'Module phải là chuỗi ký tự',
   PERMISSION_SAME_API_MODULE = 'Quyền hạn với {methodAndPath} đã tồn tại trong module {module}',
-  PERMISSION_ID_ARRAY = 'Danh sách ID quyền hạn phải là một mảng chuỗi hợp lệ',
+  PERMISSION_ID_ARRAY = 'Danh sách ID quyền hạn phải là một mảng chuỗi hợp lệ và không được để trống',
 
-  ROLE_NOT_FOUND = 'Role với ID {id} không tồn tại',
+  ROLE_ID_NOT_FOUND = 'Role với ID {id} không tồn tại',
+  ROLE_NAME_NOT_FOUND = 'Role với tên {name} không tồn tại',
   ROLE_NAME_REQUIRED = 'Tên vai trò là bắt buộc',
   ROLE_NAME_STRING = 'Tên vai trò phải là chuỗi ký tự',
   ROLE_DESCRIPTION_STRING = 'Mô tả vai trò phải là chuỗi ký tự',

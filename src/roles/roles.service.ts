@@ -125,7 +125,20 @@ export class RolesService extends BaseService<Role> {
     });
     if (!role) {
       throw new NotFoundException(
-        ErrorMessages.ROLE_NOT_FOUND.replace('{id}', id),
+        ErrorMessages.ROLE_ID_NOT_FOUND.replace('{id}', id),
+      );
+    }
+    return role;
+  }
+
+  async findOneByName(name: string): Promise<Role> {
+    const role = await this.roleRepository.findOne({
+      where: { name, isActive: true },
+      relations: ['permissions'],
+    });
+    if (!role) {
+      throw new NotFoundException(
+        ErrorMessages.ROLE_NAME_NOT_FOUND.replace('{name}', name),
       );
     }
     return role;
@@ -150,6 +163,18 @@ export class RolesService extends BaseService<Role> {
     await this.assignPermissionsToRole(role, permissions);
 
     Object.assign(role, updateRoleDto);
+    return this.roleRepository.save(role);
+  }
+
+  async updatePermissionsToRole(
+    roleId: string,
+    permissions: string[],
+  ): Promise<Role> {
+    const role = await this.findOne(roleId);
+    
+    await this.validatePermission(permissions);
+    await this.assignPermissionsToRole(role, permissions);
+
     return this.roleRepository.save(role);
   }
 

@@ -56,8 +56,8 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @MessageResponse('Người dùng đã đăng nhập thành công')
   @Post('login')
-  async login(@Req() req, @Res({ passthrough: true }) response: Response) {
-    return await this.authService.login(req.user, response);
+  async login(@User() user, @Res({ passthrough: true }) response: Response) {
+    return await this.authService.login(user, response);
   }
 
   @MessageResponse('Lấy thông tin người dùng đã đăng nhập')

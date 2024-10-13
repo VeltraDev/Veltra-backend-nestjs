@@ -8,7 +8,8 @@ import { DeepPartial, Repository } from 'typeorm';
 import {
   ADMIN_ROLE,
   commonTimestamps,
-  INIT_PERMISSIONS,
+  INIT_ADMIN_PERMISSIONS,
+  INIT_USER_LOGIN_PERMISSIONS,
   USER_ROLE,
 } from './sample';
 import { getHashPassword } from 'src/common/utils/hashPassword';
@@ -25,6 +26,93 @@ export class DatabasesService implements OnModuleInit {
     private readonly configService: ConfigService,
   ) {}
 
+  private async createOrGetPermissions(
+    permissionsArray: any[],
+  ): Promise<Permission[]> {
+    const createdPermissions: Permission[] = [];
+
+    for (const permission of permissionsArray) {
+      let existingPermission = await this.permissionRepository.findOne({
+        where: { name: permission.name, apiPath: permission.apiPath },
+      });
+
+      if (!existingPermission) {
+        existingPermission = this.permissionRepository.create(
+          permission as unknown as DeepPartial<Permission>,
+        );
+        await this.permissionRepository.save(existingPermission);
+      }
+
+      createdPermissions.push(existingPermission);
+    }
+
+    return createdPermissions;
+  }
+
+  private async createRoles(
+    adminPermissions: Permission[],
+    userPermissions: Permission[],
+  ) {
+    await this.roleRepository.save([
+      this.roleRepository.create({
+        name: ADMIN_ROLE,
+        description: 'Admin toàn quyền sử dụng hệ thống',
+        isActive: true,
+        permissions: adminPermissions,
+        ...commonTimestamps(),
+      }),
+      this.roleRepository.create({
+        name: USER_ROLE,
+        description: 'Người dùng đăng nhập với quyền hạn cơ bản',
+        isActive: true,
+        permissions: userPermissions,
+        ...commonTimestamps(),
+      }),
+    ]);
+  }
+
+  private async createUsers(adminRole: Role, userRole: Role) {
+    const users = [
+      {
+        firstName: 'Veltra',
+        lastName: 'Admin',
+        email: 'veltra.admin@gmail.com',
+        role: adminRole,
+      },
+      {
+        firstName: 'Veltra',
+        lastName: 'User',
+        email: 'veltra.user@gmail.com',
+        role: userRole,
+      },
+      {
+        firstName: 'Quách Phú',
+        lastName: 'Thuận',
+        email: 'thuanmobile1111@gmail.com',
+        role: adminRole,
+      },
+      {
+        firstName: 'Thuận',
+        lastName: 'Phú',
+        email: '2251120446@ut.edu.vn',
+        role: userRole,
+      },
+    ];
+
+    for (const userData of users) {
+      await this.userRepository.save(
+        this.userRepository.create({
+          ...userData,
+          password: getHashPassword(
+            this.configService.get<string>('INIT_PASSWORD'),
+          ),
+          isVerified: true,
+          ...commonTimestamps(),
+        }),
+      );
+    }
+  }
+
   async onModuleInit() {
     const isInit = this.configService.get<string>('SHOULD_INIT');
     if (Boolean(isInit)) {
@@ -33,33 +121,16 @@ export class DatabasesService implements OnModuleInit {
       const countRole = await this.roleRepository.count();
 
       if (countPermission === 0) {
-        for (const permission of INIT_PERMISSIONS) {
-          const newPermission = this.permissionRepository.create(
-            permission as unknown as DeepPartial<Permission>,
-          );
-          await this.permissionRepository.save(newPermission);
-        }
-      }
+        const adminPermissions = await this.createOrGetPermissions(
+          INIT_ADMIN_PERMISSIONS,
+        );
+        const userLoginPermissions = await this.createOrGetPermissions(
+          INIT_USER_LOGIN_PERMISSIONS,
+        );
 
-      if (countRole === 0) {
-        const permissions = await this.permissionRepository.find();
-        await this.roleRepository.save([
-          this.roleRepository.create({
-            name: ADMIN_ROLE,
-            description: 'Admin toàn quyền sử dụng hệ thống',
-            isActive: true,
-            permissions: permissions,
-            ...commonTimestamps(),
-          }),
-          this.roleRepository.create({
-            name: USER_ROLE,
-            description:
-              'Người dùng có thể sử dụng hệ thống tùy theo quyền hạn phù hợp theo vai trò',
-            isActive: true,
-            permissions: [],
-            ...commonTimestamps(),
-          }),
-        ]);
+        if (countRole === 0) {
+          await this.createRoles(adminPermissions, userLoginPermissions);
+        }
       }
 
       if (countUser === 0) {
@@ -69,42 +140,7 @@ export class DatabasesService implements OnModuleInit {
         const userRole = await this.roleRepository.findOne({
           where: { name: USER_ROLE },
         });
-
-        await this.userRepository.save([
-          this.userRepository.create({
-            firstName: 'Veltra',
-            lastName: 'Admin',
-            email: 'veltra.admin@gmail.com',
-            password: getHashPassword(
-              this.configService.get<string>('INIT_PASSWORD'),
-            ),
-            role: adminRole,
-            isVerified: true,
-            ...commonTimestamps(),
-          }),
-          this.userRepository.create({
-            firstName: 'Veltra',
-            lastName: 'User',
-            email: 'veltra.user@gmail.com',
-            password: getHashPassword(
-              this.configService.get<string>('INIT_PASSWORD'),
-            ),
-            role: userRole,
-            isVerified: true,
-            ...commonTimestamps(),
-          }),
-          this.userRepository.create({
-            firstName: 'Quách Phú',
-            lastName: 'Thuận',
-            email: 'thuanmobile1111@gmail.com',
-            password: getHashPassword(
-              this.configService.get<string>('INIT_PASSWORD'),
-            ),
-            role: adminRole,
-            isVerified: true,
-            ...commonTimestamps(),
-          }),
-        ]);
+        await this.createUsers(adminRole, userRole);
       }
 
       if (countUser > 0 && countRole > 0 && countPermission > 0) {

@@ -21,6 +21,7 @@ import { ForgotPasswordDto } from './dto/request/forgot-password.dto';
 import { ResetPasswordDto } from './dto/request/reset-password.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { RolesService } from 'src/roles/roles.service';
+import { USER_ROLE } from 'src/database/sample';
 
 @Injectable()
 export class AuthService {
@@ -85,7 +86,9 @@ export class AuthService {
 
   async register(registerDto: RegisterUserDto): Promise<void> {
     const newUser = plainToClass(User, registerDto);
+    
     newUser.password = getHashPassword(registerDto.password);
+    newUser.role = await this.roleService.findOneByName(USER_ROLE);
 
     const savedUser = await this.usersService.create(newUser);
 

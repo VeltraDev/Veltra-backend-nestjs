@@ -1,6 +1,5 @@
 import { Expose, Type } from 'class-transformer';
 import { PermissionResponseDto } from 'src/permissions/dto/response/permission-response.dto';
-import { UserResponseDto } from 'src/users/dto/response/user-response.dto';
 
 export class RoleResponseDto {
   @Expose()
@@ -21,8 +20,4 @@ export class RoleResponseDto {
   @Expose()
   @Type(() => PermissionResponseDto)
   permissions: PermissionResponseDto[];
-
-  // @Expose()
-  // @Type(() => UserResponseDto)
-  // users: UserResponseDto[];
 }

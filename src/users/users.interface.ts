@@ -6,12 +6,12 @@ export interface UsersInterface {
   role: {
     id: string;
     name: string;
+    permissions?: {
+      id: string;
+      name: string;
+      apiPath: string;
+      method: string;
+      module: string;
+    }[];
   };
-  permissions?: {
-    id: string;
-    name: string;
-    apiPath: string;
-    method: string;
-    module: string;
-  }[];
 }
