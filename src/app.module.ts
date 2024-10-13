@@ -9,7 +9,7 @@ import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
-import ms from 'ms';
+import { DatabasesModule } from './database/databases.module';
 
 @Module({
   imports: [
@@ -39,6 +39,7 @@ import ms from 'ms';
     UsersModule,
     RolesModule,
     PermissionsModule,
+    DatabasesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

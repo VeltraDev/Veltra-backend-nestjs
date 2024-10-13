@@ -13,12 +13,12 @@ import {
   isValidPassword,
 } from 'src/common/utils/hashPassword';
 import { UpdateProfileInformationDto } from './dto/request/update-profile.dto';
-import { RegisterUserDto } from 'src/auth/dto/request/register-user.dto';
 import { FilterUsersDto } from './dto/request/filter-user.dto';
 import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { RolesService } from 'src/roles/roles.service';
 import { BaseService } from 'src/base/base.service';
+import { CreateUserDto } from './dto/request/create-user.dto';
 
 @Injectable()
 export class UsersService extends BaseService<User> {
@@ -59,9 +59,8 @@ export class UsersService extends BaseService<User> {
     const { currentPassword, newPassword, confirmPassword } =
       updateProfilePasswordDto;
 
-    if (newPassword !== confirmPassword) {
+    if (newPassword !== confirmPassword)
       throw new BadRequestException(ErrorMessages.CONFIRM_PASSWORD_MATCH);
-    }
 
     const foundUser = await this.getUserById(user.id);
 
@@ -106,12 +105,9 @@ export class UsersService extends BaseService<User> {
     }
   }
 
-  async create(registerUserDto: RegisterUserDto): Promise<User> {
-    await this.validateUserUniqueness(
-      registerUserDto.email,
-      registerUserDto.phone,
-    );
-    const newUser = this.userRepository.create(registerUserDto);
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    await this.validateUserUniqueness(createUserDto.email, createUserDto.phone);
+    const newUser = this.userRepository.create(createUserDto);
     return await this.userRepository.save(newUser);
   }
 

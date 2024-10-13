@@ -39,6 +39,12 @@ export class User extends EntityBase {
   @Column({ nullable: true })
   otpExpiration: Date;
 
+  @Column({ default: 'basic' })
+  provider: string;
+
+  @Column({ nullable: true })
+  providerUserId: string;
+
   @Column({ default: false })
   isVerified: boolean;
 
