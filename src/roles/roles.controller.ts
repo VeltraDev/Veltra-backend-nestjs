@@ -20,6 +20,8 @@ import { MessageResponse } from 'src/common/decorators/message_response.decorato
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { FilterRolesDto } from './dto/request/filter-role.dto';
 import { UpdatePermissionsToRoleDto } from './dto/request/update-permissions-role.dto';
+import { User } from 'src/common/decorators/user.decorator';
+import { UsersInterface } from 'src/users/users.interface';
 
 @Controller('roles')
 export class RolesController {
@@ -27,8 +29,8 @@ export class RolesController {
 
   @MessageResponse('Tạo vai trò mới thành công')
   @Post()
-  async create(@Body() createRoleDto: CreateRoleDto) {
-    const role = await this.rolesService.create(createRoleDto);
+  async createRole(@Body() createRoleDto: CreateRoleDto) {
+    const role = await this.rolesService.createRole(createRoleDto);
 
     return plainToClass(RoleResponseDto, role, {
       excludeExtraneousValues: true,
@@ -62,24 +64,8 @@ export class RolesController {
 
   @MessageResponse('Lấy thông tin vai trò thành công')
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const role = await this.rolesService.findOne(id);
-
-    return plainToClass(RoleResponseDto, role, {
-      excludeExtraneousValues: true,
-    });
-  }
-
-  @MessageResponse('Cập nhật quyền hạn cho vai trò thành công')
-  @Put(':id/permissions')
-  async updatePermissions(
-    @Param('id') roleId: string,
-    @Body() updatePermissionsToRoleDto: UpdatePermissionsToRoleDto,
-  ) {
-    const role = await this.rolesService.updatePermissionsToRole(
-      roleId,
-      updatePermissionsToRoleDto.permissions,
-    );
+  async getRoleById(@Param('id') id: string) {
+    const role = await this.rolesService.getRoleById(id);
 
     return plainToClass(RoleResponseDto, role, {
       excludeExtraneousValues: true,
@@ -88,9 +74,27 @@ export class RolesController {
 
   @MessageResponse('Cập nhật thông tin vai trò thành công')
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
-    const role = await this.rolesService.update(id, updateRoleDto);
+  async updateRole(
+    @Param('id') id: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ) {
+    const role = await this.rolesService.updateRole(id, updateRoleDto);
 
+    return plainToClass(RoleResponseDto, role, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  @MessageResponse('Xóa quyền hạn khỏi vai trò thành công')
+  @Delete(':id/permissions')
+  async removePermissions(
+    @Param('id') id: string,
+    @Body() updatePermissionsDto: UpdatePermissionsToRoleDto,
+  ) {
+    const role = await this.rolesService.removePermissionsFromRole(
+      id,
+      updatePermissionsDto.permissions,
+    );
     return plainToClass(RoleResponseDto, role, {
       excludeExtraneousValues: true,
     });
@@ -98,7 +102,7 @@ export class RolesController {
 
   @MessageResponse('Vô hiệu hóa vai trò thành công')
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return await this.rolesService.remove(id);
+  async deactivateRole(@Param('id') id: string) {
+    return await this.rolesService.deactivateRole(id);
   }
 }

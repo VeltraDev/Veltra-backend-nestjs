@@ -86,9 +86,9 @@ export class AuthService {
 
   async register(registerDto: RegisterUserDto): Promise<void> {
     const newUser = plainToClass(User, registerDto);
-    
+
     newUser.password = getHashPassword(registerDto.password);
-    newUser.role = await this.roleService.findOneByName(USER_ROLE);
+    newUser.role = await this.roleService.getRoleByName(USER_ROLE);
 
     const savedUser = await this.usersService.create(newUser);
 

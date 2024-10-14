@@ -164,21 +164,21 @@ export const INIT_ADMIN_PERMISSIONS = [
     'ROLES',
   ),
   createPermission(
-    'Cập nhật vai trò theo ID',
+    'Cập nhật thông tin vai trò theo ID',
     '/api/v1/roles/:id',
     'PATCH',
     'ROLES',
   ),
   createPermission(
-    'Xóa vai trò theo ID',
+    'Vô hiệu hóa vai trò theo ID',
     '/api/v1/roles/:id',
     'DELETE',
     'ROLES',
   ),
   createPermission(
-    'Cập nhật quyền hạn cho vai trò',
+    'Xóa quyền hạn khỏi vai trò theo ID',
     '/api/v1/roles/:id/permissions',
-    'PUT',
+    'DELETE',
     'ROLES',
   ),
 

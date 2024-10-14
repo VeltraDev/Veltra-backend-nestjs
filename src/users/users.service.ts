@@ -127,7 +127,9 @@ export class UsersService extends BaseService<User> {
     const user = await this.getUserById(id);
 
     if (updateUserAdminDto.roleId) {
-      const role = await this.roleService.findOne(updateUserAdminDto.roleId);
+      const role = await this.roleService.getRoleById(
+        updateUserAdminDto.roleId,
+      );
       user.role = role;
     }
 

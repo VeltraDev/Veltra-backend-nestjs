@@ -33,6 +33,7 @@ export class BaseService<T> {
     const skip = (page - 1) * limit;
 
     const queryBuilder = this.repository.createQueryBuilder(alias);
+
     // Add relations if provided
     relations.forEach((relation) => {
       queryBuilder.leftJoinAndSelect(`${alias}.${relation}`, relation);
