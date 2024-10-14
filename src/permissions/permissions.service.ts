@@ -25,7 +25,6 @@ export class PermissionsService extends BaseService<Permission> {
   private async checkPermissionExists(
     apiPath: string,
     method: string,
-    module: string,
     excludeId?: string,
   ): Promise<void> {
     const existingPermission = await this.permissionRepository.findOne({
@@ -41,7 +40,19 @@ export class PermissionsService extends BaseService<Permission> {
         ErrorMessages.PERMISSION_SAME_API_MODULE.replace(
           '{methodAndPath}',
           methodAndPath,
-        ).replace('{module}', module),
+        ),
+      );
+    }
+  }
+
+  private async checkModuleNameExists(module: string): Promise<void> {
+    const existingModule = await this.permissionRepository.findOne({
+      where: { module },
+    });
+
+    if (existingModule) {
+      throw new BadRequestException(
+        ErrorMessages.PERMISSION_MODULE_EXISTS.replace('{module}', module),
       );
     }
   }
@@ -49,8 +60,8 @@ export class PermissionsService extends BaseService<Permission> {
   async create(createPermissionDto: CreatePermissionDto): Promise<Permission> {
     const { apiPath, method, module } = createPermissionDto;
 
-    const moduleValue = module || 'unknown module';
-    await this.checkPermissionExists(apiPath, method, moduleValue);
+    await this.checkPermissionExists(apiPath, method);
+    await this.checkModuleNameExists(module);
 
     const permission = this.permissionRepository.create(createPermissionDto);
     return this.permissionRepository.save(permission);
@@ -84,14 +95,12 @@ export class PermissionsService extends BaseService<Permission> {
     id: string,
     updatePermissionDto: UpdatePermissionDto,
   ): Promise<Permission> {
-    const { apiPath, method, module } = updatePermissionDto;
+    const { apiPath, method } = updatePermissionDto;
 
     const permission = await this.findOne(id);
 
-    if (apiPath && method) {
-      const moduleValue = module || permission.module || 'unknown module';
-      await this.checkPermissionExists(apiPath, method, moduleValue, id);
-    }
+    if (apiPath && method)
+      await this.checkPermissionExists(apiPath, method, id);
 
     Object.assign(permission, updatePermissionDto);
     return this.permissionRepository.save(permission);

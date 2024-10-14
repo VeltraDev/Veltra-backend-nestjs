@@ -77,7 +77,8 @@ export enum ErrorMessages {
   PERMISSION_METHOD_STRING = 'Method phải là chuỗi ký tự',
   PERMISSION_MODULE_REQUIRED = 'Module là bắt buộc',
   PERMISSION_MODULE_STRING = 'Module phải là chuỗi ký tự',
-  PERMISSION_SAME_API_MODULE = 'Quyền hạn với {methodAndPath} đã tồn tại trong module {module}',
+  PERMISSION_SAME_API_MODULE = 'Quyền hạn với {methodAndPath} đã tồn tại trên hệ thống và không thể tạo lại',
+  PERMISSION_MODULE_EXISTS = 'Module với tên {module} đã tồn tại, vui lòng chọn tên module khác',
   PERMISSION_ID_ARRAY = 'Danh sách ID quyền hạn phải là một mảng chuỗi hợp lệ và không được để trống',
   PERMISSION_NOT_FOUND_IN_ROLE = 'Quyền hạn {permission} không có trong vai trò {role} này',
 
