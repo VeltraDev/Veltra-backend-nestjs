@@ -117,7 +117,10 @@ export class UsersService extends BaseService<User> {
       'displayStatus',
     ];
 
-    return this.getAll(query, validSortFields, 'user', ['role', 'permissions']);
+    return this.getAll(query, validSortFields, 'user', [
+      'role',
+      'role.permissions',
+    ]);
   }
 
   async updateUserById(

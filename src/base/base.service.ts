@@ -35,8 +35,25 @@ export class BaseService<T> {
     const queryBuilder = this.repository.createQueryBuilder(alias);
 
     // Add relations if provided
-    relations.forEach((relation) => {
-      queryBuilder.leftJoinAndSelect(`${alias}.${relation}`, relation);
+    relations.forEach((relationPath) => {
+      const relationParts = relationPath.split('.');
+      let parentAlias = alias;
+
+      relationParts.forEach((part, index) => {
+        const relationAlias = relationParts.slice(0, index + 1).join('_');
+        const relation = `${parentAlias}.${part}`;
+
+        // Check if the join has already been made to avoid duplicates
+        if (
+          !queryBuilder.expressionMap.aliases.find(
+            (a) => a.name === relationAlias,
+          )
+        ) {
+          queryBuilder.leftJoinAndSelect(relation, relationAlias);
+        }
+
+        parentAlias = relationAlias;
+      });
     });
 
     // Apply filters
@@ -66,7 +83,8 @@ export class BaseService<T> {
   ) {
     Object.keys(filters).forEach((key) => {
       const value = filters[key];
-      if (value) {
+
+      if (value !== undefined && value !== null) {
         if (typeof value === 'string') {
           queryBuilder.andWhere(`LOWER(${alias}.${key}) LIKE LOWER(:${key})`, {
             [key]: `%${value}%`,
