@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
-import { CreateConversationDto } from './dto/create-conversation.dto';
-import { UpdateConversationDto } from './dto/update-conversation.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Conversation } from './entities/conversation.entity';
+import { Repository } from 'typeorm';
+import { UsersInterface } from 'src/users/users.interface';
+import { CreateOpenConversationDto } from './dto/request/create-open-conversation.dto';
 
 @Injectable()
 export class ConversationsService {
-  create(createConversationDto: CreateConversationDto) {
-    return 'This action adds a new conversation';
+  constructor(
+    @InjectRepository(Conversation)
+    private readonly conversationRepository: Repository<Conversation>,
+  ) {}
+
+  async isConversationExist(senderId: string, receiveId: string) {
+    const conversations = await this.conversationRepository.find({
+      where: { isGroup: false },
+      relations: [
+        'userConversations',
+        'userConversations.user',
+        'latestMessage',
+        'latestMessage.sender',
+      ],
+    });
   }
 
-  findAll() {
-    return `This action returns all conversations`;
-  }
+  async handleCreateOpenConversation(
+    user: UsersInterface,
+    createOpenConversationDto: CreateOpenConversationDto,
+  ) {
+    const { receiveId } = createOpenConversationDto;
 
-  findOne(id: number) {
-    return `This action returns a #${id} conversation`;
-  }
+    // Check conversation existed
+    const existedConversation = await this.isConversationExist(
+      user.id,
+      receiveId,
+    );
 
-  update(id: number, updateConversationDto: UpdateConversationDto) {
-    return `This action updates a #${id} conversation`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} conversation`;
+    return user.id;
   }
 }

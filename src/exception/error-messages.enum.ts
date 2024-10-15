@@ -63,12 +63,13 @@ export enum ErrorMessages {
   USER_NOT_FOUND_EMAIL = 'Người dùng với email {email} không tồn tại trên hệ thống',
   USER_NOT_EXISTED_OR_REFRESH_TOKEN_INVALID = 'Người dùng với id {id} không tồn tại hoặc refresh token không hợp lệ',
   USER_ID_ARRAY = 'Danh sách ID người dùng phải là một mảng chuỗi hợp lệ',
+  USERID_NOT_UUID_4 = 'ID người dùng không hợp lệ, phải là UUID phiên bản 4',
 
   // Email Errors
   SEND_EMAIL_FAIL = 'Gửi email không thành công',
 
   // Permission and Role Errors
-  PERMISSION_NOT_FOUND = 'Permission với ID {id} không tồn tại',
+  PERMISSION_NOT_FOUND = 'Quyền hạn với ID {id} không tồn tại',
   PERMISSION_NAME_REQUIRED = 'Tên quyền hạn là bắt buộc',
   PERMISSION_NAME_STRING = 'Tên quyền hạn phải là chuỗi ký tự',
   PERMISSION_API_PATH_REQUIRED = 'API path là bắt buộc',
@@ -82,12 +83,15 @@ export enum ErrorMessages {
   PERMISSION_ID_ARRAY = 'Danh sách ID quyền hạn phải là một mảng chuỗi hợp lệ và không được để trống',
   PERMISSION_NOT_FOUND_IN_ROLE = 'Quyền hạn {permission} không có trong vai trò {role} này',
 
-  ROLE_ID_NOT_FOUND = 'Role với ID {id} không tồn tại',
-  ROLE_NAME_NOT_FOUND = 'Role với tên {name} không tồn tại',
+  ROLE_ID_NOT_FOUND = 'Vai trò với ID {id} không tồn tại',
+  ROLE_NAME_NOT_FOUND = 'Vai trò với tên {name} không tồn tại',
   ROLE_NAME_REQUIRED = 'Tên vai trò là bắt buộc',
   ROLE_NAME_STRING = 'Tên vai trò phải là chuỗi ký tự',
   ROLE_DESCRIPTION_STRING = 'Mô tả vai trò phải là chuỗi ký tự',
   ROLE_IS_ACTIVE_BOOLEAN = 'Trạng thái hoạt động phải là boolean',
   ROLE_ALREADY_EXISTS = 'Vai trò với tên {name} đã tồn tại',
-  ROLEID_NOT_UUID_4 = 'Role ID không hợp lệ, phải là UUID phiên bản 4',
+  ROLEID_NOT_UUID_4 = 'ID vai trò không hợp lệ, phải là UUID phiên bản 4',
+
+  // Conversation and Message Errors
+  RECEIVERID_NOT_UUID_4 = 'ID người nhận không hợp lệ, phải là UUID phiên bản 4',
 }

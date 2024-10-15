@@ -13,6 +13,7 @@ import { join } from 'path';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import helmet from 'helmet';
 import { GlobalExceptionFilter } from './exception/global-exception.filter';
+import { WsExceptionFilter } from './exception/ws-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -31,6 +32,7 @@ async function bootstrap() {
 
   // Global Exception Filter (errors in service file)
   app.useGlobalFilters(new GlobalExceptionFilter());
+  // app.useGlobalFilters(new WsExceptionFilter());
 
   // Config versioning for APIs
   app.setGlobalPrefix('api'); // api/v1/route

@@ -22,11 +22,11 @@ export class CreateUserDto {
   )
   password: string;
 
-  @IsNotEmpty({ message: ErrorMessages.FIRST_NAME_STRING })
+  @IsNotEmpty({ message: ErrorMessages.FIRST_NAME_REQUIRED })
   @IsString({ message: ErrorMessages.FIRST_NAME_STRING })
   firstName: string;
 
-  @IsNotEmpty({ message: ErrorMessages.LAST_NAME_STRING })
+  @IsNotEmpty({ message: ErrorMessages.LAST_NAME_REQUIRED })
   @IsString({ message: ErrorMessages.LAST_NAME_STRING })
   lastName: string;
 

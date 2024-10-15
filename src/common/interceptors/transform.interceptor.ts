@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { IS_MESSAGE_RESPONSE } from '../decorators/message_response.decorator';
+import { IS_MESSAGE_RESPONSE } from '../decorators/message-response.decorator';
 
 export interface Response<T> {
   statusCode: number;
@@ -16,7 +16,9 @@ export interface Response<T> {
 }
 
 @Injectable()
-export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> {
+export class TransformInterceptor<T>
+  implements NestInterceptor<T, Response<T>>
+{
   constructor(private reflector: Reflector) {}
   intercept(
     context: ExecutionContext,

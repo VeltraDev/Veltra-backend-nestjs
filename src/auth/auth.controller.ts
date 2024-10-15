@@ -13,14 +13,14 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Response, Request } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from '../common/decorators/public.decorator';
-import { MessageResponse } from '../common/decorators/message_response.decorator';
+import { MessageResponse } from '../common/decorators/message-response.decorator';
 import { UsersInterface } from '../users/users.interface';
-import { User } from '../common/decorators/user.decorator';
 import { RegisterUserDto } from './dto/request/register-user.dto';
 import { VerifyEmailDto } from './dto/request/verify-email.dto';
 import { ResendEmailDto } from './dto/request/resend-email.dto';
 import { ForgotPasswordDto } from './dto/request/forgot-password.dto';
 import { ResetPasswordDto } from './dto/request/reset-password.dto';
+import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 
 @ApiTags('Module Auth')
 @Controller('auth')
@@ -56,20 +56,23 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @MessageResponse('Người dùng đã đăng nhập thành công')
   @Post('login')
-  async login(@User() user, @Res({ passthrough: true }) response: Response) {
+  async login(
+    @AuthUser() user,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     return await this.authService.login(user, response);
   }
 
   @MessageResponse('Lấy thông tin người dùng đã đăng nhập')
   @Get('account')
-  async getAccount(@User() user: UsersInterface) {
+  async getAccount(@AuthUser() user: UsersInterface) {
     return await { user };
   }
 
   @MessageResponse('Đăng xuất người dùng khỏi tài khoản thành công')
   @Post('logout')
   async logout(
-    @User() user: UsersInterface,
+    @AuthUser() user: UsersInterface,
     @Res({ passthrough: true }) response: Response,
   ) {
     return await this.authService.logout(user, response);

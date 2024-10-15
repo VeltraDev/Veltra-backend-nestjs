@@ -12,7 +12,6 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { DatabasesModule } from './database/databases.module';
 import { MessagesModule } from './messages/messages.module';
 import { ConversationsModule } from './conversations/conversations.module';
-import { UserConversationsModule } from './user-conversations/user-conversations.module';
 
 @Module({
   imports: [
@@ -45,7 +44,6 @@ import { UserConversationsModule } from './user-conversations/user-conversations
     DatabasesModule,
     MessagesModule,
     ConversationsModule,
-    UserConversationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

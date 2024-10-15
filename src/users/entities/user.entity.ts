@@ -4,12 +4,14 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { EntityBase } from '../../base/entities/base.entity';
 import { Exclude } from 'class-transformer';
 import { Role } from 'src/roles/entities/role.entity';
 import { Message } from 'src/messages/entities/message.entity';
-import { UserConversation } from 'src/user-conversations/entities/user-conversation.entity';
+import { Conversation } from 'src/conversations/entities/conversation.entity';
 
 @Entity()
 export class User extends EntityBase {
@@ -59,9 +61,11 @@ export class User extends EntityBase {
   @OneToMany(() => Message, (message) => message.sender)
   messages: Message[];
 
-  @OneToMany(
-    () => UserConversation,
-    (userConversation) => userConversation.user,
-  )
-  userConversations: UserConversation[];
+  @ManyToMany(() => Conversation, (conversation) => conversation.users)
+  @JoinTable({
+    name: 'user_conversations',
+    joinColumn: { name: 'userId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'conversationId', referencedColumnName: 'id' },
+  })
+  conversations: Conversation[];
 }

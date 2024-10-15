@@ -10,8 +10,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { MessageResponse } from '../common/decorators/message_response.decorator';
-import { User } from 'src/common/decorators/user.decorator';
+import { MessageResponse } from '../common/decorators/message-response.decorator';
 import { UsersInterface } from './users.interface';
 import { UpdateProfilePasswordDto } from './dto/request/update-password.dto';
 import { UpdateProfileInformationDto } from './dto/request/update-profile.dto';
@@ -21,6 +20,7 @@ import { FilterUsersDto } from './dto/request/filter-user.dto';
 import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { PaginatedUsersDto } from './dto/response/paginate-user-response.dto';
+import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -29,7 +29,7 @@ export class UsersController {
   @MessageResponse('Cập nhật mật khẩu mới thành công')
   @Put('update-password')
   async updatePassword(
-    @User() user: UsersInterface,
+    @AuthUser() user: UsersInterface,
     @Body() updateProfilePasswordDto: UpdateProfilePasswordDto,
   ) {
     const userInfo = await this.usersService.updatePassword(
@@ -44,7 +44,7 @@ export class UsersController {
   @MessageResponse('Cập nhật thông tin người dùng thành công')
   @Patch('update-profile')
   async updateProfileInfo(
-    @User() user: UsersInterface,
+    @AuthUser() user: UsersInterface,
     @Body() updateProfileInformationDto: UpdateProfileInformationDto,
   ) {
     const userInfo = await this.usersService.updateProfileInfo(
@@ -58,7 +58,7 @@ export class UsersController {
 
   @MessageResponse('Lấy thông tin người dùng thành công')
   @Get(':id')
-  async getUserById(@User() user: UsersInterface, @Param('id') id: string) {
+  async getUserById(@AuthUser() user: UsersInterface, @Param('id') id: string) {
     const userInfo = await this.usersService.getUserById(id);
     return plainToClass(UserResponseDto, userInfo, {
       excludeExtraneousValues: true,
@@ -91,7 +91,7 @@ export class UsersController {
   @MessageResponse('Cập nhật thông tin người dùng thành công')
   @Patch(':id')
   async updateUserById(
-    @User() user: UsersInterface,
+    @AuthUser() user: UsersInterface,
     @Param('id') id: string,
     @Body() updateUserAdminDto: UpdateUserAdminDto,
   ) {
@@ -107,7 +107,7 @@ export class UsersController {
   @MessageResponse('Xóa tài khoản người dùng thành công')
   @Delete(':id')
   async deleteUserById(
-    @User() user: UsersInterface,
+    @AuthUser() user: UsersInterface,
     @Param('id') id: string,
   ): Promise<void> {
     await this.usersService.deleteUserById(id);

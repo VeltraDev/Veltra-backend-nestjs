@@ -213,4 +213,12 @@ export const INIT_ADMIN_PERMISSIONS = [
     'DELETE',
     'PERMISSIONS',
   ),
+
+  // Module Conversations
+  createPermission(
+    'Tạo mới hoặc mở cuộc trò chuyện ',
+    '/api/v1/conversations',
+    'POST',
+    'CONVERSATIONS',
+  ),
 ];

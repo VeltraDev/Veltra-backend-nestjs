@@ -1,7 +1,14 @@
 import { EntityBase } from 'src/base/entities/base.entity';
 import { Message } from 'src/messages/entities/message.entity';
-import { UserConversation } from 'src/user-conversations/entities/user-conversation.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+  ManyToMany,
+} from 'typeorm';
 
 @Entity()
 export class Conversation extends EntityBase {
@@ -20,9 +27,12 @@ export class Conversation extends EntityBase {
   @OneToMany(() => Message, (message) => message.conversation)
   messages: Message[];
 
-  @OneToMany(
-    () => UserConversation,
-    (userConversation) => userConversation.conversation,
-  )
-  userConversations: UserConversation[];
+  @ManyToMany(() => User, (user) => user.conversations)
+  users: User[];
+
+  @ManyToOne(() => User, { nullable: true, eager: true })
+  admin: User;
+
+  @ManyToOne(() => Message, { nullable: true, eager: true })
+  latestMessage: Message;
 }

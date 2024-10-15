@@ -16,12 +16,10 @@ import { UpdateRoleDto } from './dto/request/update-role.dto';
 import { RoleResponseDto } from './dto/response/role-response.dto';
 import { PaginatedRolesDto } from './dto/response/paginate-role-response.dto';
 import { plainToClass } from 'class-transformer';
-import { MessageResponse } from 'src/common/decorators/message_response.decorator';
+import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { FilterRolesDto } from './dto/request/filter-role.dto';
 import { UpdatePermissionsToRoleDto } from './dto/request/update-permissions-role.dto';
-import { User } from 'src/common/decorators/user.decorator';
-import { UsersInterface } from 'src/users/users.interface';
 
 @Controller('roles')
 export class RolesController {

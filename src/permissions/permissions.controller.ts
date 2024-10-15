@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { MessageResponse } from 'src/common/decorators/message_response.decorator';
+import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { CreatePermissionDto } from './dto/request/create-permission.dto';
 import { UpdatePermissionDto } from './dto/request/update-permission.dto';
 import { plainToClass } from 'class-transformer';
