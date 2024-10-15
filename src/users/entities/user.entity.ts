@@ -1,7 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { EntityBase } from '../../base/entities/base.entity';
 import { Exclude } from 'class-transformer';
 import { Role } from 'src/roles/entities/role.entity';
+import { Message } from 'src/messages/entities/message.entity';
+import { UserConversation } from 'src/user-conversations/entities/user-conversation.entity';
 
 @Entity()
 export class User extends EntityBase {
@@ -47,4 +55,13 @@ export class User extends EntityBase {
 
   @ManyToOne(() => Role, (role) => role.users)
   role: Role;
+
+  @OneToMany(() => Message, (message) => message.sender)
+  messages: Message[];
+
+  @OneToMany(
+    () => UserConversation,
+    (userConversation) => userConversation.user,
+  )
+  userConversations: UserConversation[];
 }

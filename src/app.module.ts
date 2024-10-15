@@ -10,6 +10,9 @@ import { MailModule } from './mail/mail.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { DatabasesModule } from './database/databases.module';
+import { MessagesModule } from './messages/messages.module';
+import { ConversationsModule } from './conversations/conversations.module';
+import { UserConversationsModule } from './user-conversations/user-conversations.module';
 
 @Module({
   imports: [
@@ -40,6 +43,9 @@ import { DatabasesModule } from './database/databases.module';
     RolesModule,
     PermissionsModule,
     DatabasesModule,
+    MessagesModule,
+    ConversationsModule,
+    UserConversationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
