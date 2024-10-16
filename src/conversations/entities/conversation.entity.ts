@@ -15,13 +15,13 @@ export class Conversation extends EntityBase {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ default: 'New Conversation' })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: null })
   picture: string;
 
-  @Column()
+  @Column({ default: false })
   isGroup: boolean;
 
   @OneToMany(() => Message, (message) => message.conversation)
