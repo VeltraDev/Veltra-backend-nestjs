@@ -11,14 +11,24 @@ import { User } from 'src/users/entities/user.entity';
 import { CreateConversationDto } from './dto/request/create-conversation.dto';
 import { UsersInterface } from 'src/users/users.interface';
 import { UpdateInfoConversationDto } from './dto/request/update-conversation.dto';
+import { BaseService } from 'src/base/base.service';
 
 @Injectable()
-export class ConversationsService {
+export class ConversationsService extends BaseService<Conversation> {
   constructor(
     @InjectRepository(Conversation)
     private readonly conversationRepository: Repository<Conversation>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-  ) {}
+  ) {
+    super(conversationRepository);
+  }
+
+  async getUserConversations(userId: string): Promise<Conversation[]> {
+    return await this.conversationRepository.find({
+      where: { users: { id: userId } },
+      relations: ['users', 'admin', 'messages'],
+    });
+  }
 
   async findConversationById(
     id: string,
@@ -206,5 +216,16 @@ export class ConversationsService {
     }
 
     await this.conversationRepository.remove(conversation);
+  }
+
+  async leaveGroup(conversationId: string, userId: string): Promise<void> {
+    const conversation = await this.getConversationById(conversationId);
+    conversation.users = conversation.users.filter((u) => u.id !== userId);
+
+    if (conversation.users.length === 1) {
+      await this.conversationRepository.remove(conversation);
+    } else {
+      await this.conversationRepository.save(conversation);
+    }
   }
 }

@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ConversationsService } from './conversations.service';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
@@ -38,6 +39,31 @@ export class ConversationsController {
     return plainToClass(ConversationResponseDto, conversation, {
       excludeExtraneousValues: true,
     });
+  }
+
+  @MessageResponse(
+    'Lấy danh sách tất cả cuộc trò chuyện của người dùng hiện tại đang đăng nhập thành công',
+  )
+  @Get()
+  async getUserConversations(@AuthUser() user: UsersInterface) {
+    const conversations = await this.conversationsService.getUserConversations(
+      user.id,
+    );
+
+    return conversations.map((conversation) =>
+      plainToClass(ConversationResponseDto, conversation, {
+        excludeExtraneousValues: true,
+      }),
+    );
+  }
+
+  @MessageResponse('Rời khỏi nhóm thành công')
+  @Post(':id/leave')
+  async leaveGroup(
+    @Param('id') conversationId: string,
+    @AuthUser() user: UsersInterface,
+  ) {
+    return await this.conversationsService.leaveGroup(conversationId, user.id);
   }
 
   @MessageResponse('Cập nhật thông tin nhóm thành công')
