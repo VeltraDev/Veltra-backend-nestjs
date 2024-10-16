@@ -159,7 +159,7 @@ export class ConversationsService {
 
     // Admin can update information of group
     // if (conversation.admin.id !== userId) {
-    //   throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
+    //   throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
     // }
 
     const { name, picture } = updateInfoConversationDto;
@@ -179,7 +179,7 @@ export class ConversationsService {
 
     // Admin can change permission to add new group admin
     if (conversation.admin.id !== userId) {
-      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
+      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
     }
 
     if (!conversation.isGroup) {
@@ -208,7 +208,7 @@ export class ConversationsService {
     const conversation = await this.validateUserInConversation(id, userId);
 
     if (conversation.admin.id !== userId) {
-      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
+      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
     }
 
     const usersToAdd = await this.validateUsersExist(userIds);
@@ -252,7 +252,7 @@ export class ConversationsService {
     const conversation = await this.validateUserInConversation(id, userId);
 
     if (conversation.admin.id !== userId) {
-      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
+      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
     }
 
     if (!conversation.isGroup) {

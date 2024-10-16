@@ -114,6 +114,7 @@ export enum ErrorMessages {
   CONVERSATION_USER_NOT_IN_GROUP = 'Người dùng không phải là thành viên của nhóm',
   CONVERSATION_GROUP_CANNOT_UPDATE_ADMIN_1_1 = 'Không thể cập nhật admin cho cuộc trò chuyện 1-1',
   CONVERSATION_NO_ACCESS = 'Người dùng không có quyền truy cập vào cuộc trò chuyện này',
+  CONVERSATION_ADMIN_FORBIDDEN = 'Người dùng không thể thực hiện quyền hạn này vì không phải là admin nhóm',
 
   // Message Errors
   MESSAGE_CONTENT_REQUIRED = 'Nội dung tin nhắn không được để trống',
