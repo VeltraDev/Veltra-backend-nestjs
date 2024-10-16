@@ -94,4 +94,7 @@ export enum ErrorMessages {
 
   // Conversation and Message Errors
   RECEIVERID_NOT_UUID_4 = 'ID người nhận không hợp lệ, phải là UUID phiên bản 4',
+  IS_GROUP_BOOLEAN = 'Trạng thái nhóm phải là boolean',
+  PICTURE_GROUP_STRING = 'Ảnh đại diện của nhóm phải là chuỗi hợp lệ',
+  NAME_GROUP_STRING = 'Tên của nhóm phải là chuỗi hợp lệ',
 }
