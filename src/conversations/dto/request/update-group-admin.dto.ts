@@ -1,6 +1,7 @@
 import { IsUUID } from 'class-validator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class UpdateGroupAdminDto {
-  @IsUUID('4', { message: 'ID admin nhóm phải là UUIDv4 hợp lệ.' })
+  @IsUUID('4', { message: ErrorMessages.CONVERSATION_ADMIN_UUID })
   adminId: string;
 }

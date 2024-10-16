@@ -1,11 +1,12 @@
 import { IsOptional, IsString } from 'class-validator';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class UpdateInfoConversationDto {
   @IsOptional()
-  @IsString({ message: 'Tên cuộc trò chuyện phải là chuỗi.' })
+  @IsString({ message: ErrorMessages.CONVERSATION_NAME_STRING })
   name?: string;
 
   @IsOptional()
-  @IsString({ message: 'Đường dẫn hình ảnh phải là chuỗi.' })
+  @IsString({ message: ErrorMessages.CONVERSATION_PICTURE_STRING })
   picture?: string;
 }

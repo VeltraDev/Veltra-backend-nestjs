@@ -12,6 +12,7 @@ import { CreateConversationDto } from './dto/request/create-conversation.dto';
 import { UsersInterface } from 'src/users/users.interface';
 import { UpdateInfoConversationDto } from './dto/request/update-conversation.dto';
 import { Message } from 'src/messages/entities/message.entity';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Injectable()
 export class ConversationsService {
@@ -52,7 +53,7 @@ export class ConversationsService {
 
     if (!conversation) {
       throw new NotFoundException(
-        `Cuộc trò chuyện với ID ${id} không tồn tại.`,
+        ErrorMessages.CONVERSATION_NOT_FOUND.replace('{id}', id),
       );
     }
 
@@ -68,7 +69,10 @@ export class ConversationsService {
         (userId) => !foundUserIds.includes(userId),
       );
       throw new BadRequestException(
-        `Người dùng với các ID ${missingUserIds.join(', ')} không tồn tại.`,
+        ErrorMessages.CONVERSATION_USERS_NOT_FOUND.replace(
+          '{missingUserIds}',
+          missingUserIds.join(', '),
+        ),
       );
     }
 
@@ -80,9 +84,7 @@ export class ConversationsService {
   ): Promise<void> {
     if (conversation.users.length === 1) {
       await this.conversationRepository.remove(conversation);
-      throw new BadRequestException(
-        'Cuộc trò chuyện đã bị xóa vì chỉ còn 1 thành viên.',
-      );
+      throw new BadRequestException(ErrorMessages.CONVERSATION_ONLY_ONE_USER);
     }
   }
 
@@ -94,7 +96,7 @@ export class ConversationsService {
 
     if (users.includes(user.id)) {
       throw new BadRequestException(
-        'Người dùng không thể tạo cuộc trò chuyện với chính mình.',
+        ErrorMessages.CONVERSATION_CANNOT_CREATE_WITH_SELF,
       );
     }
 
@@ -138,7 +140,7 @@ export class ConversationsService {
 
     if (!conversation.isGroup) {
       throw new BadRequestException(
-        'Không thể cập nhật admin cho cuộc trò chuyện 1-1.',
+        ErrorMessages.CONVERSATION_GROUP_CANNOT_UPDATE_ADMIN_1_1,
       );
     }
 
@@ -146,9 +148,7 @@ export class ConversationsService {
       where: { id: adminId },
     });
     if (!newAdmin || !conversation.users.some((u) => u.id === adminId)) {
-      throw new BadRequestException(
-        'Admin mới không hợp lệ hoặc không phải thành viên nhóm.',
-      );
+      throw new BadRequestException(ErrorMessages.CONVERSATION_ADMIN_NOT_VALID);
     }
 
     conversation.admin = newAdmin;
@@ -170,13 +170,19 @@ export class ConversationsService {
 
     if (newUsers.length === 0) {
       throw new BadRequestException(
-        `Tất cả người dùng với các ID sau đã là thành viên của nhóm: ${alreadyInGroup.join(', ')}.`,
+        ErrorMessages.CONVERSATION_ALREADY_IN_GROUP.replace(
+          '{alreadyInGroup}',
+          alreadyInGroup.join(', '),
+        ),
       );
     }
 
     if (alreadyInGroup.length > 0) {
       throw new BadRequestException(
-        `Các người dùng sau đã là thành viên của nhóm: ${alreadyInGroup.join(', ')}. Những người dùng còn lại sẽ được thêm vào nhóm.`,
+        ErrorMessages.CONVERSATION_ALREADY_IN_GROUP_PARTIAL.replace(
+          '{alreadyInGroup}',
+          alreadyInGroup.join(', '),
+        ),
       );
     }
 
@@ -193,7 +199,7 @@ export class ConversationsService {
 
     if (!conversation.isGroup) {
       throw new NotFoundException(
-        `Cuộc trò chuyện với ID ${id} không phải là nhóm.`,
+        ErrorMessages.CONVERSATION_GROUP_REQUIRED.replace('{id}', id),
       );
     }
 
@@ -204,7 +210,7 @@ export class ConversationsService {
 
     if (usersToRemove.length === 0) {
       throw new BadRequestException(
-        'Người dùng không phải là thành viên của nhóm.',
+        ErrorMessages.CONVERSATION_USER_NOT_IN_GROUP,
       );
     }
 
@@ -222,7 +228,7 @@ export class ConversationsService {
 
     if (conversation.admin.id !== adminId) {
       throw new ForbiddenException(
-        'Bạn không có quyền xóa cuộc trò chuyện này vì bạn không phải là admin.',
+        ErrorMessages.CONVERSATION_CANNOT_DELETE_ADMIN,
       );
     }
 

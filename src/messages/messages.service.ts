@@ -11,6 +11,7 @@ import { ConversationsService } from 'src/conversations/conversations.service';
 import { User } from 'src/users/entities/user.entity';
 import { CreateMessageDto } from './dto/request/create-message.dto';
 import { Conversation } from 'src/conversations/entities/conversation.entity';
+import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Injectable()
 export class MessagesService {
@@ -34,7 +35,10 @@ export class MessagesService {
 
     if (!sender || !conversation.users.some((user) => user.id === senderId)) {
       throw new BadRequestException(
-        `Người gửi với ID ${senderId} không nằm trong cuộc trò chuyện.`,
+        ErrorMessages.MESSAGE_SENDER_NOT_IN_CONVERSATION.replace(
+          '{senderId}',
+          senderId,
+        ),
       );
     }
 
@@ -56,7 +60,7 @@ export class MessagesService {
 
     if (!message) {
       throw new NotFoundException(
-        `Tin nhắn với ID ${messageId} không tồn tại.`,
+        ErrorMessages.MESSAGE_NOT_FOUND.replace('{messageId}', messageId),
       );
     }
 
@@ -67,7 +71,7 @@ export class MessagesService {
     const message = await this.findMessageById(messageId);
 
     if (message.sender.id !== userId) {
-      throw new ForbiddenException('Bạn không có quyền xóa tin nhắn này.');
+      throw new ForbiddenException(ErrorMessages.MESSAGE_DELETE_FORBIDDEN);
     }
 
     await this.messageRepository.remove(message);
