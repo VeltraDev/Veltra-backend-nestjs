@@ -20,6 +20,7 @@ import { UpdateInfoConversationDto } from './dto/request/update-conversation.dto
 import { UpdateGroupAdminDto } from './dto/request/update-group-admin.dto';
 import { AddUsersDto } from './dto/request/add-user.dto';
 import { RemoveUsersDto } from './dto/request/remove-user.dto';
+import { MessageResponseDto } from 'src/messages/dto/response/message-response.dto';
 
 @Controller('conversations')
 export class ConversationsController {
@@ -42,7 +43,7 @@ export class ConversationsController {
   }
 
   @MessageResponse(
-    'Lấy danh sách tất cả cuộc trò chuyện của người dùng hiện tại đang đăng nhập thành công',
+    'Lấy danh sách tất cả cuộc trò chuyện của người dùng đang đăng nhập thành công',
   )
   @Get()
   async getUserConversations(@AuthUser() user: UsersInterface) {
@@ -55,6 +56,16 @@ export class ConversationsController {
         excludeExtraneousValues: true,
       }),
     );
+  }
+
+  @MessageResponse('Lấy tin nhắn mới nhất của một cuộc trò chuyện thành công')
+  @Get(':id/latest-message')
+  async getLatestMessage(@Param('id') conversationId: string) {
+    const latestMessage = await this.conversationsService.getLatestMessage(conversationId);
+
+    return plainToClass(MessageResponseDto, latestMessage, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @MessageResponse('Rời khỏi nhóm thành công')

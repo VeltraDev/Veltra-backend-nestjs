@@ -11,16 +11,27 @@ import { User } from 'src/users/entities/user.entity';
 import { CreateConversationDto } from './dto/request/create-conversation.dto';
 import { UsersInterface } from 'src/users/users.interface';
 import { UpdateInfoConversationDto } from './dto/request/update-conversation.dto';
-import { BaseService } from 'src/base/base.service';
+import { Message } from 'src/messages/entities/message.entity';
 
 @Injectable()
-export class ConversationsService extends BaseService<Conversation> {
+export class ConversationsService {
   constructor(
     @InjectRepository(Conversation)
     private readonly conversationRepository: Repository<Conversation>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-  ) {
-    super(conversationRepository);
+    @InjectRepository(Message)
+    private readonly messageRepository: Repository<Message>,
+  ) {}
+
+  async getLatestMessage(conversationId: string): Promise<Message> {
+    const conversation = await this.getConversationById(conversationId);
+
+    const latestMessage = await this.messageRepository.findOne({
+      where: { conversation: { id: conversation.id } },
+      order: { createdAt: 'DESC' },
+    });
+
+    return latestMessage;
   }
 
   async getUserConversations(userId: string): Promise<Conversation[]> {

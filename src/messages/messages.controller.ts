@@ -1,34 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { MessagesService } from './messages.service';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import { MessageResponse } from 'src/common/decorators/message-response.decorator';
+import { plainToClass } from 'class-transformer';
+import { MessageResponseDto } from './dto/response/message-response.dto';
+import { CreateMessageDto } from './dto/request/create-message.dto';
 
 @Controller('messages')
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 
-  @Post()
-  create(@Body() createMessageDto: CreateMessageDto) {
-    return this.messagesService.create(createMessageDto);
-  }
+  // @MessageResponse('Tạo mới tin nhắn thành công')
+  // @Post()
+  // async createMessage(@Body() createMessageDto: CreateMessageDto) {
+  //   const conversation =
+  //     await this.messagesService.createMessage(createMessageDto);
 
-  @Get()
-  findAll() {
-    return this.messagesService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.messagesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMessageDto: UpdateMessageDto) {
-    return this.messagesService.update(+id, updateMessageDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.messagesService.remove(+id);
-  }
+  //   return plainToClass(MessageResponseDto, conversation, {
+  //     excludeExtraneousValues: true,
+  //   });
+  // }
 }
