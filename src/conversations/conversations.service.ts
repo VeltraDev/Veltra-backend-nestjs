@@ -24,8 +24,39 @@ export class ConversationsService {
     private readonly messageRepository: Repository<Message>,
   ) {}
 
-  async getLatestMessage(conversationId: string): Promise<Message> {
-    const conversation = await this.getConversationById(conversationId);
+  private async validateUserInConversation(
+    conversationId: string,
+    userId: string,
+  ): Promise<Conversation> {
+    const conversation = await this.conversationRepository.findOne({
+      where: { id: conversationId },
+      relations: ['users', 'admin'],
+    });
+
+    if (!conversation) {
+      throw new NotFoundException(
+        ErrorMessages.CONVERSATION_NOT_FOUND.replace('{id}', conversationId),
+      );
+    }
+
+    const isUserInConversation = conversation.users.some(
+      (user) => user.id === userId,
+    );
+    if (!isUserInConversation) {
+      throw new ForbiddenException(ErrorMessages.CONVERSATION_NO_ACCESS);
+    }
+
+    return conversation;
+  }
+
+  async getLatestMessage(
+    conversationId: string,
+    userId: string,
+  ): Promise<Message> {
+    const conversation = await this.validateUserInConversation(
+      conversationId,
+      userId,
+    );
 
     const latestMessage = await this.messageRepository.findOne({
       where: { conversation: { id: conversation.id } },
@@ -115,19 +146,23 @@ export class ConversationsService {
     return await this.conversationRepository.save(newConversation);
   }
 
-  async getConversationById(id: string): Promise<Conversation> {
-    return await this.findConversationById(id, ['users', 'admin', 'messages']);
+  async getConversationById(id: string, userId: string): Promise<Conversation> {
+    return await this.validateUserInConversation(id, userId);
   }
 
   async updateGroupInfo(
     id: string,
     updateInfoConversationDto: UpdateInfoConversationDto,
+    userId: string,
   ): Promise<Conversation> {
+    const conversation = await this.validateUserInConversation(id, userId);
+
+    // Admin can update information of group
+    // if (conversation.admin.id !== userId) {
+    //   throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
+    // }
+
     const { name, picture } = updateInfoConversationDto;
-
-    const conversation = await this.getConversationById(id);
-
-    await this.removeConversationIfOnlyOneUser(conversation);
 
     if (name) conversation.name = name;
     if (picture) conversation.picture = picture;
@@ -135,8 +170,17 @@ export class ConversationsService {
     return await this.conversationRepository.save(conversation);
   }
 
-  async updateGroupAdmin(id: string, adminId: string): Promise<Conversation> {
-    const conversation = await this.getConversationById(id);
+  async updateGroupAdmin(
+    id: string,
+    adminId: string,
+    userId: string,
+  ): Promise<Conversation> {
+    const conversation = await this.validateUserInConversation(id, userId);
+
+    // Admin can change permission to add new group admin
+    if (conversation.admin.id !== userId) {
+      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
+    }
 
     if (!conversation.isGroup) {
       throw new BadRequestException(
@@ -147,6 +191,7 @@ export class ConversationsService {
     const newAdmin = await this.userRepository.findOne({
       where: { id: adminId },
     });
+
     if (!newAdmin || !conversation.users.some((u) => u.id === adminId)) {
       throw new BadRequestException(ErrorMessages.CONVERSATION_ADMIN_NOT_VALID);
     }
@@ -155,8 +200,16 @@ export class ConversationsService {
     return await this.conversationRepository.save(conversation);
   }
 
-  async addUsersToGroup(id: string, userIds: string[]): Promise<Conversation> {
-    const conversation = await this.getConversationById(id);
+  async addUsersToGroup(
+    id: string,
+    userIds: string[],
+    userId: string,
+  ): Promise<Conversation> {
+    const conversation = await this.validateUserInConversation(id, userId);
+
+    if (conversation.admin.id !== userId) {
+      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
+    }
 
     const usersToAdd = await this.validateUsersExist(userIds);
 
@@ -194,8 +247,13 @@ export class ConversationsService {
   async removeUsersFromGroup(
     id: string,
     userIds: string[],
+    userId: string,
   ): Promise<Conversation> {
-    const conversation = await this.getConversationById(id);
+    const conversation = await this.validateUserInConversation(id, userId);
+
+    if (conversation.admin.id !== userId) {
+      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
+    }
 
     if (!conversation.isGroup) {
       throw new NotFoundException(
@@ -224,7 +282,7 @@ export class ConversationsService {
   }
 
   async deleteConversation(id: string, adminId: string): Promise<void> {
-    const conversation = await this.findConversationById(id, ['admin']);
+    const conversation = await this.validateUserInConversation(id, adminId);
 
     if (conversation.admin.id !== adminId) {
       throw new ForbiddenException(
@@ -236,7 +294,11 @@ export class ConversationsService {
   }
 
   async leaveGroup(conversationId: string, userId: string): Promise<void> {
-    const conversation = await this.getConversationById(conversationId);
+    const conversation = await this.validateUserInConversation(
+      conversationId,
+      userId,
+    );
+
     conversation.users = conversation.users.filter((u) => u.id !== userId);
 
     if (conversation.users.length === 1) {

@@ -58,10 +58,15 @@ export class ConversationsController {
     );
   }
 
-  @MessageResponse('Lấy tin nhắn mới nhất của một cuộc trò chuyện thành công')
   @Get(':id/latest-message')
-  async getLatestMessage(@Param('id') conversationId: string) {
-    const latestMessage = await this.conversationsService.getLatestMessage(conversationId);
+  async getLatestMessage(
+    @Param('id') conversationId: string,
+    @AuthUser() user: UsersInterface,
+  ) {
+    const latestMessage = await this.conversationsService.getLatestMessage(
+      conversationId,
+      user.id,
+    );
 
     return plainToClass(MessageResponseDto, latestMessage, {
       excludeExtraneousValues: true,
@@ -82,10 +87,12 @@ export class ConversationsController {
   async updateGroupInfo(
     @Param('id') id: string,
     @Body() updateInfoConversationDto: UpdateInfoConversationDto,
+    @AuthUser() user: UsersInterface,
   ) {
     const conversation = await this.conversationsService.updateGroupInfo(
       id,
       updateInfoConversationDto,
+      user.id,
     );
 
     return plainToClass(ConversationResponseDto, conversation, {
@@ -98,10 +105,12 @@ export class ConversationsController {
   async updateGroupAdmin(
     @Param('id') id: string,
     @Body() updateGroupAdminDto: UpdateGroupAdminDto,
+    @AuthUser() user: UsersInterface,
   ) {
     const conversation = await this.conversationsService.updateGroupAdmin(
       id,
       updateGroupAdminDto.adminId,
+      user.id,
     );
 
     return plainToClass(ConversationResponseDto, conversation, {
@@ -114,10 +123,12 @@ export class ConversationsController {
   async addUsersToGroup(
     @Param('id') id: string,
     @Body() addUsersDto: AddUsersDto,
+    @AuthUser() user: UsersInterface,
   ) {
     const conversation = await this.conversationsService.addUsersToGroup(
       id,
       addUsersDto.userIds,
+      user.id,
     );
 
     return plainToClass(ConversationResponseDto, conversation, {
@@ -125,15 +136,17 @@ export class ConversationsController {
     });
   }
 
-  @Put(':id/remove-users')
   @MessageResponse('Xóa thành viên khỏi nhóm thành công')
+  @Put(':id/remove-users')
   async removeUsersFromGroup(
     @Param('id') id: string,
     @Body() removeUsersDto: RemoveUsersDto,
+    @AuthUser() user: UsersInterface,
   ) {
     const conversation = await this.conversationsService.removeUsersFromGroup(
       id,
       removeUsersDto.userIds,
+      user.id,
     );
 
     return plainToClass(ConversationResponseDto, conversation, {
@@ -143,9 +156,14 @@ export class ConversationsController {
 
   @MessageResponse('Lấy thông tin một cuộc trò chuyện thành công')
   @Get(':id')
-  async getConversation(@Param('id') id: string) {
-    const conversation =
-      await this.conversationsService.getConversationById(id);
+  async getConversation(
+    @Param('id') id: string,
+    @AuthUser() user: UsersInterface,
+  ) {
+    const conversation = await this.conversationsService.getConversationById(
+      id,
+      user.id,
+    );
 
     return plainToClass(ConversationResponseDto, conversation, {
       excludeExtraneousValues: true,

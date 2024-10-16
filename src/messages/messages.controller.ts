@@ -24,8 +24,14 @@ export class MessagesController {
 
   @MessageResponse('Lấy thông tin một tin nhắn thành công')
   @Get(':id')
-  async getMessageById(@Param('id') messageId: string) {
-    const message = await this.messagesService.findMessageById(messageId);
+  async getMessageById(
+    @Param('id') messageId: string,
+    @AuthUser() user: UsersInterface,
+  ) {
+    const message = await this.messagesService.findMessageById(
+      messageId,
+      user.id,
+    );
 
     return plainToClass(MessageResponseDto, message, {
       excludeExtraneousValues: true,

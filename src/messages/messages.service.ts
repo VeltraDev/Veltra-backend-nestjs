@@ -52,10 +52,10 @@ export class MessagesService {
     return await this.messageRepository.save(newMessage);
   }
 
-  async findMessageById(messageId: string): Promise<Message> {
+  async findMessageById(messageId: string, userId: string): Promise<Message> {
     const message = await this.messageRepository.findOne({
       where: { id: messageId },
-      relations: ['sender', 'conversation'],
+      relations: ['sender', 'conversation', 'conversation.users'],
     });
 
     if (!message) {
@@ -64,11 +64,18 @@ export class MessagesService {
       );
     }
 
+    const isUserInConversation = message.conversation.users.some(
+      (user) => user.id === userId,
+    );
+    if (!isUserInConversation) {
+      throw new ForbiddenException(ErrorMessages.MESSAGE_NO_ACCESS);
+    }
+
     return message;
   }
 
   async deleteMessage(messageId: string, userId: string): Promise<void> {
-    const message = await this.findMessageById(messageId);
+    const message = await this.findMessageById(messageId, userId);
 
     if (message.sender.id !== userId) {
       throw new ForbiddenException(ErrorMessages.MESSAGE_DELETE_FORBIDDEN);

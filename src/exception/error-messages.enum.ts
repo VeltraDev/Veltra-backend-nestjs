@@ -113,6 +113,7 @@ export enum ErrorMessages {
   CONVERSATION_ALREADY_IN_GROUP_PARTIAL = 'Các người dùng sau đã là thành viên của nhóm: {alreadyInGroup} Những người dùng còn lại sẽ được thêm vào nhóm',
   CONVERSATION_USER_NOT_IN_GROUP = 'Người dùng không phải là thành viên của nhóm',
   CONVERSATION_GROUP_CANNOT_UPDATE_ADMIN_1_1 = 'Không thể cập nhật admin cho cuộc trò chuyện 1-1',
+  CONVERSATION_NO_ACCESS = 'Người dùng không có quyền truy cập vào cuộc trò chuyện này',
 
   // Message Errors
   MESSAGE_CONTENT_REQUIRED = 'Nội dung tin nhắn không được để trống',
@@ -125,4 +126,5 @@ export enum ErrorMessages {
   MESSAGE_SENDER_NOT_IN_CONVERSATION = 'Người gửi với ID {senderId} không nằm trong cuộc trò chuyện',
   MESSAGE_NOT_FOUND = 'Tin nhắn với ID {messageId} không tồn tại',
   MESSAGE_DELETE_FORBIDDEN = 'Bạn không có quyền xóa tin nhắn này',
+  MESSAGE_NO_ACCESS = 'Bạn không có quyền xem tin nhắn này',
 }
