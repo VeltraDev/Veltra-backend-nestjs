@@ -26,8 +26,10 @@ export class MessagesService {
   async createMessage(createMessageDto: CreateMessageDto): Promise<Message> {
     const { content, conversationId, senderId, files } = createMessageDto;
 
-    const conversation =
-      await this.conversationService.getConversationById(conversationId);
+    const conversation = await this.conversationService.getConversationById(
+      conversationId,
+      senderId,
+    );
 
     const sender = await this.userRepository.findOne({
       where: { id: senderId },
