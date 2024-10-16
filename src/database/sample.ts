@@ -216,9 +216,16 @@ export const INIT_ADMIN_PERMISSIONS = [
 
   // Module Conversations
   createPermission(
-    'Tạo mới hoặc mở cuộc trò chuyện ',
+    'Tạo mới cuộc trò chuyện',
     '/api/v1/conversations',
     'POST',
+    'CONVERSATIONS',
+  ),
+
+  createPermission(
+    'Lấy một cuộc trò chuyện theo ID',
+    '/api/v1/conversations/:id',
+    'GET',
     'CONVERSATIONS',
   ),
 ];

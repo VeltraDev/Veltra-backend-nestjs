@@ -25,7 +25,7 @@ export class ConversationResponseDto {
 
   @Expose()
   @Type(() => MessageResponseDto)
-  latestMessage?: MessageResponseDto;
+  messages?: MessageResponseDto;
 
   @Expose()
   createdAt: Date;

@@ -32,7 +32,4 @@ export class Conversation extends EntityBase {
 
   @ManyToOne(() => User, { nullable: true, eager: true })
   admin: User;
-
-  @ManyToOne(() => Message, { nullable: true, eager: true })
-  latestMessage: Message;
 }
