@@ -84,9 +84,7 @@ export class MessagesService extends BaseService<Message> {
   async deleteMessage(messageId: string, userId: string): Promise<void> {
     const message = await this.findMessageById(messageId, userId);
 
-    if (message.sender.id !== userId) {
-      throw new ForbiddenException(ErrorMessages.MESSAGE_DELETE_FORBIDDEN);
-    }
+    if (message.sender.id !== userId) throw new ForbiddenException(ErrorMessages.MESSAGE_DELETE_FORBIDDEN);
 
     await this.messageRepository.remove(message);
   }

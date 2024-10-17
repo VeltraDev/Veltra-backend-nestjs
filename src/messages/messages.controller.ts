@@ -55,7 +55,6 @@ export class MessagesController {
     @Param('id') messageId: string,
     @AuthUser() user: UsersInterface,
   ) {
-    await this.messagesService.deleteMessage(messageId, user.id);
-    return { message: 'Tin nhắn đã được xóa thành công.' };
+    return await this.messagesService.deleteMessage(messageId, user.id);
   }
 }

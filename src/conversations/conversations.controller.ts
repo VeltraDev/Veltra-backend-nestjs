@@ -70,7 +70,7 @@ export class ConversationsController {
   }
 
   @MessageResponse('Rời khỏi nhóm thành công')
-  @Post(':id/leave')
+  @Delete(':id/leave')
   async leaveGroup(
     @Param('id') conversationId: string,
     @AuthUser() user: UsersInterface,

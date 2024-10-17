@@ -208,6 +208,12 @@ export class ConversationsService extends BaseService<Conversation> {
     //   throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
     // }
 
+    if (!conversation.isGroup) {
+      throw new NotFoundException(
+        ErrorMessages.CONVERSATION_GROUP_REQUIRED.replace('{id}', id),
+      );
+    }
+
     const { name, picture } = updateInfoConversationDto;
 
     if (name) conversation.name = name;
@@ -222,15 +228,22 @@ export class ConversationsService extends BaseService<Conversation> {
     userId: string,
   ): Promise<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
-
-    // Admin can change permission to add new group admin
-    if (conversation.admin.id !== userId) {
-      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
-    }
-
     if (!conversation.isGroup) {
       throw new BadRequestException(
         ErrorMessages.CONVERSATION_GROUP_CANNOT_UPDATE_ADMIN_1_1,
+      );
+    }
+
+    if (!conversation.admin || conversation.admin.id !== userId) {
+      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
+    }
+
+    if (adminId === userId) {
+      throw new BadRequestException(
+        ErrorMessages.CONVERSATION_CANNOT_UPDATE_ADMIN_TO_SELF.replace(
+          '{adminId}',
+          adminId,
+        ),
       );
     }
 
@@ -243,6 +256,7 @@ export class ConversationsService extends BaseService<Conversation> {
     }
 
     conversation.admin = newAdmin;
+
     return await this.conversationRepository.save(conversation);
   }
 
@@ -253,27 +267,40 @@ export class ConversationsService extends BaseService<Conversation> {
   ): Promise<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
 
-    if (conversation.admin.id !== userId) {
-      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
+    if (!conversation.isGroup) {
+      throw new BadRequestException(
+        ErrorMessages.CONVERSATION_NOT_GROUP_OR_TOO_SMALL,
+      );
+    }
+
+    const isUserInGroup = conversation.users.some((user) => user.id === userId);
+    if (!isUserInGroup) {
+      throw new ForbiddenException(
+        ErrorMessages.CONVERSATION_USER_NOT_IN_GROUP,
+      );
+    }
+
+    if (userIds.includes(userId)) {
+      throw new BadRequestException(
+        ErrorMessages.CONVERSATION_CANNOT_ADD_SELF.replace('{userId}', userId),
+      );
     }
 
     const usersToAdd = await this.validateUsersExist(userIds);
 
     const existingUsers = conversation.users.map((user) => user.id);
+
     const alreadyInGroup = userIds.filter((userId) =>
       existingUsers.includes(userId),
     );
+
     const newUsers = usersToAdd.filter(
       (user) => !existingUsers.includes(user.id),
     );
 
-    if (newUsers.length === 0) {
-      throw new BadRequestException(
-        ErrorMessages.CONVERSATION_ALREADY_IN_GROUP.replace(
-          '{alreadyInGroup}',
-          alreadyInGroup.join(', '),
-        ),
-      );
+    if (newUsers.length > 0) {
+      conversation.users.push(...newUsers);
+      await this.conversationRepository.save(conversation);
     }
 
     if (alreadyInGroup.length > 0) {
@@ -285,9 +312,7 @@ export class ConversationsService extends BaseService<Conversation> {
       );
     }
 
-    conversation.users.push(...newUsers);
-
-    return await this.conversationRepository.save(conversation);
+    return conversation;
   }
 
   async removeUsersFromGroup(
@@ -297,29 +322,27 @@ export class ConversationsService extends BaseService<Conversation> {
   ): Promise<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
 
-    if (conversation.admin.id !== userId) {
-      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
-    }
-
     if (!conversation.isGroup) {
-      throw new NotFoundException(
-        ErrorMessages.CONVERSATION_GROUP_REQUIRED.replace('{id}', id),
+      throw new BadRequestException(
+        ErrorMessages.CONVERSATION_NOT_GROUP_OR_TOO_SMALL,
       );
     }
 
-    const existingUsers = conversation.users.map((user) => user.id);
-    const usersToRemove = userIds.filter((userId) =>
-      existingUsers.includes(userId),
-    );
+    const isUserInGroup = conversation.users.some((user) => user.id === userId);
+    if (!isUserInGroup && conversation.admin.id !== userId) {
+      throw new ForbiddenException(
+        ErrorMessages.CONVERSATION_ADMIN_OR_MEMBER_REQUIRED,
+      );
+    }
 
-    if (usersToRemove.length === 0) {
+    if (conversation.admin.id === userId && userIds.includes(userId)) {
       throw new BadRequestException(
-        ErrorMessages.CONVERSATION_USER_NOT_IN_GROUP,
+        ErrorMessages.CONVERSATION_ADMIN_CANNOT_REMOVE_SELF,
       );
     }
 
     conversation.users = conversation.users.filter(
-      (user) => !usersToRemove.includes(user.id),
+      (user) => !userIds.includes(user.id),
     );
 
     await this.removeConversationIfOnlyOneUser(conversation);
@@ -345,12 +368,24 @@ export class ConversationsService extends BaseService<Conversation> {
       userId,
     );
 
-    conversation.users = conversation.users.filter((u) => u.id !== userId);
-
-    if (conversation.users.length === 1) {
-      await this.conversationRepository.remove(conversation);
-    } else {
-      await this.conversationRepository.save(conversation);
+    if (!conversation.isGroup) {
+      throw new BadRequestException(
+        ErrorMessages.CONVERSATION_NOT_GROUP_OR_TOO_SMALL,
+      );
     }
+
+    if (conversation.admin.id === userId) {
+      throw new BadRequestException(
+        ErrorMessages.CONVERSATION_ADMIN_CANNOT_REMOVE_SELF,
+      );
+    }
+
+    conversation.users = conversation.users.filter(
+      (user) => user.id !== userId,
+    );
+
+    await this.removeConversationIfOnlyOneUser(conversation);
+
+    await this.conversationRepository.save(conversation);
   }
 }

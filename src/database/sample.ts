@@ -226,7 +226,7 @@ const PERMISSIONS = {
     createPermission(
       'Người dùng đang đăng nhập rời khỏi một cuộc trò chuyện',
       '/api/v1/conversations/:id/leave',
-      'POST',
+      'DELETE',
       'CONVERSATIONS',
     ),
     createPermission(
