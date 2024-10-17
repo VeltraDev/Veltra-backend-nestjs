@@ -10,21 +10,26 @@ import { Message } from './entities/message.entity';
 import { ConversationsService } from 'src/conversations/conversations.service';
 import { User } from 'src/users/entities/user.entity';
 import { CreateMessageDto } from './dto/request/create-message.dto';
-import { Conversation } from 'src/conversations/entities/conversation.entity';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
+import { BaseService } from 'src/base/base.service';
 
 @Injectable()
-export class MessagesService {
+export class MessagesService extends BaseService<Message> {
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
     private readonly conversationService: ConversationsService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) {
+    super(messageRepository);
+  }
 
-  async createMessage(createMessageDto: CreateMessageDto): Promise<Message> {
-    const { content, conversationId, senderId, files } = createMessageDto;
+  async createMessage(
+    createMessageDto: CreateMessageDto,
+    senderId: string,
+  ): Promise<Message> {
+    const { content, conversationId, files } = createMessageDto;
 
     const conversation = await this.conversationService.getConversationById(
       conversationId,
@@ -46,8 +51,8 @@ export class MessagesService {
 
     const newMessage = this.messageRepository.create({
       content,
-      sender: { id: senderId } as User,
-      conversation: { id: conversationId } as Conversation,
+      sender,
+      conversation,
       files: files || [],
     });
 

@@ -96,7 +96,7 @@ export enum ErrorMessages {
   CONVERSATION_NAME_STRING = 'Tên cuộc trò chuyện phải là chuỗi ký tự',
   CONVERSATION_PICTURE_STRING = 'Đường dẫn hình ảnh phải là chuỗi ký tự',
   CONVERSATION_USERS_ARRAY = 'Danh sách người dùng phải là một mảng',
-  CONVERSATION_USERS_MIN_SIZE = 'Phải có ít nhất 1 người dùng trong cuộc trò chuyện',
+  CONVERSATION_USERS_MIN_SIZE = 'Phải có ít nhất 2 người dùng trong cuộc trò chuyện',
   CONVERSATION_USERS_UUID = 'ID của người dùng phải là UUID hợp lệ',
   CONVERSATION_ADMIN_UUID = 'ID admin nhóm phải là UUID v4 hợp lệ',
   CONVERSATION_USER_IDS_ARRAY = 'Danh sách ID người dùng phải là một mảng',
@@ -115,6 +115,7 @@ export enum ErrorMessages {
   CONVERSATION_GROUP_CANNOT_UPDATE_ADMIN_1_1 = 'Không thể cập nhật admin cho cuộc trò chuyện 1-1',
   CONVERSATION_NO_ACCESS = 'Người dùng không có quyền truy cập vào cuộc trò chuyện này',
   CONVERSATION_ADMIN_FORBIDDEN = 'Người dùng không thể thực hiện quyền hạn này vì không phải là admin nhóm',
+  FETCH_CONVERSATIONS_FAILED = 'Không thể lấy thông tin cuộc trò chuyện, hãy kiểm tra truy vấn của bạn',
 
   // Message Errors
   MESSAGE_CONTENT_REQUIRED = 'Nội dung tin nhắn không được để trống',
@@ -128,4 +129,5 @@ export enum ErrorMessages {
   MESSAGE_NOT_FOUND = 'Tin nhắn với ID {messageId} không tồn tại',
   MESSAGE_DELETE_FORBIDDEN = 'Bạn không có quyền xóa tin nhắn này',
   MESSAGE_NO_ACCESS = 'Bạn không có quyền xem tin nhắn này',
+  FETCH_MESSAGES_FAILED = 'Không thể lấy thông tin tin nhắn, hãy kiểm tra truy vấn của bạn',
 }

@@ -2,7 +2,7 @@ import { Expose, Type } from 'class-transformer';
 import { MessageResponseDto } from 'src/messages/dto/response/message-response.dto';
 import { UserSecureResponseDto } from 'src/users/dto/response/user-secure-response.dto';
 
-export class ConversationResponseDto {
+export class GetOneConversationResponseDto {
   @Expose()
   id: string;
 
@@ -25,7 +25,7 @@ export class ConversationResponseDto {
 
   @Expose()
   @Type(() => MessageResponseDto)
-  latestMessage?: MessageResponseDto;
+  messages?: MessageResponseDto[];
 
   @Expose()
   createdAt: Date;

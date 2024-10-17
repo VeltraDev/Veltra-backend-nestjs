@@ -13,16 +13,22 @@ import { UsersInterface } from 'src/users/users.interface';
 import { UpdateInfoConversationDto } from './dto/request/update-conversation.dto';
 import { Message } from 'src/messages/entities/message.entity';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
+import { BaseService } from 'src/base/base.service';
+import { FilterConversationsDto } from './dto/request/filter-conversation.dto';
+import { plainToClass } from 'class-transformer';
+import { MessageResponseDto } from 'src/messages/dto/response/message-response.dto';
 
 @Injectable()
-export class ConversationsService {
+export class ConversationsService extends BaseService<Conversation> {
   constructor(
     @InjectRepository(Conversation)
     private readonly conversationRepository: Repository<Conversation>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
-  ) {}
+  ) {
+    super(conversationRepository);
+  }
 
   private async validateUserInConversation(
     conversationId: string,
@@ -30,7 +36,7 @@ export class ConversationsService {
   ): Promise<Conversation> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
-      relations: ['users', 'admin'],
+      relations: ['users', 'admin', 'messages'],
     });
 
     if (!conversation) {
@@ -49,28 +55,72 @@ export class ConversationsService {
     return conversation;
   }
 
-  async getLatestMessage(
-    conversationId: string,
-    userId: string,
-  ): Promise<Message> {
-    const conversation = await this.validateUserInConversation(
-      conversationId,
-      userId,
-    );
+  async getConversationById(id: string, userId: string): Promise<Conversation> {
+    const conversation = await this.validateUserInConversation(id, userId);
 
-    const latestMessage = await this.messageRepository.findOne({
-      where: { conversation: { id: conversation.id } },
-      order: { createdAt: 'DESC' },
+    const sortedMessages = conversation.messages.sort((a, b) => {
+      return a.createdAt.getTime() - b.createdAt.getTime();
     });
 
-    return latestMessage;
+    return {
+      ...conversation,
+      messages: sortedMessages,
+    };
   }
 
-  async getUserConversations(userId: string): Promise<Conversation[]> {
-    return await this.conversationRepository.find({
-      where: { users: { id: userId } },
-      relations: ['users', 'admin', 'messages'],
-    });
+  async getAllConversations(
+    userId: string,
+    query: FilterConversationsDto,
+  ): Promise<{
+    total: number;
+    page: number;
+    limit: number;
+    results: any[];
+  }> {
+    const validSortFields = ['name', 'createdAt'];
+    const paginatedConversations = await this.getAll(
+      query,
+      validSortFields,
+      'conversation',
+      ['users', 'admin', 'messages'],
+    );
+
+    const conversationsWithLatestMessage = await Promise.all(
+      paginatedConversations.results.map(async (conversation) => {
+        const latestMessage = await this.messageRepository.findOne({
+          where: { conversation: { id: conversation.id } },
+          order: { createdAt: 'DESC' },
+          relations: ['sender'],
+        });
+
+        return {
+          ...conversation,
+          latestMessage: latestMessage
+            ? plainToClass(MessageResponseDto, {
+                id: latestMessage.id,
+                content: latestMessage.content,
+                files: latestMessage.files,
+                sender: {
+                  id: latestMessage.sender.id,
+                  firstName: latestMessage.sender.firstName,
+                  lastName: latestMessage.sender.lastName,
+                  email: latestMessage.sender.email,
+                  avatar: latestMessage.sender.avatar,
+                },
+                createdAt: latestMessage.createdAt,
+                updatedAt: latestMessage.updatedAt,
+              })
+            : null,
+        };
+      }),
+    );
+
+    return {
+      total: paginatedConversations.total,
+      page: paginatedConversations.page,
+      limit: paginatedConversations.limit,
+      results: conversationsWithLatestMessage,
+    };
   }
 
   async findConversationById(
@@ -144,10 +194,6 @@ export class ConversationsService {
     });
 
     return await this.conversationRepository.save(newConversation);
-  }
-
-  async getConversationById(id: string, userId: string): Promise<Conversation> {
-    return await this.validateUserInConversation(id, userId);
   }
 
   async updateGroupInfo(

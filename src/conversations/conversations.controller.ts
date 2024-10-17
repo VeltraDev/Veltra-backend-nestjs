@@ -12,7 +12,7 @@ import {
 import { ConversationsService } from './conversations.service';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { CreateConversationDto } from './dto/request/create-conversation.dto';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { ConversationResponseDto } from './dto/response/conversation-response.dto';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 import { UsersInterface } from 'src/users/users.interface';
@@ -21,6 +21,8 @@ import { UpdateGroupAdminDto } from './dto/request/update-group-admin.dto';
 import { AddUsersDto } from './dto/request/add-user.dto';
 import { RemoveUsersDto } from './dto/request/remove-user.dto';
 import { MessageResponseDto } from 'src/messages/dto/response/message-response.dto';
+import { FilterConversationsDto } from './dto/request/filter-conversation.dto';
+import { GetOneConversationResponseDto } from './dto/response/get-one-conversation-response.dto';
 
 @Controller('conversations')
 export class ConversationsController {
@@ -43,34 +45,28 @@ export class ConversationsController {
   }
 
   @MessageResponse(
-    'Lấy danh sách tất cả cuộc trò chuyện của người dùng đang đăng nhập thành công',
+    'Lấy danh sách tất cả cuộc trò chuyện của người dùng đang đăng nhập với điều kiện truy vấn thành công',
   )
   @Get()
-  async getUserConversations(@AuthUser() user: UsersInterface) {
-    const conversations = await this.conversationsService.getUserConversations(
-      user.id,
-    );
+  async getAllConversations(
+    @AuthUser() user: UsersInterface,
+    @Query() query: FilterConversationsDto,
+  ) {
+    const paginatedConversations =
+      await this.conversationsService.getAllConversations(user.id, query);
 
-    return conversations.map((conversation) =>
+    const results = paginatedConversations.results.map((conversation) =>
       plainToClass(ConversationResponseDto, conversation, {
         excludeExtraneousValues: true,
       }),
     );
-  }
 
-  @Get(':id/latest-message')
-  async getLatestMessage(
-    @Param('id') conversationId: string,
-    @AuthUser() user: UsersInterface,
-  ) {
-    const latestMessage = await this.conversationsService.getLatestMessage(
-      conversationId,
-      user.id,
-    );
-
-    return plainToClass(MessageResponseDto, latestMessage, {
-      excludeExtraneousValues: true,
-    });
+    return {
+      total: paginatedConversations.total,
+      page: paginatedConversations.page,
+      limit: paginatedConversations.limit,
+      results,
+    };
   }
 
   @MessageResponse('Rời khỏi nhóm thành công')
@@ -165,9 +161,24 @@ export class ConversationsController {
       user.id,
     );
 
-    return plainToClass(ConversationResponseDto, conversation, {
-      excludeExtraneousValues: true,
-    });
+    const messageDtos = plainToInstance(
+      MessageResponseDto,
+      conversation.messages,
+      {
+        excludeExtraneousValues: true,
+      },
+    );
+
+    return plainToInstance(
+      GetOneConversationResponseDto,
+      {
+        ...conversation,
+        messages: messageDtos, 
+      },
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 
   @Delete(':id')

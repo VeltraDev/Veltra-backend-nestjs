@@ -13,13 +13,21 @@ export class MessagesController {
 
   @MessageResponse('Tạo mới tin nhắn thành công')
   @Post()
-  async createMessage(@Body() createMessageDto: CreateMessageDto) {
-    const conversation =
-      await this.messagesService.createMessage(createMessageDto);
+  async createMessage(
+    @Body() createMessageDto: CreateMessageDto,
+    @AuthUser() user: UsersInterface,
+  ) {
+    const message = await this.messagesService.createMessage(
+      createMessageDto,
+      user.id,
+    );
 
-    return plainToClass(MessageResponseDto, conversation, {
-      excludeExtraneousValues: true,
-    });
+    return {
+      ...plainToClass(MessageResponseDto, message, {
+        excludeExtraneousValues: true,
+      }),
+      conversationId: message.conversation.id,
+    };
   }
 
   @MessageResponse('Lấy thông tin một tin nhắn thành công')
@@ -33,9 +41,12 @@ export class MessagesController {
       user.id,
     );
 
-    return plainToClass(MessageResponseDto, message, {
-      excludeExtraneousValues: true,
-    });
+    return {
+      ...plainToClass(MessageResponseDto, message, {
+        excludeExtraneousValues: true,
+      }),
+      conversationId: message.conversation.id,
+    };
   }
 
   @MessageResponse('Xóa tin nhắn thành công')

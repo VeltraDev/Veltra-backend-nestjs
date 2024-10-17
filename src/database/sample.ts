@@ -194,14 +194,8 @@ const PERMISSIONS = {
       'CONVERSATIONS',
     ),
     createPermission(
-      'Lấy tất cả cuộc trò chuyện của người dùng đang đăng nhập',
+      'Lấy tất cả cuộc trò chuyện của người dùng đang đăng nhập với điều kiện truy vấn',
       '/api/v1/conversations',
-      'GET',
-      'CONVERSATIONS',
-    ),
-    createPermission(
-      'Lấy tất cả các tin nhắn theo thứ tự mới nhất giảm dần của một cuộc trò chuyện',
-      '/api/v1/conversations/latest-message',
       'GET',
       'CONVERSATIONS',
     ),
@@ -279,12 +273,8 @@ export const INIT_USER_LOGIN_PERMISSIONS = [
   ),
   PERMISSIONS.CONVERSATIONS.find(
     (p) =>
-      p.name === 'Lấy tất cả cuộc trò chuyện của người dùng đang đăng nhập',
-  ),
-  PERMISSIONS.CONVERSATIONS.find(
-    (p) =>
       p.name ===
-      'Lấy tất cả các tin nhắn theo thứ tự mới nhất giảm dần của một cuộc trò chuyện',
+      'Lấy tất cả cuộc trò chuyện của người dùng đang đăng nhập với điều kiện truy vấn',
   ),
   PERMISSIONS.CONVERSATIONS.find(
     (p) => p.name === 'Cập nhật thông tin một cuộc trò chuyện',

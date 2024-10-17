@@ -9,6 +9,9 @@ export class MessageResponseDto {
   content: string;
 
   @Expose()
+  files: string[];
+
+  @Expose()
   @Type(() => UserSecureResponseDto)
   sender: UserSecureResponseDto;
 
