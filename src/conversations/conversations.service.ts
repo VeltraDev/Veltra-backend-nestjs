@@ -55,6 +55,21 @@ export class ConversationsService extends BaseService<Conversation> {
     return conversation;
   }
 
+  private async validateIsGroup(conversation: Conversation): Promise<void> {
+    if (!conversation.isGroup) {
+      throw new BadRequestException(ErrorMessages.CONVERSATION_GROUP_REQUIRED);
+    }
+  }
+
+  private async validateAdmin(
+    conversation: Conversation,
+    userId: string,
+  ): Promise<void> {
+    if (!conversation.admin || conversation.admin.id !== userId) {
+      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
+    }
+  }
+
   async getConversationById(id: string, userId: string): Promise<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
 
@@ -202,20 +217,10 @@ export class ConversationsService extends BaseService<Conversation> {
     userId: string,
   ): Promise<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
-
-    // Admin can update information of group
-    // if (conversation.admin.id !== userId) {
-    //   throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
-    // }
-
-    if (!conversation.isGroup) {
-      throw new NotFoundException(
-        ErrorMessages.CONVERSATION_GROUP_REQUIRED.replace('{id}', id),
-      );
-    }
+    await this.validateIsGroup(conversation);
+    await this.validateAdmin(conversation, userId);
 
     const { name, picture } = updateInfoConversationDto;
-
     if (name) conversation.name = name;
     if (picture) conversation.picture = picture;
 
@@ -228,15 +233,8 @@ export class ConversationsService extends BaseService<Conversation> {
     userId: string,
   ): Promise<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
-    if (!conversation.isGroup) {
-      throw new BadRequestException(
-        ErrorMessages.CONVERSATION_GROUP_CANNOT_UPDATE_ADMIN_1_1,
-      );
-    }
-
-    if (!conversation.admin || conversation.admin.id !== userId) {
-      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
-    }
+    await this.validateIsGroup(conversation);
+    await this.validateAdmin(conversation, userId);
 
     if (adminId === userId) {
       throw new BadRequestException(
@@ -266,28 +264,9 @@ export class ConversationsService extends BaseService<Conversation> {
     userId: string,
   ): Promise<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
-
-    if (!conversation.isGroup) {
-      throw new BadRequestException(
-        ErrorMessages.CONVERSATION_NOT_GROUP_OR_TOO_SMALL,
-      );
-    }
-
-    const isUserInGroup = conversation.users.some((user) => user.id === userId);
-    if (!isUserInGroup) {
-      throw new ForbiddenException(
-        ErrorMessages.CONVERSATION_USER_NOT_IN_GROUP,
-      );
-    }
-
-    if (userIds.includes(userId)) {
-      throw new BadRequestException(
-        ErrorMessages.CONVERSATION_CANNOT_ADD_SELF.replace('{userId}', userId),
-      );
-    }
+    await this.validateIsGroup(conversation);
 
     const usersToAdd = await this.validateUsersExist(userIds);
-
     const existingUsers = conversation.users.map((user) => user.id);
 
     const alreadyInGroup = userIds.filter((userId) =>
@@ -321,19 +300,8 @@ export class ConversationsService extends BaseService<Conversation> {
     userId: string,
   ): Promise<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
-
-    if (!conversation.isGroup) {
-      throw new BadRequestException(
-        ErrorMessages.CONVERSATION_NOT_GROUP_OR_TOO_SMALL,
-      );
-    }
-
-    const isUserInGroup = conversation.users.some((user) => user.id === userId);
-    if (!isUserInGroup && conversation.admin.id !== userId) {
-      throw new ForbiddenException(
-        ErrorMessages.CONVERSATION_ADMIN_OR_MEMBER_REQUIRED,
-      );
-    }
+    await this.validateIsGroup(conversation);
+    await this.validateAdmin(conversation, userId);
 
     if (conversation.admin.id === userId && userIds.includes(userId)) {
       throw new BadRequestException(
@@ -352,12 +320,7 @@ export class ConversationsService extends BaseService<Conversation> {
 
   async deleteConversation(id: string, adminId: string): Promise<void> {
     const conversation = await this.validateUserInConversation(id, adminId);
-
-    if (conversation.admin.id !== adminId) {
-      throw new ForbiddenException(
-        ErrorMessages.CONVERSATION_CANNOT_DELETE_ADMIN,
-      );
-    }
+    await this.validateAdmin(conversation, adminId);
 
     await this.conversationRepository.remove(conversation);
   }
@@ -367,12 +330,7 @@ export class ConversationsService extends BaseService<Conversation> {
       conversationId,
       userId,
     );
-
-    if (!conversation.isGroup) {
-      throw new BadRequestException(
-        ErrorMessages.CONVERSATION_NOT_GROUP_OR_TOO_SMALL,
-      );
-    }
+    await this.validateIsGroup(conversation);
 
     if (conversation.admin.id === userId) {
       throw new BadRequestException(
