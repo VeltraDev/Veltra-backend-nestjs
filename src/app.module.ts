@@ -12,6 +12,7 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { DatabasesModule } from './database/databases.module';
 import { MessagesModule } from './messages/messages.module';
 import { ConversationsModule } from './conversations/conversations.module';
+import { S3FilesModule } from './S3-files/S3-files.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ConversationsModule } from './conversations/conversations.module';
     DatabasesModule,
     MessagesModule,
     ConversationsModule,
+    S3FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
