@@ -8,9 +8,9 @@ const commonUser = {
 
 export const commonTimestamps = () => ({
   createdAt: new Date().toISOString(),
-  createdBy: commonUser,
+  // createdBy: commonUser,
   updatedAt: new Date().toISOString(),
-  updatedBy: commonUser,
+  // updatedBy: commonUser,
 });
 
 const createPermission = (name, apiPath, method, module) => ({

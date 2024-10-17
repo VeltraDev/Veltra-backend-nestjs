@@ -7,9 +7,9 @@ export abstract class EntityBase {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: 'json', nullable: true })
-  createdBy: { id: string; email: string };
+  // @Column({ type: 'json', nullable: true })
+  // createdBy: { id: string; email: string };
 
-  @Column({ type: 'json', nullable: true })
-  updatedBy: { id: string; email: string };
+  // @Column({ type: 'json', nullable: true })
+  // updatedBy: { id: string; email: string };
 }
