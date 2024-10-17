@@ -108,6 +108,13 @@ export class AuthService {
     currentUser: UsersInterface,
     response: Response,
   ) {
+    // Before login, check user is verified account
+    const checkUserVerified = await this.usersService.getUserById(
+      currentUser.id,
+    );
+    if (!checkUserVerified.isVerified)
+      throw new UnauthorizedException(ErrorMessages.NOT_VERIFIED_ACCOUNT);
+
     // Add information about current user login to response
     const authResponse = new AuthenticationResponse();
     authResponse.user = plainToInstance(UserResponseDto, currentUser, {

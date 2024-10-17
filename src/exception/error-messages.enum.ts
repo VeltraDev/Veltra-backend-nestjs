@@ -11,6 +11,7 @@ export enum ErrorMessages {
   EMAIL_OR_PASSWORD_INVALID = 'Email hoặc mật khẩu không hợp lệ Hãy thử lại!',
   EMAIL_ALREADY_USED = 'Email {email} đã được sử dụng',
   MISSING_EMAIL = 'Email bị thiếu, hãy bổ sung thêm email',
+  NOT_VERIFIED_ACCOUNT = 'Người dùng vẫn chưa xác thực tài khoản, vui lòng kiểm tra email để xác thực tài khoản của bạn',
 
   // -- Token Validations
   TOKEN_REQUIRED = 'Token là bắt buộc',
