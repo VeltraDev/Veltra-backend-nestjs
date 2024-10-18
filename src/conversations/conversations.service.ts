@@ -30,7 +30,7 @@ export class ConversationsService extends BaseService<Conversation> {
     super(conversationRepository);
   }
 
-  private async validateUserInConversation(
+  async validateUserInConversation(
     conversationId: string,
     userId: string,
   ): Promise<Conversation> {

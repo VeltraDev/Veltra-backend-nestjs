@@ -26,6 +26,15 @@ export const ADMIN_ROLE = 'ADMIN';
 export const USER_ROLE = 'USER';
 
 const PERMISSIONS = {
+  FILE: [
+    createPermission(
+      'Tải file lên AWS S3',
+      '/api/v1/files/upload',
+      'POST',
+      'FILE',
+    ),
+  ],
+
   AUTH: [
     createPermission(
       'Đăng ký người dùng',
@@ -295,9 +304,11 @@ export const INIT_USER_LOGIN_PERMISSIONS = [
   PERMISSIONS.MESSAGES.find((p) => p.name === 'Xóa một tin nhắn'),
   PERMISSIONS.MESSAGES.find((p) => p.name === 'Lấy thông tin một tin nhắn'),
   PERMISSIONS.MESSAGES.find((p) => p.name === 'Tạo một tin nhắn mới'),
+  PERMISSIONS.FILE.find((p) => p.name === 'Tải file lên AWS S3'),
 ];
 
 export const INIT_ADMIN_PERMISSIONS = [
+  ...PERMISSIONS.FILE,
   ...PERMISSIONS.AUTH,
   ...PERMISSIONS.USERS,
   ...PERMISSIONS.ROLES,
