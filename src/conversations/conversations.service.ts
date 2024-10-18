@@ -36,7 +36,7 @@ export class ConversationsService extends BaseService<Conversation> {
   ): Promise<Conversation> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
-      relations: ['users', 'admin', 'messages'],
+      relations: ['users', 'admin', 'messages', 'messages.sender'],
     });
 
     if (!conversation) {

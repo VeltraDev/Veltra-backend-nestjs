@@ -14,6 +14,8 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import helmet from 'helmet';
 import { GlobalExceptionFilter } from './exception/global-exception.filter';
 import { WsExceptionFilter } from './exception/ws-exception.filter';
+import { JwtService } from '@nestjs/jwt';
+import { AuthenticatedSocketIoAdapter } from './chats/secure/authenticated-socketio.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -62,6 +64,10 @@ async function bootstrap() {
   // Interceptor
   app.useGlobalInterceptors(new TransformInterceptor(reflector)); // response when success (status code 200)
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+  // Custom adapter for socket.io
+  const jwtService = app.get(JwtService);
+  app.useWebSocketAdapter(new AuthenticatedSocketIoAdapter(app, jwtService));
 
   // Config helmet to enhance security
   // app.use(helmet());

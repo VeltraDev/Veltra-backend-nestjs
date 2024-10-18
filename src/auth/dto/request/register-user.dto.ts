@@ -29,8 +29,4 @@ export class RegisterUserDto {
   @IsNotEmpty({ message: ErrorMessages.LAST_NAME_STRING })
   @IsString({ message: ErrorMessages.LAST_NAME_STRING })
   lastName: string;
-
-  @IsOptional()
-  @IsString({ message: ErrorMessages.AVATAR_STRING })
-  avatar?: string;
 }

@@ -8,10 +8,9 @@ import {
 } from '@nestjs/common';
 import { S3FilesService } from './S3-files.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 
-@ApiTags('Module Upload Files')
+
 @Controller('files')
 export class S3FilesController {
   constructor(private readonly S3FilesService: S3FilesService) {}

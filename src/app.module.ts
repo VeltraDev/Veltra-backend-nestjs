@@ -13,6 +13,7 @@ import { DatabasesModule } from './database/databases.module';
 import { MessagesModule } from './messages/messages.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { S3FilesModule } from './S3-files/S3-files.module';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { S3FilesModule } from './S3-files/S3-files.module';
     MessagesModule,
     ConversationsModule,
     S3FilesModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
