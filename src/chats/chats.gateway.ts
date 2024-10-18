@@ -14,7 +14,7 @@ import { CreateMessageDto } from 'src/messages/dto/request/create-message.dto';
 import { ChatsService } from './chats.service';
 
 @WebSocketGateway({
-  cors: { origin: ['http://localhost:3000'], credentials: true },
+  cors: { origin: ['*']},
 })
 export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly chatsService: ChatsService) {}
