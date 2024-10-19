@@ -21,6 +21,8 @@ import { ResendEmailDto } from './dto/request/resend-email.dto';
 import { ForgotPasswordDto } from './dto/request/forgot-password.dto';
 import { ResetPasswordDto } from './dto/request/reset-password.dto';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
+import { AuthenticationResponse } from './dto/response/authentication-response.dto';
+import { plainToClass } from 'class-transformer';
 
 @ApiTags('Module Auth')
 @Controller('auth')
@@ -60,7 +62,10 @@ export class AuthController {
     @AuthUser() user,
     @Res({ passthrough: true }) response: Response,
   ) {
-    return await this.authService.login(user, response);
+    const authResponse = await this.authService.login(user, response);
+    return plainToClass(AuthenticationResponse, authResponse, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @MessageResponse('Lấy thông tin người dùng đã đăng nhập')

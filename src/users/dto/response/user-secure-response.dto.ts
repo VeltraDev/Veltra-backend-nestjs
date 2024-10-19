@@ -1,8 +1,12 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { RoleSecureResponseDto } from 'src/roles/dto/response/role-secure-response.dto';
 
 export class UserSecureResponseDto {
   @Expose()
   id: string;
+
+  @Expose()
+  email: string;
 
   @Expose()
   firstName: string;
@@ -11,8 +15,15 @@ export class UserSecureResponseDto {
   lastName: string;
 
   @Expose()
-  email: string;
+  avatar: string;
 
   @Expose()
-  avatar?: string;
+  displayStatus: string;
+
+  @Expose()
+  createdAt: Date;
+
+  @Expose()
+  @Type(() => RoleSecureResponseDto)
+  role: RoleSecureResponseDto;
 }

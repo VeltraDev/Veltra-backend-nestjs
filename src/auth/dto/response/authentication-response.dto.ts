@@ -1,6 +1,11 @@
-import { UserResponseDto } from 'src/users/dto/response/user-response.dto';
+import { Expose, Type } from 'class-transformer';
+import { UserSecureResponseDto } from 'src/users/dto/response/user-secure-response.dto';
 
 export class AuthenticationResponse {
+  @Expose()
   access_token: string;
-  user: UserResponseDto;
+
+  @Expose()
+  @Type(() => UserSecureResponseDto)
+  user: UserSecureResponseDto;
 }
