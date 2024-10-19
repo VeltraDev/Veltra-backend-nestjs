@@ -13,7 +13,7 @@ import { JoinConversationDto } from './dto/request/join-conversation.dto';
 import { CreateMessageDto } from 'src/messages/dto/request/create-message.dto';
 import { ChatsService } from './chats.service';
 
-@WebSocketGateway(8081, {
+@WebSocketGateway({
   cors: {
     origin: [
       'http://localhost:3001',
