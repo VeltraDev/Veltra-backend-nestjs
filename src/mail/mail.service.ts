@@ -77,7 +77,7 @@ export class MailService {
     const token = this.generateEmailToken(user);
     const templateData = {
       name: `${user.firstName} ${user.lastName}`,
-      [`${linkType}Url`]: `${this.appUrl}/${linkType === 'verify' ? 'verify-email' : 'forgot-password'}?token=${token}`,
+      [`${linkType}Url`]: `${this.appUrl}/${linkType === 'verify' ? 'verify-email' : 'reset-password'}?token=${token}`,
     };
 
     await this.sendMail(user.email, subject, templateName, templateData);
