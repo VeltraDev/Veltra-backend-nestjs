@@ -71,7 +71,10 @@ export class AuthController {
   @MessageResponse('Lấy thông tin người dùng đã đăng nhập')
   @Get('account')
   async getAccount(@AuthUser() user: UsersInterface) {
-    return await { user };
+    const currentUser = await { user };
+    return plainToClass(AuthenticationResponse, currentUser, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @MessageResponse('Đăng xuất người dùng khỏi tài khoản thành công')
@@ -91,7 +94,13 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const refresh_Token = request.cookies['refreshToken'];
-    return await this.authService.processNewToken(refresh_Token, response);
+    const authResponse = await this.authService.processNewToken(
+      refresh_Token,
+      response,
+    );
+    return plainToClass(AuthenticationResponse, authResponse, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Public()
