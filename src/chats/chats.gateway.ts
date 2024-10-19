@@ -13,8 +13,15 @@ import { JoinConversationDto } from './dto/request/join-conversation.dto';
 import { CreateMessageDto } from 'src/messages/dto/request/create-message.dto';
 import { ChatsService } from './chats.service';
 
-@WebSocketGateway({
-  cors: { origin: ['*']},
+@WebSocketGateway(8081, {
+  cors: {
+    origin: [
+      'http://localhost:3001',
+      'http://localhost:3000',
+      'http://localhost:5173',
+    ],
+    credentials: true,
+  },
 })
 export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly chatsService: ChatsService) {}
