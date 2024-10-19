@@ -51,9 +51,7 @@ export class MailService {
         subject,
         html,
       });
-    } catch (error) {
-      throw new InternalServerErrorException(ErrorMessages.SEND_EMAIL_FAIL);
-    }
+    } catch (error) { throw new InternalServerErrorException(ErrorMessages.SEND_EMAIL_FAIL) }
   }
 
   private generateEmailToken(user: User): string {
