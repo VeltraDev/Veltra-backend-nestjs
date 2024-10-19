@@ -51,7 +51,9 @@ export class MailService {
         subject,
         html,
       });
-    } catch (error) { throw new InternalServerErrorException(ErrorMessages.SEND_EMAIL_FAIL) }
+    } catch (error) {
+      throw new InternalServerErrorException(ErrorMessages.SEND_EMAIL_FAIL);
+    }
   }
 
   private generateEmailToken(user: User): string {
@@ -75,7 +77,7 @@ export class MailService {
     const token = this.generateEmailToken(user);
     const templateData = {
       name: `${user.firstName} ${user.lastName}`,
-      [`${linkType}Url`]: `${this.appUrl}/verify-email?token=${token}`,
+      [`${linkType}Url`]: `${this.appUrl}/${linkType === 'verify' ? 'verify-email' : 'forgot-password'}?token=${token}`,
     };
 
     await this.sendMail(user.email, subject, templateName, templateData);
