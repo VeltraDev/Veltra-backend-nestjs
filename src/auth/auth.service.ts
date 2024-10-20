@@ -145,6 +145,7 @@ export class AuthService {
     response.clearCookie('refreshToken');
     response.cookie('refreshToken', refreshToken, {
       httpOnly: true,
+      secure: true,
       maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRE')),
     });
 
