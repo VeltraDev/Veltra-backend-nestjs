@@ -143,10 +143,7 @@ export class AuthService {
 
     // Set refresh token into cookies
     response.clearCookie('refreshToken');
-    response.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRE')),
-    });
+    response.cookie('refreshToken', refreshToken, {httpOnly: true, maxAge: ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRE'))});
 
     return authResponse;
   }
