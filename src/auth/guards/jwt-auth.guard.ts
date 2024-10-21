@@ -65,7 +65,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         targetEndpoint === permission.apiPath,
     );
 
-    if (!isExist) throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT.message);
+    if (!isExist)
+      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT.message);
 
     return user;
   }
