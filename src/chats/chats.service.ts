@@ -3,9 +3,10 @@ import { MessagesService } from '../messages/messages.service';
 import { ConversationsService } from '../conversations/conversations.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateMessageDto } from 'src/messages/dto/request/create-message.dto';
-import { JoinConversationDto } from './dto/request/join-conversation.dto';
 import { plainToClass } from 'class-transformer';
 import { MessageResponseDto } from 'src/messages/dto/response/message-response.dto';
+import { UsersInterface } from 'src/users/users.interface';
+import { UpdateProfileInformationDto } from 'src/users/dto/request/update-profile.dto';
 
 @Injectable()
 export class ChatsService {
@@ -14,6 +15,16 @@ export class ChatsService {
     private readonly conversationService: ConversationsService,
     private readonly userService: UsersService,
   ) {}
+
+  async handleUpdateDisplayStatus(user: UsersInterface, status: string) {
+    const updateProfileInformationDto: UpdateProfileInformationDto = {
+      displayStatus: status,
+    };
+    return await this.userService.updateProfileInfo(
+      user,
+      updateProfileInformationDto,
+    );
+  }
 
   async handleJoinConversation(user: any, conversationId: string) {
     const conversation =
@@ -25,13 +36,6 @@ export class ChatsService {
     return {
       conversationId: conversation.id,
       message: `${user.firstName} ${user.lastName} đã tham gia cuộc trò chuyện`,
-    };
-  }
-
-  async handleLeaveConversation(user: any, conversationId: string) {
-    return {
-      conversationId,
-      message: `${user.firstName} ${user.lastName} đã rời khỏi cuộc trò chuyện`,
     };
   }
 

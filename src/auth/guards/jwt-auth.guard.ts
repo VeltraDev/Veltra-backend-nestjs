@@ -30,22 +30,27 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest(err, user, info, context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
 
-    if (info && info.message === 'No auth token') {
-      throw new UnauthorizedException({
-        message: ErrorMessages.TOKEN_REQUIRED.message,
-      });
-    }
+    if (info) {
+      if (info instanceof TokenExpiredError) {
+        throw new UnauthorizedException({
+          message: ErrorMessages.TOKEN_EXPIRED.message,
+        });
+      }
 
-    if (info && info.message === 'jwt malformed') {
-      throw new UnauthorizedException({
-        message: ErrorMessages.TOKEN_STRING.message,
-      });
-    }
-
-    if (info instanceof TokenExpiredError) {
-      throw new UnauthorizedException({
-        message: ErrorMessages.TOKEN_EXPIRED.message,
-      });
+      switch (info.name) {
+        case 'JsonWebTokenError':
+          throw new UnauthorizedException({
+            message: ErrorMessages.TOKEN_INVALID.message,
+          });
+        case 'TokenExpiredError':
+          throw new UnauthorizedException({
+            message: ErrorMessages.TOKEN_EXPIRED.message,
+          });
+        default:
+          throw new UnauthorizedException({
+            message: ErrorMessages.TOKEN_INVALID.message,
+          });
+      }
     }
 
     if (err || !user) {

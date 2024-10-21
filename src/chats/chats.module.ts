@@ -5,7 +5,6 @@ import { ConversationsModule } from 'src/conversations/conversations.module';
 import { MessagesModule } from 'src/messages/messages.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import ms from 'ms';
 import { ChatsService } from './chats.service';
 
 @Module({
