@@ -102,11 +102,8 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody('conversationId') conversationId: string,
   ) {
     try {
-      const isClientInRoom =
-        this.server.sockets.adapter.rooms.has(conversationId);
-      if (!isClientInRoom || !client.rooms.has(conversationId)) {
-        await this.joinConversationHandler(client, conversationId);
-      }
+      const isClientInRoom = this.server.sockets.adapter.rooms.has(conversationId);
+      if (!isClientInRoom || !client.rooms.has(conversationId)) await this.joinConversationHandler(client, conversationId);
 
       this.server.to(conversationId).emit('typing', {
         user: `${client.user.firstName} ${client.user.lastName}`,
