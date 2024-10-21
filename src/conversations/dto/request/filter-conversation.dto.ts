@@ -13,34 +13,34 @@ export class FilterConversationsDto {
   @IsOptional()
   @IsInt()
   @Transform(({ value }) => parseInt(value, 10))
-  @Min(1, { message: ErrorMessages.PAGE_NUMBER_MIN })
+  @Min(1, { message: ErrorMessages.PAGE_NUMBER_MIN.message })
   page?: number;
 
   @IsOptional()
   @IsInt()
   @Transform(({ value }) => parseInt(value, 10))
-  @Min(1, { message: ErrorMessages.LIMIT_RECORDS_MIN })
+  @Min(1, { message: ErrorMessages.LIMIT_RECORDS_MIN.message })
   limit?: number;
 
   @IsOptional()
-  @IsString({ message: ErrorMessages.SORT_BY_STRING })
+  @IsString({ message: ErrorMessages.SORT_BY_STRING.message })
   @IsIn(['name', 'createdAt'], {
-    message: ErrorMessages.SORT_BY_INVALID,
+    message: ErrorMessages.SORT_BY_INVALID.message,
   })
   sortBy?: string;
 
   @IsOptional()
-  @IsString({ message: ErrorMessages.ORDER_STRING })
+  @IsString({ message: ErrorMessages.ORDER_STRING.message })
   @IsIn(['ASC', 'DESC', 'asc', 'desc'], {
-    message: ErrorMessages.ORDER_INVALID,
+    message: ErrorMessages.ORDER_INVALID.message,
   })
   order?: string;
 
   @IsOptional()
-  @IsString({ message: ErrorMessages.CONVERSATION_NAME_STRING })
+  @IsString({ message: ErrorMessages.CONVERSATION_NAME_STRING.message })
   name?: string;
 
   @IsOptional()
-  @IsDateString({}, { message: ErrorMessages.INVALID_DATE })
+  @IsDateString({}, { message: ErrorMessages.INVALID_DATE.message })
   createdAt?: string;
 }

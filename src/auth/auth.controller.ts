@@ -43,7 +43,13 @@ export class AuthController {
     @Body() verifyEmailDto: VerifyEmailDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    return await this.authService.verifyEmail(verifyEmailDto, response);
+    const authResponse = await this.authService.verifyEmail(
+      verifyEmailDto,
+      response,
+    );
+    return plainToClass(AuthenticationResponse, authResponse, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Public()

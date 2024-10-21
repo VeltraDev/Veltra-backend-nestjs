@@ -52,7 +52,9 @@ export class MailService {
         html,
       });
     } catch (error) {
-      throw new InternalServerErrorException(ErrorMessages.SEND_EMAIL_FAIL);
+      throw new InternalServerErrorException(
+        ErrorMessages.SEND_EMAIL_FAIL.message,
+      );
     }
   }
 

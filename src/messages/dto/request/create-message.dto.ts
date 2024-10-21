@@ -8,15 +8,15 @@ import {
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class CreateMessageDto {
-  @IsNotEmpty({ message: ErrorMessages.MESSAGE_CONTENT_REQUIRED })
-  @IsString({ message: ErrorMessages.MESSAGE_CONTENT_STRING })
+  @IsNotEmpty({ message: ErrorMessages.MESSAGE_CONTENT_REQUIRED.message })
+  @IsString({ message: ErrorMessages.MESSAGE_CONTENT_STRING.message })
   content: string;
 
-  @IsUUID('4', { message: ErrorMessages.MESSAGE_CONVERSATION_UUID })
-  @IsNotEmpty({ message: ErrorMessages.MESSAGE_CONVERSATION_REQUIRED })
+  @IsUUID('4', { message: ErrorMessages.MESSAGE_CONVERSATION_UUID.message })
+  @IsNotEmpty({ message: ErrorMessages.MESSAGE_CONVERSATION_REQUIRED.message })
   conversationId: string;
 
-  @IsArray({ message: ErrorMessages.MESSAGE_FILES_ARRAY })
+  @IsArray({ message: ErrorMessages.MESSAGE_FILES_ARRAY.message })
   @IsOptional()
   files?: { url: string; type?: string }[];
 }

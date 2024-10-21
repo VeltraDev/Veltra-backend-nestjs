@@ -38,7 +38,9 @@ export class UsersService extends BaseService<User> {
       foundUser.password,
     );
     if (!validPassword) {
-      throw new BadRequestException(ErrorMessages.CURRENT_PASSWORD_INCORRECT);
+      throw new BadRequestException(
+        ErrorMessages.CURRENT_PASSWORD_INCORRECT.message,
+      );
     }
   }
 
@@ -48,7 +50,9 @@ export class UsersService extends BaseService<User> {
       foundUser.password,
     );
     if (isNewPasswordSameAsCurrent) {
-      throw new BadRequestException(ErrorMessages.PASSWORD_SAME_AS_CURRENT);
+      throw new BadRequestException(
+        ErrorMessages.PASSWORD_SAME_AS_CURRENT.message,
+      );
     }
   }
 
@@ -60,7 +64,9 @@ export class UsersService extends BaseService<User> {
       updateProfilePasswordDto;
 
     if (newPassword !== confirmPassword)
-      throw new BadRequestException(ErrorMessages.CONFIRM_PASSWORD_MATCH);
+      throw new BadRequestException(
+        ErrorMessages.CONFIRM_PASSWORD_MATCH.message,
+      );
 
     const foundUser = await this.getUserById(user.id);
 
@@ -91,7 +97,7 @@ export class UsersService extends BaseService<User> {
 
     if (emailExists) {
       throw new BadRequestException(
-        ErrorMessages.EMAIL_ALREADY_USED.replace('{email}', email),
+        ErrorMessages.EMAIL_ALREADY_USED.message.replace('{email}', email),
       );
     }
   }
@@ -155,7 +161,7 @@ export class UsersService extends BaseService<User> {
 
     if (!user) {
       throw new NotFoundException(
-        ErrorMessages.USER_NOT_FOUND_ID.replace('{id}', id),
+        ErrorMessages.USER_NOT_FOUND_ID.message.replace('{id}', id),
       );
     }
 
@@ -170,7 +176,7 @@ export class UsersService extends BaseService<User> {
 
     if (!user) {
       throw new NotFoundException(
-        ErrorMessages.USER_NOT_FOUND_EMAIL.replace('{email}', email),
+        ErrorMessages.USER_NOT_FOUND_EMAIL.message.replace('{email}', email),
       );
     }
 
@@ -207,7 +213,7 @@ export class UsersService extends BaseService<User> {
 
     if (!user) {
       throw new NotFoundException(
-        ErrorMessages.USER_NOT_EXISTED_OR_REFRESH_TOKEN_INVALID.replace(
+        ErrorMessages.USER_NOT_EXISTED_OR_REFRESH_TOKEN_INVALID.message.replace(
           '{id}',
           id,
         ),

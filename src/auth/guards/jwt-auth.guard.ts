@@ -8,6 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
+import { TokenExpiredError } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -29,11 +30,29 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest(err, user, info, context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
 
-    if (err || !user)
-      throw (
-        err ||
-        new UnauthorizedException(ErrorMessages.TOKEN_INVALID_OR_NO_TOKEN)
-      );
+    if (info && info.message === 'No auth token') {
+      throw new UnauthorizedException({
+        message: ErrorMessages.TOKEN_REQUIRED.message,
+      });
+    }
+
+    if (info && info.message === 'jwt malformed') {
+      throw new UnauthorizedException({
+        message: ErrorMessages.TOKEN_STRING.message,
+      });
+    }
+
+    if (info instanceof TokenExpiredError) {
+      throw new UnauthorizedException({
+        message: ErrorMessages.TOKEN_EXPIRED.message,
+      });
+    }
+
+    if (err || !user) {
+      throw new UnauthorizedException({
+        message: ErrorMessages.TOKEN_INVALID.message,
+      });
+    }
 
     // Authorization (check permissions)
     const targetMethod = request.method;
@@ -47,7 +66,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     );
 
     if (!isExist)
-      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT);
+      throw new ForbiddenException(ErrorMessages.NO_ACCESS_ENDPOINT.message);
 
     return user;
   }

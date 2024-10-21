@@ -40,7 +40,7 @@ export class RolesService extends BaseService<Role> {
     const role = await query.getOne();
     if (role) {
       throw new BadRequestException(
-        ErrorMessages.ROLE_ALREADY_EXISTS.replace('{name}', name),
+        ErrorMessages.ROLE_ALREADY_EXISTS.message.replace('{name}', name),
       );
     }
   }
@@ -69,7 +69,7 @@ export class RolesService extends BaseService<Role> {
       await this.validateEntityExistence(
         permissions,
         this.permissionRepository,
-        ErrorMessages.PERMISSION_NOT_FOUND,
+        ErrorMessages.PERMISSION_NOT_FOUND.message,
       );
     }
   }
@@ -127,7 +127,7 @@ export class RolesService extends BaseService<Role> {
     });
     if (!role) {
       throw new NotFoundException(
-        ErrorMessages.ROLE_ID_NOT_FOUND.replace('{id}', id),
+        ErrorMessages.ROLE_ID_NOT_FOUND.message.replace('{id}', id),
       );
     }
     return role;
@@ -140,7 +140,7 @@ export class RolesService extends BaseService<Role> {
     });
     if (!role) {
       throw new NotFoundException(
-        ErrorMessages.ROLE_NAME_NOT_FOUND.replace('{name}', name),
+        ErrorMessages.ROLE_NAME_NOT_FOUND.message.replace('{name}', name),
       );
     }
     return role;
@@ -185,7 +185,9 @@ export class RolesService extends BaseService<Role> {
     try {
       await this.roleRepository.save(role);
     } catch (error) {
-      throw new InternalServerErrorException(ErrorMessages.NOT_DISABLE_ROLE);
+      throw new InternalServerErrorException(
+        ErrorMessages.NOT_DISABLE_ROLE.message,
+      );
     }
   }
 
@@ -200,10 +202,9 @@ export class RolesService extends BaseService<Role> {
     );
 
     if (invalidPermissions.length > 0) {
-      const errorMessage = ErrorMessages.PERMISSION_NOT_FOUND_IN_ROLE.replace(
-        '{permission}',
-        invalidPermissions.join(', '),
-      ).replace('{role}', role.name);
+      const errorMessage = ErrorMessages.PERMISSION_NOT_FOUND_IN_ROLE.message
+        .replace('{permission}', invalidPermissions.join(', '))
+        .replace('{role}', role.name);
 
       throw new NotFoundException(errorMessage);
     }

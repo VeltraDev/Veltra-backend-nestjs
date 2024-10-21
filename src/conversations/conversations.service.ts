@@ -41,7 +41,10 @@ export class ConversationsService extends BaseService<Conversation> {
 
     if (!conversation) {
       throw new NotFoundException(
-        ErrorMessages.CONVERSATION_NOT_FOUND.replace('{id}', conversationId),
+        ErrorMessages.CONVERSATION_NOT_FOUND.message.replace(
+          '{id}',
+          conversationId,
+        ),
       );
     }
 
@@ -49,7 +52,9 @@ export class ConversationsService extends BaseService<Conversation> {
       (user) => user.id === userId,
     );
     if (!isUserInConversation) {
-      throw new ForbiddenException(ErrorMessages.CONVERSATION_NO_ACCESS);
+      throw new ForbiddenException(
+        ErrorMessages.CONVERSATION_NO_ACCESS.message,
+      );
     }
 
     return conversation;
@@ -57,7 +62,9 @@ export class ConversationsService extends BaseService<Conversation> {
 
   private async validateIsGroup(conversation: Conversation): Promise<void> {
     if (!conversation.isGroup) {
-      throw new BadRequestException(ErrorMessages.CONVERSATION_GROUP_REQUIRED);
+      throw new BadRequestException(
+        ErrorMessages.CONVERSATION_GROUP_REQUIRED.message,
+      );
     }
   }
 
@@ -66,7 +73,9 @@ export class ConversationsService extends BaseService<Conversation> {
     userId: string,
   ): Promise<void> {
     if (!conversation.admin || conversation.admin.id !== userId) {
-      throw new ForbiddenException(ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN);
+      throw new ForbiddenException(
+        ErrorMessages.CONVERSATION_ADMIN_FORBIDDEN.message,
+      );
     }
   }
 
@@ -149,7 +158,7 @@ export class ConversationsService extends BaseService<Conversation> {
 
     if (!conversation) {
       throw new NotFoundException(
-        ErrorMessages.CONVERSATION_NOT_FOUND.replace('{id}', id),
+        ErrorMessages.CONVERSATION_NOT_FOUND.message.replace('{id}', id),
       );
     }
 
@@ -165,7 +174,7 @@ export class ConversationsService extends BaseService<Conversation> {
         (userId) => !foundUserIds.includes(userId),
       );
       throw new BadRequestException(
-        ErrorMessages.CONVERSATION_USERS_NOT_FOUND.replace(
+        ErrorMessages.CONVERSATION_USERS_NOT_FOUND.message.replace(
           '{missingUserIds}',
           missingUserIds.join(', '),
         ),
@@ -180,7 +189,9 @@ export class ConversationsService extends BaseService<Conversation> {
   ): Promise<void> {
     if (conversation.users.length === 1) {
       await this.conversationRepository.remove(conversation);
-      throw new BadRequestException(ErrorMessages.CONVERSATION_ONLY_ONE_USER);
+      throw new BadRequestException(
+        ErrorMessages.CONVERSATION_ONLY_ONE_USER.message,
+      );
     }
   }
 
@@ -192,7 +203,7 @@ export class ConversationsService extends BaseService<Conversation> {
 
     if (users.includes(user.id)) {
       throw new BadRequestException(
-        ErrorMessages.CONVERSATION_CANNOT_CREATE_WITH_SELF,
+        ErrorMessages.CONVERSATION_CANNOT_CREATE_WITH_SELF.message,
       );
     }
 
@@ -201,11 +212,24 @@ export class ConversationsService extends BaseService<Conversation> {
     const userEntities = await this.validateUsersExist(users);
 
     const isGroup = users.length > 2;
+    let conversationName = 'New Conversation';
+    let conversationPicture = null;
+
+    if (!isGroup && users.length === 2) {
+      const otherUser = userEntities.find((u) => u.id !== user.id);
+
+      if (otherUser) {
+        conversationName = `${otherUser.firstName} ${otherUser.lastName}`;
+        conversationPicture = otherUser.avatar;
+      }
+    }
 
     const newConversation = this.conversationRepository.create({
       isGroup,
       users: userEntities,
       admin: isGroup ? userEntities.find((u) => u.id === user.id) : null,
+      name: conversationName,
+      picture: conversationPicture,
     });
 
     return await this.conversationRepository.save(newConversation);
@@ -238,7 +262,7 @@ export class ConversationsService extends BaseService<Conversation> {
 
     if (adminId === userId) {
       throw new BadRequestException(
-        ErrorMessages.CONVERSATION_CANNOT_UPDATE_ADMIN_TO_SELF.replace(
+        ErrorMessages.CONVERSATION_CANNOT_UPDATE_ADMIN_TO_SELF.message.replace(
           '{adminId}',
           adminId,
         ),
@@ -250,7 +274,9 @@ export class ConversationsService extends BaseService<Conversation> {
     });
 
     if (!newAdmin || !conversation.users.some((u) => u.id === adminId)) {
-      throw new BadRequestException(ErrorMessages.CONVERSATION_ADMIN_NOT_VALID);
+      throw new BadRequestException(
+        ErrorMessages.CONVERSATION_ADMIN_NOT_VALID.message,
+      );
     }
 
     conversation.admin = newAdmin;
@@ -284,7 +310,7 @@ export class ConversationsService extends BaseService<Conversation> {
 
     if (alreadyInGroup.length > 0) {
       throw new BadRequestException(
-        ErrorMessages.CONVERSATION_ALREADY_IN_GROUP_PARTIAL.replace(
+        ErrorMessages.CONVERSATION_ALREADY_IN_GROUP_PARTIAL.message.replace(
           '{alreadyInGroup}',
           alreadyInGroup.join(', '),
         ),
@@ -305,7 +331,7 @@ export class ConversationsService extends BaseService<Conversation> {
 
     if (conversation.admin.id === userId && userIds.includes(userId)) {
       throw new BadRequestException(
-        ErrorMessages.CONVERSATION_ADMIN_CANNOT_REMOVE_SELF,
+        ErrorMessages.CONVERSATION_ADMIN_CANNOT_REMOVE_SELF.message,
       );
     }
 
@@ -334,7 +360,7 @@ export class ConversationsService extends BaseService<Conversation> {
 
     if (conversation.admin.id === userId) {
       throw new BadRequestException(
-        ErrorMessages.CONVERSATION_ADMIN_CANNOT_REMOVE_SELF,
+        ErrorMessages.CONVERSATION_ADMIN_CANNOT_REMOVE_SELF.message,
       );
     }
 

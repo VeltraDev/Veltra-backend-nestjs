@@ -42,7 +42,7 @@ export class MessagesService extends BaseService<Message> {
 
     if (!sender || !conversation.users.some((user) => user.id === senderId)) {
       throw new BadRequestException(
-        ErrorMessages.MESSAGE_SENDER_NOT_IN_CONVERSATION.replace(
+        ErrorMessages.MESSAGE_SENDER_NOT_IN_CONVERSATION.message.replace(
           '{senderId}',
           senderId,
         ),
@@ -67,7 +67,10 @@ export class MessagesService extends BaseService<Message> {
 
     if (!message) {
       throw new NotFoundException(
-        ErrorMessages.MESSAGE_NOT_FOUND.replace('{messageId}', messageId),
+        ErrorMessages.MESSAGE_NOT_FOUND.message.replace(
+          '{messageId}',
+          messageId,
+        ),
       );
     }
 
@@ -75,7 +78,7 @@ export class MessagesService extends BaseService<Message> {
       (user) => user.id === userId,
     );
     if (!isUserInConversation) {
-      throw new ForbiddenException(ErrorMessages.MESSAGE_NO_ACCESS);
+      throw new ForbiddenException(ErrorMessages.MESSAGE_NO_ACCESS.message);
     }
 
     return message;
@@ -85,7 +88,9 @@ export class MessagesService extends BaseService<Message> {
     const message = await this.findMessageById(messageId, userId);
 
     if (message.sender.id !== userId)
-      throw new ForbiddenException(ErrorMessages.MESSAGE_DELETE_FORBIDDEN);
+      throw new ForbiddenException(
+        ErrorMessages.MESSAGE_DELETE_FORBIDDEN.message,
+      );
 
     await this.messageRepository.remove(message);
   }

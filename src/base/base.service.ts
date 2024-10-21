@@ -21,13 +21,13 @@ export class BaseService<T> {
 
     // Validate sortBy field
     if (!validSortFields.includes(sortBy)) {
-      throw new BadRequestException(ErrorMessages.SORT_BY_INVALID);
+      throw new BadRequestException(ErrorMessages.SORT_BY_INVALID.message);
     }
 
     // Normalize order to uppercase
     const orderUpperCase = order.toUpperCase();
     if (!['ASC', 'DESC'].includes(orderUpperCase)) {
-      throw new BadRequestException(ErrorMessages.ORDER_INVALID);
+      throw new BadRequestException(ErrorMessages.ORDER_INVALID.message);
     }
 
     const skip = (page - 1) * limit;

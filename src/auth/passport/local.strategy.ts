@@ -22,7 +22,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     );
 
     if (!user)
-      throw new UnauthorizedException(ErrorMessages.EMAIL_OR_PASSWORD_INVALID);
+      throw new UnauthorizedException(
+        ErrorMessages.EMAIL_OR_PASSWORD_INVALID.message,
+      );
 
     return user;
   }

@@ -42,7 +42,9 @@ export class AuthService {
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
     const { token, newPassword, confirmPassword } = resetPasswordDto;
     if (newPassword !== confirmPassword)
-      throw new BadRequestException(ErrorMessages.CONFIRM_PASSWORD_MATCH);
+      throw new BadRequestException(
+        ErrorMessages.CONFIRM_PASSWORD_MATCH.message,
+      );
 
     const user: User = await this.validateTokenAndGetUser(token);
     user.password = getHashPassword(newPassword);
@@ -55,7 +57,7 @@ export class AuthService {
     const user: User = await this.validateTokenAndGetUser(token);
 
     if (user.isVerified)
-      throw new BadRequestException(ErrorMessages.IS_VERIFIED);
+      throw new BadRequestException(ErrorMessages.IS_VERIFIED.message);
 
     user.isVerified = true;
     await this.usersService.update(user.id, { isVerified: true });
@@ -64,7 +66,8 @@ export class AuthService {
   }
 
   async validateTokenAndGetUser(token: string): Promise<User> {
-    if (!token) throw new BadRequestException(ErrorMessages.TOKEN_REQUIRED);
+    if (!token)
+      throw new BadRequestException(ErrorMessages.TOKEN_REQUIRED.message);
 
     let decodedToken: any;
 
@@ -74,9 +77,9 @@ export class AuthService {
       });
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        throw new UnauthorizedException(ErrorMessages.TOKEN_EXPIRED);
+        throw new UnauthorizedException(ErrorMessages.TOKEN_EXPIRED.message);
       } else {
-        throw new UnauthorizedException(ErrorMessages.TOKEN_INVALID);
+        throw new UnauthorizedException(ErrorMessages.TOKEN_INVALID.message);
       }
     }
 
@@ -99,7 +102,7 @@ export class AuthService {
     const user = await this.usersService.findOneByEmail(email);
 
     if (user.isVerified)
-      throw new BadRequestException(ErrorMessages.IS_VERIFIED);
+      throw new BadRequestException(ErrorMessages.IS_VERIFIED.message);
 
     await this.mailService.sendVerifyEmail(user);
   }
@@ -113,7 +116,9 @@ export class AuthService {
       currentUser.id,
     );
     if (!checkUserVerified.isVerified)
-      throw new UnauthorizedException(ErrorMessages.NOT_VERIFIED_ACCOUNT);
+      throw new UnauthorizedException(
+        ErrorMessages.NOT_VERIFIED_ACCOUNT.message,
+      );
 
     // Add information about current user login to response
     const authResponse = new AuthenticationResponse();
@@ -188,12 +193,17 @@ export class AuthService {
 
       return await this.createAuthResponse(user, response);
     } catch (error) {
-      throw new BadRequestException(ErrorMessages.REFRESH_TOKEN_INVALID);
+      throw new BadRequestException(
+        ErrorMessages.REFRESH_TOKEN_INVALID.message,
+      );
     }
   };
 
   logout = async (user: UsersInterface, response: Response) => {
     await this.usersService.updateUserRefreshToken(null, user.email);
-    response.clearCookie('refreshToken');
+    response.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+    });
   };
 }

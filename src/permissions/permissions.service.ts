@@ -37,7 +37,7 @@ export class PermissionsService extends BaseService<Permission> {
     ) {
       const methodAndPath = `${method} ${apiPath}`;
       throw new ConflictException(
-        ErrorMessages.PERMISSION_SAME_API_MODULE.replace(
+        ErrorMessages.PERMISSION_SAME_API_MODULE.message.replace(
           '{methodAndPath}',
           methodAndPath,
         ),
@@ -52,7 +52,10 @@ export class PermissionsService extends BaseService<Permission> {
 
     if (existingModule) {
       throw new BadRequestException(
-        ErrorMessages.PERMISSION_MODULE_EXISTS.replace('{module}', module),
+        ErrorMessages.PERMISSION_MODULE_EXISTS.message.replace(
+          '{module}',
+          module,
+        ),
       );
     }
   }
@@ -85,7 +88,7 @@ export class PermissionsService extends BaseService<Permission> {
     });
     if (!permission) {
       throw new NotFoundException(
-        ErrorMessages.PERMISSION_NOT_FOUND.replace('{id}', id),
+        ErrorMessages.PERMISSION_NOT_FOUND.message.replace('{id}', id),
       );
     }
     return permission;

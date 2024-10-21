@@ -11,6 +11,7 @@ import { IS_MESSAGE_RESPONSE } from '../decorators/message-response.decorator';
 
 export interface Response<T> {
   statusCode: number;
+  code: number;
   message?: string;
   data: T;
 }
@@ -24,8 +25,10 @@ export class TransformInterceptor<T>
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<Response<T>> {
+
     return next.handle().pipe(
       map((data) => ({
+        code: 1000,
         statusCode: context.switchToHttp().getResponse().statusCode,
         message:
           this.reflector.get<string>(
