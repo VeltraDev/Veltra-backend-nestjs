@@ -33,7 +33,7 @@ export class RolesService extends BaseService<Role> {
   ): Promise<void> {
     const query = this.roleRepository
       .createQueryBuilder('role')
-      .where('LOWER(role.name) = LOWER(:name)', { name });
+      .where('UPPER(role.name) = UPPER(:name)', { name });
 
     if (excludeId) query.andWhere('role.id != :id', { id: excludeId });
 
@@ -90,9 +90,9 @@ export class RolesService extends BaseService<Role> {
   async createRole(createRoleDto: CreateRoleDto): Promise<Role> {
     const { name, description, permissions } = createRoleDto;
 
-    const lowercaseName = name.toLowerCase();
+    const upperCaseName = name.toUpperCase();
 
-    await this.checkRoleExists(lowercaseName);
+    await this.checkRoleExists(upperCaseName);
     await this.validatePermission(permissions);
 
     const permissionEntities = await this.permissionRepository.find({
@@ -102,7 +102,7 @@ export class RolesService extends BaseService<Role> {
     });
 
     let role = this.roleRepository.create({
-      name,
+      name: upperCaseName,
       description,
       permissions: permissionEntities,
     });
@@ -152,9 +152,9 @@ export class RolesService extends BaseService<Role> {
     const role = await this.getRoleById(id);
 
     if (name) {
-      const lowercaseName = name.toLowerCase();
-      await this.checkRoleExists(lowercaseName, id);
-      role.name = lowercaseName;
+      const upperCaseName = name.toUpperCase();
+      await this.checkRoleExists(upperCaseName, id);
+      role.name = upperCaseName;
     }
 
     if (description !== undefined) role.description = description;
