@@ -18,10 +18,6 @@ export class CreateRoleDto {
   description?: string;
 
   @IsOptional()
-  @IsBoolean({ message: ErrorMessages.ROLE_IS_ACTIVE_BOOLEAN.message })
-  isActive?: boolean;
-
-  @IsOptional()
   @IsArray({ message: ErrorMessages.PERMISSION_ID_ARRAY.message })
   @Type(() => String)
   permissions?: string[];

@@ -7,6 +7,7 @@ import {
   IsIn,
   IsDateString,
   IsEmail,
+  IsUUID,
 } from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 

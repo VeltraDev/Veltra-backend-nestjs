@@ -9,10 +9,7 @@ export class RoleSecureResponseDto {
 
   @Expose()
   description: string;
-
-  @Expose()
-  isActive: string;
-
+  
   @Expose()
   createdAt: string;
 }

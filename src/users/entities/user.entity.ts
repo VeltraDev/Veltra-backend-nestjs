@@ -6,6 +6,7 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  JoinColumn,
 } from 'typeorm';
 import { EntityBase } from '../../base/entities/base.entity';
 import { Exclude } from 'class-transformer';

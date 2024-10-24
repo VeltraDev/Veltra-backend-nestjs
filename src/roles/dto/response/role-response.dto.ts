@@ -12,9 +12,6 @@ export class RoleResponseDto {
   description: string;
 
   @Expose()
-  isActive: string;
-
-  @Expose()
   createdAt: string;
 
   @Expose()

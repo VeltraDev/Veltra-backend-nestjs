@@ -57,14 +57,12 @@ export class DatabasesService implements OnModuleInit {
       this.roleRepository.create({
         name: ADMIN_ROLE,
         description: 'Admin toàn quyền sử dụng hệ thống',
-        isActive: true,
         permissions: adminPermissions,
         ...commonTimestamps(),
       }),
       this.roleRepository.create({
         name: USER_ROLE,
         description: 'Người dùng đăng nhập với quyền hạn cơ bản',
-        isActive: true,
         permissions: userPermissions,
         ...commonTimestamps(),
       }),
@@ -96,6 +94,24 @@ export class DatabasesService implements OnModuleInit {
         lastName: 'Phú',
         email: '2251120446@ut.edu.vn',
         role: userRole,
+      },
+      {
+        firstName: 'Lê Trần Hoàng',
+        lastName: 'Kiên',
+        email: 'thuyy566@gmail.com',
+        role: adminRole,
+      },
+      {
+        firstName: 'Trần Nguyễn Minh',
+        lastName: 'Quân',
+        email: 'tranquanmikaz@gmail.com',
+        role: adminRole,
+      },
+      {
+        firstName: 'Lê Phạm Thanh',
+        lastName: 'Duy',
+        email: 'tdmg1809@gmail.com',
+        role: adminRole,
       },
     ];
 

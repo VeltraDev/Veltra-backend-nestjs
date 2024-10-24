@@ -21,6 +21,7 @@ import { UpdateUserAdminDto } from './dto/request/update-user-admin.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { PaginatedUsersDto } from './dto/response/paginate-user-response.dto';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
+import { UserSecureResponseDto } from './dto/response/user-secure-response.dto';
 
 @Controller('users')
 export class UsersController {
@@ -36,9 +37,13 @@ export class UsersController {
       user,
       updateProfilePasswordDto,
     );
-    return plainToClass(UserResponseDto, userInfo, {
-      excludeExtraneousValues: true,
-    });
+    return plainToClass(
+      user.role.name === 'ADMIN' ? UserResponseDto : UserSecureResponseDto,
+      userInfo,
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 
   @MessageResponse('Cập nhật thông tin người dùng thành công')
@@ -51,18 +56,26 @@ export class UsersController {
       user,
       updateProfileInformationDto,
     );
-    return plainToClass(UserResponseDto, userInfo, {
-      excludeExtraneousValues: true,
-    });
+    return plainToClass(
+      user.role.name === 'ADMIN' ? UserResponseDto : UserSecureResponseDto,
+      userInfo,
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 
   @MessageResponse('Lấy thông tin người dùng thành công')
   @Get(':id')
   async getUserById(@AuthUser() user: UsersInterface, @Param('id') id: string) {
     const userInfo = await this.usersService.getUserById(id);
-    return plainToClass(UserResponseDto, userInfo, {
-      excludeExtraneousValues: true,
-    });
+    return plainToClass(
+      user.role.name === 'ADMIN' ? UserResponseDto : UserSecureResponseDto,
+      userInfo,
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 
   @MessageResponse(
@@ -78,9 +91,15 @@ export class UsersController {
         page: paginatedUsers.page,
         limit: paginatedUsers.limit,
         results: paginatedUsers.results.map((user) =>
-          plainToClass(UserResponseDto, user, {
-            excludeExtraneousValues: true,
-          }),
+          plainToClass(
+            user.role.name === 'ADMIN'
+              ? UserResponseDto
+              : UserSecureResponseDto,
+            user,
+            {
+              excludeExtraneousValues: true,
+            },
+          ),
         ),
       });
     } catch (error) {
@@ -99,9 +118,13 @@ export class UsersController {
       id,
       updateUserAdminDto,
     );
-    return plainToClass(UserResponseDto, userInfo, {
-      excludeExtraneousValues: true,
-    });
+    return plainToClass(
+      user.role.name === 'ADMIN' ? UserResponseDto : UserSecureResponseDto,
+      userInfo,
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 
   @MessageResponse('Xóa tài khoản người dùng thành công')

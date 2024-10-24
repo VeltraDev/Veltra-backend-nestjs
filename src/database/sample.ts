@@ -276,6 +276,10 @@ export const INIT_USER_LOGIN_PERMISSIONS = [
   PERMISSIONS.USERS.find(
     (p) => p.name === 'Cập nhật mật khẩu hồ sơ người dùng',
   ),
+  PERMISSIONS.USERS.find((p) => p.name === 'Lấy thông tin người dùng theo ID'),
+  PERMISSIONS.USERS.find(
+    (p) => p.name === 'Lấy danh sách người dùng với phân trang, lọc và sắp xếp',
+  ),
   PERMISSIONS.CONVERSATIONS.find((p) => p.name === 'Tạo mới cuộc trò chuyện'),
   PERMISSIONS.CONVERSATIONS.find(
     (p) => p.name === 'Lấy một cuộc trò chuyện theo ID',

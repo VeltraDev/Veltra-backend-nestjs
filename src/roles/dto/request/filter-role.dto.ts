@@ -46,19 +46,6 @@ export class FilterRolesDto {
   description?: string;
 
   @IsOptional()
-  @IsBoolean({ message: ErrorMessages.ROLE_IS_ACTIVE_BOOLEAN.message })
-  @Transform(({ value }) => {
-    if (value === 'true' || value === '1') {
-      return true;
-    }
-    if (value === 'false' || value === '0') {
-      return false;
-    }
-    return value;
-  })
-  isActive?: boolean;
-
-  @IsOptional()
   @IsDateString({}, { message: ErrorMessages.INVALID_DATE.message })
   createdAt?: string;
 }

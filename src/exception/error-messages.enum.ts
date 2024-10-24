@@ -5,10 +5,6 @@ export const ErrorMessages = {
     code: 1003,
     message: 'Bạn không có quyền để truy cập endpoint này',
   },
-  NOT_DISABLE_ROLE: {
-    code: 1002,
-    message: 'Không thể vô hiệu hóa vai trò do lỗi hệ thống',
-  },
 
   // Field Validations (1500 - 1999)
   // -- Email Validations (1500 - 1549)
@@ -230,6 +226,11 @@ export const ErrorMessages = {
   ROLEID_NOT_UUID_4: {
     code: 4507,
     message: 'ID vai trò không hợp lệ, phải là UUID phiên bản 4',
+  },
+  NOT_DELETE_USER_ADMIN_ROLE: {
+    code: 4508,
+    message:
+      'Không thể xóa vai trò USER hoặc ADMIN vì đây là 2 vai trò cơ bản của hệ thống',
   },
 
   // Conversation Errors (5000 - 5499)
