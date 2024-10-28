@@ -404,4 +404,31 @@ export const ErrorMessages = {
     code: 5511,
     message: 'Không thể lấy thông tin tin nhắn, hãy kiểm tra truy vấn của bạn',
   },
+
+  // Message Errors (6000 - 6499)
+  USER_EXISTED_VIDEO_CALL: {
+    code: 6000,
+    message:
+      'Bạn đang trong một cuộc gọi khác. Hãy kết thúc cuộc gọi hiện tại để chuyển sang một cuộc gọi mới',
+  },
+
+  USER_NOT_ONLINE_STATUS: {
+    code: 6001,
+    message: 'Người dùng hiện tại đang không trực tuyến. Vui lòng gọi lại sau',
+  },
+
+  USER_CALL_ANOTHER_PEOPLE: {
+    code: 6002,
+    message: 'Người dùng hiện tại đang bận tham gia cuộc gọi khác',
+  },
+
+  NO_CALL_TO_ANSWER: {
+    code: 6003,
+    message: 'Không có cuộc gọi nào để trả lời',
+  },
+
+  NO_CALL_TO_END: {
+    code: 6004,
+    message: 'Không có cuộc gọi nào để kết thúc',
+  },
 };

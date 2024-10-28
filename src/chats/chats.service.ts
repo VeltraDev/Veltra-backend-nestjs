@@ -20,13 +20,14 @@ export class ChatsService {
     const updateProfileInformationDto: UpdateProfileInformationDto = {
       displayStatus: status,
     };
+
     return await this.userService.updateProfileInfo(
       user,
       updateProfileInformationDto,
     );
   }
 
-  async handleJoinConversation(user: any, conversationId: string) {
+  async handleJoinConversation(user: UsersInterface, conversationId: string) {
     const conversation =
       await this.conversationService.validateUserInConversation(
         conversationId,
@@ -34,12 +35,12 @@ export class ChatsService {
       );
 
     return {
-      conversationId: conversation.id,
+      conversation,
       message: `${user.firstName} ${user.lastName} đã tham gia cuộc trò chuyện`,
     };
   }
 
-  async handleSendMessages(user: any, request: CreateMessageDto) {
+  async handleSendMessages(user: UsersInterface, request: CreateMessageDto) {
     const { conversationId } = request;
 
     const conversation =
