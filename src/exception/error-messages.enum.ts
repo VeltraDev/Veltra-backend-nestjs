@@ -54,6 +54,16 @@ export const ErrorMessages = {
     code: 1559,
     message: 'Token tạo mới mật khẩu phải là chuỗi',
   },
+  MISSING_HEADERS_AUTHORIZATION: {
+    code: 1560,
+    message:
+      'Request truyền lên bắt buộc phải đúng định dạng headers có key là Authorization',
+  },
+  MISSING_HEADERS_AUTHORIZATION_OR_VALUE_BEARER: {
+    code: 1561,
+    message:
+      'Request truyền lên bắt buộc phải đúng định dạng với headers có key là Authorization và value bắt đầu bằng Bearer',
+  },
 
   // -- Name Validations (1600 - 1649)
   FIRST_NAME_REQUIRED: { code: 1600, message: 'Tên là bắt buộc' },
@@ -405,7 +415,7 @@ export const ErrorMessages = {
     message: 'Không thể lấy thông tin tin nhắn, hãy kiểm tra truy vấn của bạn',
   },
 
-  // Message Errors (6000 - 6499)
+  // Video call Errors (6000 - 6499)
   USER_EXISTED_VIDEO_CALL: {
     code: 6000,
     message:
@@ -430,5 +440,89 @@ export const ErrorMessages = {
   NO_CALL_TO_END: {
     code: 6004,
     message: 'Không có cuộc gọi nào để kết thúc',
+  },
+
+  // Post and Reactions Errors (6500 - 6999)
+  POST_NOT_FOUND: {
+    code: 6500,
+    message: 'Không tìm thấy bài viết với id {id}',
+  },
+  POST_NOT_OWNER: {
+    code: 6501,
+    message: 'Bạn không có quyền chỉnh sửa hoặc xóa bài viết này',
+  },
+  FETCH_POSTS_FAILED: {
+    code: 6502,
+    message: 'Lấy danh sách bài viết thất bại',
+  },
+  POST_CONTENT_REQUIRED: {
+    code: 6503,
+    message: 'Nội dung bài viết không được để trống',
+  },
+  POST_CONTENT_STRING: {
+    code: 6504,
+    message: 'Nội dung bài viết phải là chuỗi ký tự',
+  },
+  ATTACHMENT_URL_REQUIRED: {
+    code: 6505,
+    message: 'URL của tệp đính kèm không được để trống',
+  },
+  ATTACHMENT_URL_STRING: {
+    code: 6506,
+    message: 'URL của tệp đính kèm phải là chuỗi ký tự',
+  },
+  ATTACHMENT_TYPE_STRING: {
+    code: 6507,
+    message: 'Loại tệp đính kèm phải là chuỗi ký tự',
+  },
+  ATTACHMENTS_ARRAY: {
+    code: 6508,
+    message: 'Danh sách tệp đính kèm phải là một mảng',
+  },
+
+  REACTION_TYPE_REQUIRED: {
+    code: 6509,
+    message: 'Loại phản ứng không được để trống',
+  },
+  REACTION_TYPE_STRING: {
+    code: 6510,
+    message: 'Loại phản ứng phải là chuỗi ký tự',
+  },
+  REACTION_TYPE_ALREADY_EXISTS: {
+    code: 6511,
+    message: 'Loại phản ứng "{type}" đã tồn tại',
+  },
+  REACTION_TYPE_NOT_FOUND: {
+    code: 6512,
+    message: 'Không tìm thấy loại phản ứng với id {id}',
+  },
+
+  REACTION_TYPE_ID_REQUIRED: {
+    code: 6513,
+    message: 'ID loại phản ứng không được để trống',
+  },
+  REACTION_TYPE_ID_INVALID: {
+    code: 6514,
+    message: 'ID loại phản ứng không hợp lệ',
+  },
+  POST_ID_REQUIRED: {
+    code: 6515,
+    message: 'ID bài viết không được để trống',
+  },
+  POST_ID_INVALID: {
+    code: 6516,
+    message: 'ID bài viết không hợp lệ',
+  },
+  REACTION_ALREADY_EXISTS: {
+    code: 6517,
+    message: 'Bạn đã phản ứng với bài viết này',
+  },
+  REACTION_RECORD_NOT_FOUND: {
+    code: 6518,
+    message: 'Không tìm thấy phản ứng với id {id}',
+  },
+  REACTION_NOT_OWNER: {
+    code: 6519,
+    message: 'Bạn không có quyền xóa phản ứng này',
   },
 };

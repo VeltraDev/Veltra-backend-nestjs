@@ -15,14 +15,20 @@ export class AuthenticatedSocketIoAdapter extends IoAdapter {
     const server = super.createIOServer(port, options);
     server.use((socket, next) => {
       const authHeader = socket.handshake.headers.authorization;
-      if (!authHeader) {
-        return next(new Error(ErrorMessages.TOKEN_REQUIRED.message));
-      }
+      if (!authHeader)
+        return next(
+          new Error(ErrorMessages.MISSING_HEADERS_AUTHORIZATION.message),
+        );
 
-      const token = authHeader.split(' ')[1];
-      if (!token) {
-        return next(new Error(ErrorMessages.TOKEN_REQUIRED.message));
-      }
+      const [scheme, token] = authHeader.split(' ');
+      if (scheme !== 'Bearer')
+        return next(
+          new Error(
+            ErrorMessages.MISSING_HEADERS_AUTHORIZATION_OR_VALUE_BEARER.message,
+          ),
+        );
+
+      if (!token) return next(new Error(ErrorMessages.TOKEN_REQUIRED.message));
 
       try {
         const user = this.jwtService.verify(token);

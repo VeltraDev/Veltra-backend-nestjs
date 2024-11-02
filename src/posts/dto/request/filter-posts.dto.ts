@@ -9,22 +9,22 @@ import {
 } from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
-export class FilterPermissionsDto {
+export class FilterPostsDto {
   @IsOptional()
-  @IsInt()
+  @IsInt({ message: ErrorMessages.PAGE_NUMBER_MIN.message })
   @Transform(({ value }) => parseInt(value, 10))
   @Min(1, { message: ErrorMessages.PAGE_NUMBER_MIN.message })
   page?: number;
 
   @IsOptional()
-  @IsInt()
+  @IsInt({ message: ErrorMessages.LIMIT_RECORDS_MIN.message })
   @Transform(({ value }) => parseInt(value, 10))
   @Min(1, { message: ErrorMessages.LIMIT_RECORDS_MIN.message })
   limit?: number;
 
   @IsOptional()
   @IsString({ message: ErrorMessages.SORT_BY_STRING.message })
-  @IsIn(['name', 'apiPath', 'method', 'module', 'createdAt'], {
+  @IsIn(['content', 'createdAt'], {
     message: ErrorMessages.SORT_BY_INVALID.message,
   })
   sortBy?: string;
@@ -37,20 +37,8 @@ export class FilterPermissionsDto {
   order?: string;
 
   @IsOptional()
-  @IsString({ message: ErrorMessages.PERMISSION_NAME_STRING.message })
-  name?: string;
-
-  @IsOptional()
-  @IsString({ message: ErrorMessages.PERMISSION_API_PATH_STRING.message })
-  apiPath?: string;
-
-  @IsOptional()
-  @IsString({ message: ErrorMessages.PERMISSION_METHOD_STRING.message })
-  method?: string;
-
-  @IsOptional()
-  @IsString({ message: ErrorMessages.PERMISSION_MODULE_STRING.message })
-  module?: string;
+  @IsString({ message: ErrorMessages.POST_CONTENT_STRING.message })
+  content?: string;
 
   @IsOptional()
   @IsDateString({}, { message: ErrorMessages.INVALID_DATE.message })

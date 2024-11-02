@@ -14,6 +14,9 @@ import { MessagesModule } from './messages/messages.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { S3FilesModule } from './S3-files/S3-files.module';
 import { ChatsModule } from './chats/chats.module';
+import { PostsModule } from './posts/posts.module';
+import { PostReactionRecordsModule } from './post-reaction-records/post-reaction-records.module';
+import { PostReactionTypesModule } from './post-reaction-types/post-reaction-types.module';
 
 @Module({
   imports: [
@@ -48,6 +51,9 @@ import { ChatsModule } from './chats/chats.module';
     ConversationsModule,
     S3FilesModule,
     ChatsModule,
+    PostsModule,
+    PostReactionRecordsModule,
+    PostReactionTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

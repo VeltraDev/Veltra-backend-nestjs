@@ -6,13 +6,14 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
-  JoinColumn,
 } from 'typeorm';
 import { EntityBase } from '../../base/entities/base.entity';
 import { Exclude } from 'class-transformer';
 import { Role } from 'src/roles/entities/role.entity';
 import { Message } from 'src/messages/entities/message.entity';
 import { Conversation } from 'src/conversations/entities/conversation.entity';
+import { Post } from 'src/posts/entities/post.entity';
+import { PostReactionRecord } from 'src/post-reaction-records/entities/post-reaction-record.entity';
 
 @Entity()
 export class User extends EntityBase {
@@ -69,4 +70,10 @@ export class User extends EntityBase {
     inverseJoinColumn: { name: 'conversationId', referencedColumnName: 'id' },
   })
   conversations: Conversation[];
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
+
+  @OneToMany(() => PostReactionRecord, (reactionRecord) => reactionRecord.user)
+  postReactions: PostReactionRecord[];
 }
