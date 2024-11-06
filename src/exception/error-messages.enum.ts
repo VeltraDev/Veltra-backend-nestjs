@@ -361,7 +361,17 @@ export const ErrorMessages = {
   CONVERSATION_ADMIN_CANNOT_REMOVE_SELF: {
     code: 5027,
     message:
-      'Admin không thể tự xóa chính mình khỏi nhóm. Vui lòng chuyển quyền admin cho thành viên khác trước.',
+      'Admin không thể tự xóa chính mình khỏi nhóm. Vui lòng chuyển quyền admin cho thành viên khác trước',
+  },
+  CONVERSATION_1vs1_ALREADY_EXISTS: {
+    code: 5028,
+    message:
+      'Bạn đã có cuộc trò chuyện riêng tư với người dùng này. Không thể tạo mới cuộc trò chuyện',
+  },
+  BODY_NAME_PICTURE_FOR_GROUP: {
+    code: 5029,
+    message:
+      'Đây là cuộc trò chuyện riêng tư 1-1, ảnh đại diện và tên cuộc trò chuyện sẽ được lấy theo thông tin người đối diện',
   },
 
   // Message Errors (5500 - 5999)

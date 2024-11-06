@@ -1,4 +1,4 @@
-import { IsArray, ArrayMinSize, IsUUID } from 'class-validator';
+import { IsArray, ArrayMinSize, IsUUID, IsOptional, IsString } from 'class-validator';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class CreateConversationDto {
@@ -11,4 +11,12 @@ export class CreateConversationDto {
     message: ErrorMessages.CONVERSATION_USERS_UUID.message,
   })
   users: string[];
+
+  @IsOptional()
+  @IsString({ message: ErrorMessages.CONVERSATION_NAME_STRING.message })
+  name?: string;
+
+  @IsOptional()
+  @IsString({ message: ErrorMessages.CONVERSATION_PICTURE_STRING.message })
+  picture?: string;
 }

@@ -195,11 +195,28 @@ export class ConversationsService extends BaseService<Conversation> {
     }
   }
 
+  async find1vs1Conversation(
+    userId1: string,
+    userId2: string,
+  ): Promise<Conversation | undefined> {
+    const conversations = await this.conversationRepository.find({
+      where: {
+        isGroup: false,
+      },
+      relations: ['users'],
+    });
+
+    return conversations.find((conversation) => {
+      const userIds = conversation.users.map((user) => user.id);
+      return userIds.includes(userId1) && userIds.includes(userId2);
+    });
+  }
+
   async createConversation(
     user: UsersInterface,
     createConversationDto: CreateConversationDto,
   ): Promise<Conversation> {
-    const { users } = createConversationDto;
+    const { users, name, picture } = createConversationDto;
 
     if (users.includes(user.id)) {
       throw new BadRequestException(
@@ -207,13 +224,32 @@ export class ConversationsService extends BaseService<Conversation> {
       );
     }
 
+    if (users.length === 1) {
+      const existingConversation = await this.find1vs1Conversation(
+        user.id,
+        users[0],
+      );
+
+      if (existingConversation) {
+        throw new BadRequestException(
+          ErrorMessages.CONVERSATION_1vs1_ALREADY_EXISTS.message,
+        );
+      }
+
+      if (name || picture) {
+        throw new BadRequestException(
+          ErrorMessages.BODY_NAME_PICTURE_FOR_GROUP.message,
+        );
+      }
+    }
+
     users.push(user.id);
 
     const userEntities = await this.validateUsersExist(users);
 
     const isGroup = users.length > 2;
-    let conversationName = 'New Conversation';
-    let conversationPicture = null;
+    let conversationName = name || 'New Conversation';
+    let conversationPicture = picture || null;
 
     if (!isGroup && users.length === 2) {
       const otherUser = userEntities.find((u) => u.id !== user.id);
