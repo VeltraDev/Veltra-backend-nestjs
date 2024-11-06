@@ -8,7 +8,7 @@ import {
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 export class CreateMessageDto {
-  @IsNotEmpty({ message: ErrorMessages.MESSAGE_CONTENT_REQUIRED.message })
+  @IsOptional()
   @IsString({ message: ErrorMessages.MESSAGE_CONTENT_STRING.message })
   content: string;
 

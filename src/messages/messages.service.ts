@@ -12,6 +12,9 @@ import { User } from 'src/users/entities/user.entity';
 import { CreateMessageDto } from './dto/request/create-message.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { BaseService } from 'src/base/base.service';
+import { MessageForward } from './entities/message-forward.entity';
+import { ForwardMessageDto } from './dto/request/forward-message.dto';
+import { Conversation } from 'src/conversations/entities/conversation.entity';
 
 @Injectable()
 export class MessagesService extends BaseService<Message> {
@@ -21,8 +24,59 @@ export class MessagesService extends BaseService<Message> {
     private readonly conversationService: ConversationsService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(MessageForward)
+    private messageForwardRepository: Repository<MessageForward>,
   ) {
     super(messageRepository);
+  }
+
+  async forwardMessage(forwardDto: ForwardMessageDto, userId: string) {
+    const { originalMessageId, targetConversationId } = forwardDto;
+
+    const originalMessage = await this.findMessageById(
+      originalMessageId,
+      userId,
+    );
+
+    const targetConversation =
+      await this.conversationService.findConversationById(
+        targetConversationId,
+        ['users'],
+      );
+
+    const isInTargetConversation = targetConversation.users.some(
+      (user) => user.id === userId,
+    );
+    if (!isInTargetConversation) {
+      throw new ForbiddenException(
+        ErrorMessages.CONVERSATION_NO_ACCESS.message,
+      );
+    }
+
+    const messageForward = this.messageForwardRepository.create({
+      forwardedBy: { id: userId } as User,
+      originalMessage: { id: originalMessageId } as Message,
+      targetConversation: { id: targetConversationId } as Conversation,
+    });
+    await this.messageForwardRepository.save(messageForward);
+
+    const forwardedMessageContent = {
+      originalSender: {
+        senderId: originalMessage.sender.id,
+        fullName: `${originalMessage.sender.firstName} ${originalMessage.sender.lastName}`,
+      },
+      originalContent: originalMessage.content || null,
+    };
+
+    const newMessageDto: CreateMessageDto = {
+      conversationId: targetConversationId,
+      content: JSON.stringify(forwardedMessageContent),
+      files: originalMessage.files || null,
+    };
+
+    const newMessage = await this.createMessage(newMessageDto, userId);
+
+    return { messageForward, newMessage };
   }
 
   async createMessage(
@@ -30,6 +84,12 @@ export class MessagesService extends BaseService<Message> {
     senderId: string,
   ): Promise<Message> {
     const { content, conversationId, files } = createMessageDto;
+
+    if (!content && (!files || files.length === 0)) {
+      throw new BadRequestException(
+        ErrorMessages.AT_LEAST_CONTENT_OR_FILES.message,
+      );
+    }
 
     const conversation = await this.conversationService.getConversationById(
       conversationId,
@@ -41,7 +101,7 @@ export class MessagesService extends BaseService<Message> {
     });
 
     if (!sender || !conversation.users.some((user) => user.id === senderId)) {
-      throw new BadRequestException(
+      throw new ForbiddenException(
         ErrorMessages.MESSAGE_SENDER_NOT_IN_CONVERSATION.message.replace(
           '{senderId}',
           senderId,
@@ -53,7 +113,7 @@ export class MessagesService extends BaseService<Message> {
       content,
       sender,
       conversation,
-      files: files || [],
+      files: files || null,
     });
 
     return await this.messageRepository.save(newMessage);
@@ -74,12 +134,31 @@ export class MessagesService extends BaseService<Message> {
       );
     }
 
+    if (
+      !message.conversation.users ||
+      !Array.isArray(message.conversation.users)
+    ) {
+      message.conversation =
+        await this.conversationService.findConversationById(
+          message.conversation.id,
+          ['users'],
+        );
+
+      if (
+        !message.conversation.users ||
+        !Array.isArray(message.conversation.users)
+      ) {
+        throw new NotFoundException(
+          ErrorMessages.DATA_CONVERSATION_MISSING_OR_INVALID.message,
+        );
+      }
+    }
+
     const isUserInConversation = message.conversation.users.some(
       (user) => user.id === userId,
     );
-    if (!isUserInConversation) {
+    if (!isUserInConversation)
       throw new ForbiddenException(ErrorMessages.MESSAGE_NO_ACCESS.message);
-    }
 
     return message;
   }

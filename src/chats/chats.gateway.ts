@@ -17,6 +17,7 @@ import { UserSecureResponseDto } from 'src/users/dto/response/user-secure-respon
 import { plainToClass } from 'class-transformer';
 import { UsersService } from 'src/users/users.service';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
+import { ForwardMessageDto } from 'src/messages/dto/request/forward-message.dto';
 
 @WebSocketGateway(8081, {
   cors: {
@@ -174,6 +175,22 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(conversationId).emit('receiveMessage', messageResponse);
 
       client.emit('messageSent', messageResponse);
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('forwardMessage')
+  async forwardMessage(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() forwardDto: ForwardMessageDto,
+  ) {
+    try {
+      const { conversationId, messageResponse } = await this.chatsService.handleForwardMessage(client.user, forwardDto);
+
+      this.server.to(conversationId).emit('receiveForwardMessage', messageResponse);
+
+      client.emit('messageForwarded', messageResponse);
     } catch (error) {
       client.emit('error', { message: error.message });
     }

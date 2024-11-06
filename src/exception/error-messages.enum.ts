@@ -373,6 +373,11 @@ export const ErrorMessages = {
     message:
       'Đây là cuộc trò chuyện riêng tư 1-1, ảnh đại diện và tên cuộc trò chuyện sẽ được lấy theo thông tin người đối diện',
   },
+  DATA_CONVERSATION_MISSING_OR_INVALID: {
+    code: 5030,
+    message:
+      'Dữ liệu cuộc hội thoại không hợp lệ do danh sách người dùng bị thiếu hoặc không được tải đúng cách',
+  },
 
   // Message Errors (5500 - 5999)
   MESSAGE_CONTENT_REQUIRED: {
@@ -401,7 +406,8 @@ export const ErrorMessages = {
   },
   MESSAGE_FILES_ARRAY: {
     code: 5506,
-    message: 'Files phải là một mảng đối tượng',
+    message:
+      'Files phải là một mảng đối tượng có thông tin về URL và kiểu định dạng files',
   },
   MESSAGE_SENDER_NOT_IN_CONVERSATION: {
     code: 5507,
@@ -423,6 +429,11 @@ export const ErrorMessages = {
   FETCH_MESSAGES_FAILED: {
     code: 5511,
     message: 'Không thể lấy thông tin tin nhắn, hãy kiểm tra truy vấn của bạn',
+  },
+  AT_LEAST_CONTENT_OR_FILES: {
+    code: 5512,
+    message:
+      'Không được để tin nhắn bị trống, bạn ít nhất phải truyền lên nội dung tin nhắn hoặc files',
   },
 
   // Video call Errors (6000 - 6499)

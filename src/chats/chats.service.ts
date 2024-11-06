@@ -7,6 +7,7 @@ import { plainToClass } from 'class-transformer';
 import { MessageResponseDto } from 'src/messages/dto/response/message-response.dto';
 import { UsersInterface } from 'src/users/users.interface';
 import { UpdateProfileInformationDto } from 'src/users/dto/request/update-profile.dto';
+import { ForwardMessageDto } from 'src/messages/dto/request/forward-message.dto';
 
 @Injectable()
 export class ChatsService {
@@ -59,5 +60,19 @@ export class ChatsService {
     });
 
     return { conversationId: conversation.id, messageResponse };
+  }
+
+  async handleForwardMessage(
+    user: UsersInterface,
+    forwardDto: ForwardMessageDto,
+  ): Promise<{ conversationId: string; messageResponse: MessageResponseDto }> {
+    const { messageForward, newMessage } =
+      await this.messagesService.forwardMessage(forwardDto, user.id);
+
+    const messageResponse = plainToClass(MessageResponseDto, newMessage, {
+      excludeExtraneousValues: true,
+    });
+
+    return { conversationId: newMessage.conversation.id, messageResponse };
   }
 }
