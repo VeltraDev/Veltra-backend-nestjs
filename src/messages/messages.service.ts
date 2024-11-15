@@ -166,7 +166,7 @@ export class MessagesService extends BaseService<Message> {
     return await this.messageRepository.find({
       where: { conversation: { id: conversationId } },
       relations: ['sender', 'forwardedMessage', 'forwardedMessage.sender'],
-      order: { createdAt: 'ASC' },
+      order: { createdAt: 'DESC' },
     });
   }
 }

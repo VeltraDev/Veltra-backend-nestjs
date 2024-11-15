@@ -28,7 +28,7 @@ export class Conversation extends EntityBase {
   messages: Message[];
 
   @ManyToMany(() => User, (user) => user.conversations)
-  users: User[];  
+  users: User[];
 
   @ManyToOne(() => User, { nullable: true, eager: true })
   admin: User;

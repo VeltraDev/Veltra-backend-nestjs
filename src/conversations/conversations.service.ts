@@ -87,7 +87,7 @@ export class ConversationsService extends BaseService<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
 
     const sortedMessages = conversation.messages.sort((a, b) => {
-      return a.createdAt.getTime() - b.createdAt.getTime();
+      return b.createdAt.getTime() - a.createdAt.getTime();
     });
 
     return {
@@ -142,6 +142,16 @@ export class ConversationsService extends BaseService<Conversation> {
         };
       }),
     );
+
+    conversationsWithLatestMessage.sort((a, b) => {
+      const dateA = a.latestMessage
+        ? new Date(a.latestMessage.createdAt).getTime()
+        : 0;
+      const dateB = b.latestMessage
+        ? new Date(b.latestMessage.createdAt).getTime()
+        : 0;
+      return dateB - dateA;
+    });
 
     return {
       total: paginatedConversations.total,
