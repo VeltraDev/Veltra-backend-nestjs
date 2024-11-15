@@ -12,7 +12,6 @@ import { User } from 'src/users/entities/user.entity';
 import { CreateMessageDto } from './dto/request/create-message.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { BaseService } from 'src/base/base.service';
-import { MessageForward } from './entities/message-forward.entity';
 import { ForwardMessageDto } from './dto/request/forward-message.dto';
 import { Conversation } from 'src/conversations/entities/conversation.entity';
 
@@ -24,8 +23,6 @@ export class MessagesService extends BaseService<Message> {
     private readonly conversationService: ConversationsService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(MessageForward)
-    private messageForwardRepository: Repository<MessageForward>,
   ) {
     super(messageRepository);
   }
@@ -53,30 +50,19 @@ export class MessagesService extends BaseService<Message> {
       );
     }
 
-    const messageForward = this.messageForwardRepository.create({
-      forwardedBy: { id: userId } as User,
-      originalMessage: { id: originalMessageId } as Message,
-      targetConversation: { id: targetConversationId } as Conversation,
+    const sender = await this.userRepository.findOne({ where: { id: userId } });
+
+    const newMessage = this.messageRepository.create({
+      content: originalMessage.content,
+      files: originalMessage.files,
+      sender,
+      conversation: targetConversation,
+      forwardedMessage: originalMessage,
     });
-    await this.messageForwardRepository.save(messageForward);
 
-    const forwardedMessageContent = {
-      originalSender: {
-        senderId: originalMessage.sender.id,
-        fullName: `${originalMessage.sender.firstName} ${originalMessage.sender.lastName}`,
-      },
-      originalContent: originalMessage.content || null,
-    };
+    await this.messageRepository.save(newMessage);
 
-    const newMessageDto: CreateMessageDto = {
-      conversationId: targetConversationId,
-      content: JSON.stringify(forwardedMessageContent),
-      files: originalMessage.files || null,
-    };
-
-    const newMessage = await this.createMessage(newMessageDto, userId);
-
-    return { messageForward, newMessage };
+    return newMessage;
   }
 
   async createMessage(
@@ -179,7 +165,7 @@ export class MessagesService extends BaseService<Message> {
   ): Promise<Message[]> {
     return await this.messageRepository.find({
       where: { conversation: { id: conversationId } },
-      relations: ['sender'],
+      relations: ['sender', 'forwardedMessage', 'forwardedMessage.sender'],
       order: { createdAt: 'ASC' },
     });
   }

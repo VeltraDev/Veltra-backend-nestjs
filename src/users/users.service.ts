@@ -114,7 +114,11 @@ export class UsersService extends BaseService<User> {
     await this.userRepository.save(user);
   }
 
-  async getAllUsers(query: FilterUsersDto) {
+  async getAllUsers(): Promise<User[]> {
+    return await this.userRepository.find();
+  }
+
+  async getAllUsersWithQuery(query: FilterUsersDto) {
     const validSortFields = [
       'createdAt',
       'email',

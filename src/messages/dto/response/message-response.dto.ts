@@ -9,11 +9,18 @@ export class MessageResponseDto {
   content: string;
 
   @Expose()
-  files: string[];
+  files: { url: string; type?: string }[];
 
   @Expose()
   @Type(() => UserSecureResponseDto)
   sender: UserSecureResponseDto;
+
+  @Expose()
+  conversationId: string;
+
+  @Expose()
+  @Type(() => MessageResponseDto)
+  forwardedMessage?: MessageResponseDto;
 
   @Expose()
   createdAt: Date;

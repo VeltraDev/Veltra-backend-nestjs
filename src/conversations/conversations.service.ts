@@ -17,6 +17,9 @@ import { BaseService } from 'src/base/base.service';
 import { FilterConversationsDto } from './dto/request/filter-conversation.dto';
 import { plainToClass } from 'class-transformer';
 import { MessageResponseDto } from 'src/messages/dto/response/message-response.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ConversationResponseDto } from './dto/response/conversation-response.dto';
+import { UserSecureResponseDto } from 'src/users/dto/response/user-secure-response.dto';
 
 @Injectable()
 export class ConversationsService extends BaseService<Conversation> {
@@ -26,6 +29,7 @@ export class ConversationsService extends BaseService<Conversation> {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     super(conversationRepository);
   }
@@ -268,7 +272,20 @@ export class ConversationsService extends BaseService<Conversation> {
       picture: conversationPicture,
     });
 
-    return await this.conversationRepository.save(newConversation);
+    await this.conversationRepository.save(newConversation);
+
+    const conversationDto = plainToClass(
+      ConversationResponseDto,
+      newConversation,
+    );
+    this.eventEmitter.emit('conversation.created', {
+      conversation: conversationDto,
+      users: userEntities.map((user) =>
+        plainToClass(UserSecureResponseDto, user),
+      ),
+    });
+
+    return newConversation;
   }
 
   async updateGroupInfo(
@@ -284,7 +301,21 @@ export class ConversationsService extends BaseService<Conversation> {
     if (name) conversation.name = name;
     if (picture) conversation.picture = picture;
 
-    return await this.conversationRepository.save(conversation);
+    await this.conversationRepository.save(conversation);
+
+    const updatedConversation = await this.conversationRepository.findOne({
+      where: { id: conversation.id },
+      relations: ['users', 'admin'],
+    });
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    this.eventEmitter.emit('conversation.groupInfoUpdated', {
+      conversation: updatedConversation,
+      user,
+    });
+
+    return updatedConversation;
   }
 
   async updateGroupAdmin(
@@ -315,9 +346,23 @@ export class ConversationsService extends BaseService<Conversation> {
       );
     }
 
+    const oldAdmin = conversation.admin;
     conversation.admin = newAdmin;
 
-    return await this.conversationRepository.save(conversation);
+    await this.conversationRepository.save(conversation);
+
+    const updatedConversation = await this.conversationRepository.findOne({
+      where: { id: conversation.id },
+      relations: ['users', 'admin'],
+    });
+
+    this.eventEmitter.emit('conversation.adminGroupUpdated', {
+      conversation: updatedConversation,
+      oldAdmin,
+      newAdmin,
+    });
+
+    return updatedConversation;
   }
 
   async addUsersToGroup(
@@ -342,6 +387,21 @@ export class ConversationsService extends BaseService<Conversation> {
     if (newUsers.length > 0) {
       conversation.users.push(...newUsers);
       await this.conversationRepository.save(conversation);
+
+      const updatedConversation = await this.conversationRepository.findOne({
+        where: { id: conversation.id },
+        relations: ['users', 'admin'],
+      });
+
+      const adder = await this.userRepository.findOne({
+        where: { id: userId },
+      });
+
+      this.eventEmitter.emit('conversation.userAdded', {
+        conversation: updatedConversation,
+        addedUsers: newUsers,
+        adder,
+      });
     }
 
     if (alreadyInGroup.length > 0) {
@@ -371,13 +431,50 @@ export class ConversationsService extends BaseService<Conversation> {
       );
     }
 
+    const removedUsers = conversation.users.filter((user) =>
+      userIds.includes(user.id),
+    );
+
     conversation.users = conversation.users.filter(
       (user) => !userIds.includes(user.id),
     );
 
     await this.removeConversationIfOnlyOneUser(conversation);
 
-    return await this.conversationRepository.save(conversation);
+    await this.conversationRepository.save(conversation);
+
+    const currentUsers = await this.userRepository.findByIds(
+      conversation.users.map((user) => user.id),
+    );
+
+    const updatedConversation = await this.conversationRepository.findOne({
+      where: { id: conversation.id },
+      relations: ['users', 'admin'],
+    });
+
+    const conversationDto = plainToClass(
+      ConversationResponseDto,
+      updatedConversation,
+    );
+    const currentUsersDto = currentUsers.map((user) =>
+      plainToClass(UserSecureResponseDto, user),
+    );
+    const removedUsersDto = removedUsers.map((user) =>
+      plainToClass(UserSecureResponseDto, user),
+    );
+
+    const remover = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    this.eventEmitter.emit('conversation.userGroupRemoved', {
+      conversation: conversationDto,
+      currentUsers: currentUsersDto,
+      removedUsers: removedUsersDto,
+      remover,
+    });
+
+    return updatedConversation;
   }
 
   async deleteConversation(id: string, adminId: string): Promise<void> {
@@ -385,6 +482,15 @@ export class ConversationsService extends BaseService<Conversation> {
     await this.validateAdmin(conversation, adminId);
 
     await this.conversationRepository.remove(conversation);
+
+    const deleter = await this.userRepository.findOne({
+      where: { id: adminId },
+    });
+
+    this.eventEmitter.emit('conversation.deleted', {
+      conversationId: id,
+      deleter,
+    });
   }
 
   async leaveGroup(conversationId: string, userId: string): Promise<void> {
@@ -407,5 +513,25 @@ export class ConversationsService extends BaseService<Conversation> {
     await this.removeConversationIfOnlyOneUser(conversation);
 
     await this.conversationRepository.save(conversation);
+
+    const updatedConversation = await this.conversationRepository.findOne({
+      where: { id: conversation.id },
+      relations: ['users', 'admin'],
+    });
+
+    const leaver = await this.userRepository.findOne({ where: { id: userId } });
+
+    this.eventEmitter.emit('conversation.userLeft', {
+      conversation: updatedConversation,
+      userId: userId,
+      leaver,
+    });
+  }
+
+  async getUserConversations(userId: string): Promise<Conversation[]> {
+    return this.conversationRepository
+      .createQueryBuilder('conversation')
+      .innerJoin('conversation.users', 'user', 'user.id = :userId', { userId })
+      .getMany();
   }
 }

@@ -8,6 +8,7 @@ import { MessageResponseDto } from 'src/messages/dto/response/message-response.d
 import { UsersInterface } from 'src/users/users.interface';
 import { UpdateProfileInformationDto } from 'src/users/dto/request/update-profile.dto';
 import { ForwardMessageDto } from 'src/messages/dto/request/forward-message.dto';
+import { Conversation } from 'src/conversations/entities/conversation.entity';
 
 @Injectable()
 export class ChatsService {
@@ -66,13 +67,29 @@ export class ChatsService {
     user: UsersInterface,
     forwardDto: ForwardMessageDto,
   ): Promise<{ conversationId: string; messageResponse: MessageResponseDto }> {
-    const { messageForward, newMessage } =
-      await this.messagesService.forwardMessage(forwardDto, user.id);
+    const newMessage = await this.messagesService.forwardMessage(
+      forwardDto,
+      user.id,
+    );
 
     const messageResponse = plainToClass(MessageResponseDto, newMessage, {
       excludeExtraneousValues: true,
     });
 
-    return { conversationId: newMessage.conversation.id, messageResponse };
+    return {
+      conversationId: newMessage.conversation.id,
+      messageResponse: {
+        ...messageResponse,
+        forwardedMessage: newMessage.forwardedMessage
+          ? plainToClass(MessageResponseDto, newMessage.forwardedMessage, {
+              excludeExtraneousValues: true,
+            })
+          : null,
+      },
+    };
+  }
+
+  async getUserConversations(userId: string): Promise<Conversation[]> {
+    return this.conversationService.getUserConversations(userId);
   }
 }

@@ -82,9 +82,9 @@ export class UsersController {
     'Lấy thông tin tất cả người dùng với điều kiện truy vấn thành công',
   )
   @Get()
-  async getAllUsers(@Query() query: FilterUsersDto) {
+  async getAllUsersWithQuery(@Query() query: FilterUsersDto) {
     try {
-      const paginatedUsers = await this.usersService.getAllUsers(query);
+      const paginatedUsers = await this.usersService.getAllUsersWithQuery(query);
 
       return plainToClass(PaginatedUsersDto, {
         total: paginatedUsers.total,

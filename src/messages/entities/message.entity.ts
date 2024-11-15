@@ -19,4 +19,7 @@ export class Message extends EntityBase {
 
   @ManyToOne(() => Conversation, (conversation) => conversation.messages)
   conversation: Conversation;
+
+  @ManyToOne(() => Message, { nullable: true })
+  forwardedMessage: Message;
 }
