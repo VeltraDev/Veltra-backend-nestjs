@@ -8,6 +8,7 @@ import {
 import { EntityBase } from '../../base/entities/base.entity';
 import { User } from 'src/users/entities/user.entity';
 import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-record.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
 
 @Entity()
 export class Post extends EntityBase {
@@ -25,4 +26,7 @@ export class Post extends EntityBase {
 
   @OneToMany(() => PostReactionRecord, (reactionRecord) => reactionRecord.post)
   postReactions: PostReactionRecord[];
+
+  @OneToMany(() => Comment, (comment) => comment.post)
+  comments: Comment[];
 }

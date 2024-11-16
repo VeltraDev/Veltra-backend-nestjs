@@ -90,6 +90,6 @@ export class ChatsService {
   }
 
   async getUserConversations(userId: string): Promise<Conversation[]> {
-    return this.conversationService.getUserConversations(userId);
+    return await this.conversationService.getUserConversations(userId);
   }
 }

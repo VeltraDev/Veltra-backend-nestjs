@@ -551,5 +551,21 @@ export const ErrorMessages = {
     message: 'ID của loại phản ứng cảm xúc trên bài viết phải là UUID hợp lệ',
   },
 
-  
+  // Comment and Reactions Errors (7000 - 7499)
+  COMMENT_CONTENT_REQUIRED: {
+    code: 7000,
+    message: 'Nội dung bình luận không được để trống',
+  },
+  COMMENT_NOT_FOUND: {
+    code: 7001,
+    message: 'Không tìm thấy bình luận với id {id}',
+  },
+  COMMENT_NOT_OWNER: {
+    code: 7002,
+    message: 'Bạn không có quyền chỉnh sửa hoặc xóa bình luận này',
+  },
+  PARENT_INVALID_UUID: {
+    code: 7003,
+    message: 'ID của bình luận gốc phải là UUID hợp lệ',
+  },
 };

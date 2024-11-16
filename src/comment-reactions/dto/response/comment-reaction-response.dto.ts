@@ -1,19 +1,19 @@
 import { Expose, Type } from 'class-transformer';
 import { UserSecureResponseDto } from 'src/users/dto/response/user-secure-response.dto';
 import { ReactionTypeResponseDto } from 'src/reaction-types/dto/response/reaction-type-response.dto';
-import { PostResponseDto } from 'src/posts/dto/response/post-response.dto';
+import { CommentResponseDto } from 'src/comments/dto/response/comment-response.dto';
 
-export class ReactionResponseDto {
+export class CommentReactionResponseDto {
   @Expose()
   id: string;
 
   @Expose()
   @Type(() => UserSecureResponseDto)
-  userReactToPost: UserSecureResponseDto;
+  user: UserSecureResponseDto;
 
   @Expose()
-  @Type(() => PostResponseDto)
-  post: PostResponseDto;
+  @Type(() => CommentResponseDto)
+  comment: CommentResponseDto;
 
   @Expose()
   @Type(() => ReactionTypeResponseDto)

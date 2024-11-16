@@ -35,7 +35,10 @@ export class PostsService extends BaseService<Post> {
 
   async getAllPosts(query: FilterPostsDto) {
     const validSortFields = ['content', 'createdAt'];
-    return this.getAll(query, validSortFields, 'post');
+    return this.getAll(query, validSortFields, 'post', [
+      'user',
+      'postReactions.reactionType',
+    ]);
   }
 
   async findOne(id: string): Promise<Post> {

@@ -559,12 +559,17 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('call-user')
   async handleCallUser(
-    @MessageBody() data: { to: string; offer: RTCSessionDescriptionInit },
+    @MessageBody()
+    data: {
+      to: string;
+      conversationId: string;
+      offer: RTCSessionDescriptionInit;
+    },
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     try {
       const callerId = client.user.id;
-      const recipientId = data.to;
+      const { to, conversationId, offer } = data;
 
       if (this.isUserInCall(callerId)) {
         client.emit('call-error', {
@@ -573,14 +578,14 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      if (!this.isUserOnline(recipientId)) {
+      if (!this.isUserOnline(to)) {
         client.emit('call-error', {
           message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
         });
         return;
       }
 
-      if (this.isUserInCall(recipientId)) {
+      if (this.isUserInCall(to)) {
         client.emit('call-error', {
           message: ErrorMessages.USER_CALL_ANOTHER_PEOPLE.message,
         });
@@ -589,14 +594,16 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const callerInfo = await this.getFullUserInfo(callerId);
 
-      this.activeCalls1To1.set(callerId, recipientId);
-      this.activeCalls1To1.set(recipientId, callerId);
+      this.activeCalls1To1.set(callerId, to);
+      this.activeCalls1To1.set(to, callerId);
 
-      const message = `${callerInfo.firstName} đang gọi cho bạn.`;
-      await this.server.to(recipientId).emit('receive-call', {
+      const message = `${callerInfo.firstName} đang gọi cho bạn trong cuộc trò chuyện ${conversationId}.`;
+
+      this.server.to(to).emit('receive-call', {
         from: callerInfo,
-        offer: data.offer,
-        message: message,
+        conversationId,
+        offer,
+        message,
       });
     } catch (error) {
       client.emit('error', { message: error.message });
@@ -605,14 +612,19 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('answer-call')
   async handleAnswerCall(
-    @MessageBody() data: { to: string; answer: RTCSessionDescriptionInit },
+    @MessageBody()
+    data: {
+      to: string;
+      conversationId: string;
+      answer: RTCSessionDescriptionInit;
+    },
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     try {
       const answererId = client.user.id;
-      const callerId = data.to;
+      const { to, conversationId, answer } = data;
 
-      if (this.activeCalls1To1.get(answererId) !== callerId) {
+      if (this.activeCalls1To1.get(answererId) !== to) {
         client.emit('call-error', {
           message: ErrorMessages.NO_CALL_TO_ANSWER.message,
         });
@@ -621,11 +633,13 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const answererInfo = await this.getFullUserInfo(answererId);
 
-      const message = `${answererInfo.firstName} đã trả lời cuộc gọi của bạn.`;
-      await this.server.to(callerId).emit('call-answered', {
+      const message = `${answererInfo.firstName} đã trả lời cuộc gọi trong cuộc trò chuyện ${conversationId}.`;
+
+      this.server.to(to).emit('call-answered', {
         from: answererInfo,
-        answer: data.answer,
-        message: message,
+        conversationId,
+        answer,
+        message,
       });
     } catch (error) {
       client.emit('error', { message: error.message });
@@ -634,20 +648,23 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('send-ice-candidate')
   async handleSendIceCandidate(
-    @MessageBody() data: { to: string; candidate: RTCIceCandidate },
+    @MessageBody()
+    data: { to: string; conversationId: string; candidate: RTCIceCandidate },
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     try {
       const senderId = client.user.id;
-      const recipientId = data.to;
+      const { to, conversationId, candidate } = data;
 
       const senderInfo = await this.getFullUserInfo(senderId);
 
-      const message = `Đã nhận được ICE candidate từ ${senderInfo.firstName}.`;
-      await this.server.to(recipientId).emit('ice-candidate', {
+      const message = `Đã nhận được ICE candidate từ ${senderInfo.firstName} trong cuộc trò chuyện ${conversationId}.`;
+
+      this.server.to(to).emit('ice-candidate', {
         from: senderInfo,
-        candidate: data.candidate,
-        message: message,
+        conversationId,
+        candidate,
+        message,
       });
     } catch (error) {
       client.emit('error', { message: error.message });
@@ -656,27 +673,30 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('end-call')
   async handleEndCall(
-    @MessageBody() data: { to: string },
+    @MessageBody() data: { to: string; conversationId: string },
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     try {
       const userId = client.user.id;
-      const partnerId = data.to;
+      const { to, conversationId } = data;
 
-      if (this.activeCalls1To1.get(userId) !== partnerId) {
+      if (this.activeCalls1To1.get(userId) !== to) {
         client.emit('call-error', {
           message: ErrorMessages.NO_CALL_TO_END.message,
         });
         return;
       }
 
-      await this.handleCallTermination(userId, 'user-ended-call');
+      this.activeCalls1To1.delete(userId);
+      this.activeCalls1To1.delete(to);
 
-      const message = `Người dùng đã kết thúc cuộc gọi.`;
-      this.server.to(partnerId).emit('end-call', {
+      const message = `Người dùng đã kết thúc cuộc gọi trong cuộc trò chuyện ${conversationId}.`;
+
+      this.server.to(to).emit('end-call', {
         from: userId,
+        conversationId,
         reason: 'user-ended-call',
-        message: message,
+        message,
       });
     } catch (error) {
       client.emit('error', { message: error.message });

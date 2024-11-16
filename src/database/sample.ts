@@ -265,6 +265,77 @@ const PERMISSIONS = {
       'MESSAGES',
     ),
   ],
+  POSTS: [
+    createPermission('Tạo một bài viết mới', '/api/v1/posts', 'POST', 'POSTS'),
+    createPermission(
+      'Lấy một bài viết theo ID',
+      '/api/v1/posts/:id',
+      'GET',
+      'POSTS',
+    ),
+    createPermission(
+      'Lấy tất cả bài viết với điều kiện truy vấn',
+      '/api/v1/posts',
+      'GET',
+      'POSTS',
+    ),
+    createPermission(
+      'Cập nhật một bài viết theo ID',
+      '/api/v1/posts/:id',
+      'PATCH',
+      'POSTS',
+    ),
+    createPermission(
+      'Xóa một bài viết theo ID',
+      '/api/v1/posts/:id',
+      'DELETE',
+      'POSTS',
+    ),
+    createPermission(
+      'Thả phản hồi cảm xúc vào bài viết',
+      '/api/v1/posts/:id/reactions',
+      'POST',
+      'POSTS',
+    ),
+    createPermission(
+      'Xóa phản hồi cảm xúc khỏi bài viết',
+      '/api/v1/posts/:id/reactions',
+      'DELETE',
+      'POSTS',
+    ),
+  ],
+  REACTION_TYPES: [
+    createPermission(
+      'Tạo một loại phản ứng cảm xúc mới',
+      '/api/v1/reaction-types',
+      'POST',
+      'REACTION TYPES',
+    ),
+    createPermission(
+      'Lấy một loại phản ứng cảm xúc theo ID',
+      '/api/v1/reaction-types/:id',
+      'GET',
+      'REACTION TYPES',
+    ),
+    createPermission(
+      'Lấy tất cả phản ứng cảm xúc với điều kiện truy vấn',
+      '/api/v1/reaction-types',
+      'GET',
+      'REACTION TYPES',
+    ),
+    createPermission(
+      'Xóa một loại phản ứng cảm xúc theo ID',
+      '/api/v1/reaction-types/:id',
+      'DELETE',
+      'REACTION TYPES',
+    ),
+    createPermission(
+      'Cập nhật một loại phản ứng cảm xúc theo ID',
+      '/api/v1/reaction-types/:id',
+      'PATCH',
+      'REACTION TYPES',
+    ),
+  ],
 };
 
 export const INIT_USER_LOGIN_PERMISSIONS = [
@@ -309,6 +380,17 @@ export const INIT_USER_LOGIN_PERMISSIONS = [
   PERMISSIONS.MESSAGES.find((p) => p.name === 'Lấy thông tin một tin nhắn'),
   PERMISSIONS.MESSAGES.find((p) => p.name === 'Tạo một tin nhắn mới'),
   PERMISSIONS.FILE.find((p) => p.name === 'Tải file lên AWS S3'),
+  PERMISSIONS.POSTS.find((p) => p.name === 'Tạo một bài viết mới'),
+  PERMISSIONS.POSTS.find(
+    (p) => p.name === 'Lấy tất cả bài viết với điều kiện truy vấn',
+  ),
+  PERMISSIONS.POSTS.find((p) => p.name === 'Cập nhật một bài viết theo ID'),
+  PERMISSIONS.POSTS.find((p) => p.name === 'Xóa một bài viết theo ID'),
+  PERMISSIONS.POSTS.find((p) => p.name === 'Thả phản hồi cảm xúc vào bài viết'),
+  PERMISSIONS.POSTS.find(
+    (p) => p.name === 'Xóa phản hồi cảm xúc khỏi bài viết',
+  ),
+  PERMISSIONS.POSTS.find((p) => p.name === 'Lấy một bài viết theo ID'),
 ];
 
 export const INIT_ADMIN_PERMISSIONS = [
@@ -319,4 +401,6 @@ export const INIT_ADMIN_PERMISSIONS = [
   ...PERMISSIONS.PERMISSIONS,
   ...PERMISSIONS.CONVERSATIONS,
   ...PERMISSIONS.MESSAGES,
+  ...PERMISSIONS.POSTS,
+  ...PERMISSIONS.REACTION_TYPES,
 ];

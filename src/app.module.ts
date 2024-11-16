@@ -17,6 +17,8 @@ import { ChatsModule } from './chats/chats.module';
 import { PostsModule } from './posts/posts.module';
 import { ReactionTypesModule } from './reaction-types/reaction-types.module';
 import { PostReactionsModule } from './post-reactions/post-reactions.module';
+import { CommentsModule } from './comments/comments.module';
+import { CommentReactionsModule } from './comment-reactions/comment-reactions.module';
 
 @Module({
   imports: [
@@ -54,6 +56,8 @@ import { PostReactionsModule } from './post-reactions/post-reactions.module';
     PostsModule,
     ReactionTypesModule,
     PostReactionsModule,
+    CommentsModule,
+    CommentReactionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

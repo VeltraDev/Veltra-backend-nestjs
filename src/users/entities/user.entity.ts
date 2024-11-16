@@ -14,6 +14,8 @@ import { Message } from 'src/messages/entities/message.entity';
 import { Conversation } from 'src/conversations/entities/conversation.entity';
 import { Post } from 'src/posts/entities/post.entity';
 import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-record.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
+import { CommentReactionRecord } from 'src/comment-reactions/entities/comment-reaction-record.entity';
 
 @Entity()
 export class User extends EntityBase {
@@ -76,4 +78,10 @@ export class User extends EntityBase {
 
   @OneToMany(() => PostReactionRecord, (reactionRecord) => reactionRecord.user)
   postReactions: PostReactionRecord[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
+
+  @OneToMany(() => CommentReactionRecord, (reaction) => reaction.user)
+  commentReactions: CommentReactionRecord[];
 }
