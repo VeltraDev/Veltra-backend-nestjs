@@ -28,7 +28,7 @@ export class PostReactionsController {
       ReactionResponseDto,
       {
         id: result.id,
-        userReactToPost: result.user,
+        user: result.user,
         post: result.post,
         reactionType: result.reactionType,
       },

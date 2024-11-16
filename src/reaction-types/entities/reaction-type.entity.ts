@@ -1,5 +1,6 @@
 import { EntityBase } from 'src/base/entities/base.entity';
 import { CommentReactionRecord } from 'src/comment-reactions/entities/comment-reaction-record.entity';
+import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-record.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity('reaction_types')
@@ -12,4 +13,7 @@ export class ReactionType extends EntityBase {
 
   @OneToMany(() => CommentReactionRecord, (reaction) => reaction.reactionType)
   commentReactions: CommentReactionRecord[];
+
+  @OneToMany(() => PostReactionRecord, (reaction) => reaction.reactionType)
+  postReactions: PostReactionRecord[];
 }

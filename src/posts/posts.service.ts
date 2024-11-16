@@ -37,6 +37,7 @@ export class PostsService extends BaseService<Post> {
     const validSortFields = ['content', 'createdAt'];
     return this.getAll(query, validSortFields, 'post', [
       'user',
+      'postReactions.user',
       'postReactions.reactionType',
     ]);
   }

@@ -16,6 +16,8 @@ export class PostReactionRecord extends EntityBase {
   @ManyToOne(() => Post, (post) => post.postReactions, { onDelete: 'CASCADE' })
   post: Post;
 
-  @ManyToOne(() => ReactionType)
+  @ManyToOne(() => ReactionType, (reactionType) => reactionType.postReactions, {
+    eager: true,
+  })
   reactionType: ReactionType;
 }

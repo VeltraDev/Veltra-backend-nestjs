@@ -9,7 +9,7 @@ export class ReactionResponseDto {
 
   @Expose()
   @Type(() => UserSecureResponseDto)
-  userReactToPost: UserSecureResponseDto;
+  user: UserSecureResponseDto;
 
   @Expose()
   @Type(() => PostResponseDto)
