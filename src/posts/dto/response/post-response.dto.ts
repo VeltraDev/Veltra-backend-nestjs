@@ -1,5 +1,6 @@
 import { Expose, Type } from 'class-transformer';
 import { UserSecureResponseDto } from 'src/users/dto/response/user-secure-response.dto';
+import { ReactionResponseDto } from 'src/post-reactions/dto/response/reaction-response.dto';
 
 export class AttachmentResponseDto {
   @Expose()
@@ -26,4 +27,8 @@ export class PostResponseDto {
 
   @Expose()
   createdAt: Date;
+
+  @Expose()
+  @Type(() => ReactionResponseDto)
+  postReactions: ReactionResponseDto[];
 }

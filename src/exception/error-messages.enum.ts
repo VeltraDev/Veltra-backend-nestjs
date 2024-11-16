@@ -503,28 +503,28 @@ export const ErrorMessages = {
 
   REACTION_TYPE_REQUIRED: {
     code: 6509,
-    message: 'Loại phản ứng không được để trống',
+    message: 'Loại phản ứng cảm xúc không được để trống',
   },
   REACTION_TYPE_STRING: {
     code: 6510,
-    message: 'Loại phản ứng phải là chuỗi ký tự',
+    message: 'Loại phản ứng cảm xúc phải là chuỗi ký tự',
   },
   REACTION_TYPE_ALREADY_EXISTS: {
     code: 6511,
-    message: 'Loại phản ứng "{type}" đã tồn tại',
+    message: 'Loại phản ứng cảm xúc {type} đã tồn tại',
   },
   REACTION_TYPE_NOT_FOUND: {
     code: 6512,
-    message: 'Không tìm thấy loại phản ứng với id {id}',
+    message: 'Không tìm thấy loại phản ứng cảm xúc với id {id}',
   },
 
   REACTION_TYPE_ID_REQUIRED: {
     code: 6513,
-    message: 'ID loại phản ứng không được để trống',
+    message: 'ID loại phản ứng cảm xúc không được để trống',
   },
   REACTION_TYPE_ID_INVALID: {
     code: 6514,
-    message: 'ID loại phản ứng không hợp lệ',
+    message: 'ID loại phản ứng cảm xúc không hợp lệ',
   },
   POST_ID_REQUIRED: {
     code: 6515,
@@ -536,14 +536,20 @@ export const ErrorMessages = {
   },
   REACTION_ALREADY_EXISTS: {
     code: 6517,
-    message: 'Bạn đã phản ứng với bài viết này',
+    message: 'Bạn đã phản ứng cảm xúc với bài viết này',
   },
   REACTION_RECORD_NOT_FOUND: {
     code: 6518,
-    message: 'Không tìm thấy phản ứng với id {id}',
+    message: 'Không tìm thấy phản ứng cảm xúc với id {id}',
   },
   REACTION_NOT_OWNER: {
     code: 6519,
-    message: 'Bạn không có quyền xóa phản ứng này',
+    message: 'Bạn không có quyền xóa phản ứng cảm xúc này',
   },
+  POST_REACTION_UUID: {
+    code: 6520,
+    message: 'ID của loại phản ứng cảm xúc trên bài viết phải là UUID hợp lệ',
+  },
+
+  
 };

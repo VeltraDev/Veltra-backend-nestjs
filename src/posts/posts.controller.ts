@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post as HttpPost,
   Body,
   Patch,
   Param,
@@ -43,9 +42,7 @@ export class PostsController {
     });
   }
 
-  @MessageResponse(
-    'Lấy danh sách tất cả bài viết với truy vấn thành công',
-  )
+  @MessageResponse('Lấy danh sách tất cả bài viết với truy vấn thành công')
   @Get()
   async getAllPosts(@Query() query: FilterPostsDto) {
     try {
@@ -77,14 +74,12 @@ export class PostsController {
   }
 
   @MessageResponse('Cập nhật bài viết thành công')
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
-    @Req() req: Request,
+    @AuthUser() user: UsersInterface,
   ) {
-    const user = req.user as any;
     const post = await this.postsService.update(id, updatePostDto, user.id);
 
     return plainToClass(PostResponseDto, post, {
@@ -93,10 +88,8 @@ export class PostsController {
   }
 
   @MessageResponse('Xóa bài viết thành công')
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: Request) {
-    const user = req.user as any;
+  async remove(@Param('id') id: string, @AuthUser() user: UsersInterface) {
     await this.postsService.remove(id, user.id);
   }
 }

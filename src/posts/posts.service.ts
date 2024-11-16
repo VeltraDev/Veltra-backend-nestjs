@@ -11,7 +11,6 @@ import { CreatePostDto } from './dto/request/create-post.dto';
 import { UpdatePostDto } from './dto/request/update-post.dto';
 import { FilterPostsDto } from './dto/request/filter-posts.dto';
 import { BaseService } from 'src/base/base.service';
-import { User } from 'src/users/entities/user.entity';
 import { UsersInterface } from 'src/users/users.interface';
 
 @Injectable()
@@ -42,7 +41,12 @@ export class PostsService extends BaseService<Post> {
   async findOne(id: string): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['user', 'postReactions'],
+      relations: [
+        'user',
+        'postReactions',
+        'postReactions.user',
+        'postReactions.reactionType',
+      ],
     });
     if (!post) {
       throw new NotFoundException(
@@ -59,20 +63,19 @@ export class PostsService extends BaseService<Post> {
   ): Promise<Post> {
     const post = await this.findOne(id);
 
-    if (post.user.id !== userId) {
+    if (post.user.id !== userId)
       throw new BadRequestException(ErrorMessages.POST_NOT_OWNER.message);
-    }
 
     Object.assign(post, updatePostDto);
+
     return this.postRepository.save(post);
   }
 
   async remove(id: string, userId: string): Promise<void> {
     const post = await this.findOne(id);
 
-    if (post.user.id !== userId) {
+    if (post.user.id !== userId)
       throw new BadRequestException(ErrorMessages.POST_NOT_OWNER.message);
-    }
 
     await this.postRepository.remove(post);
   }

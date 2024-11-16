@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 
-export class PostReactionTypeResponseDto {
+export class ReactionTypeResponseDto {
   @Expose()
   id: string;
 
@@ -9,4 +9,8 @@ export class PostReactionTypeResponseDto {
 
   @Expose()
   createdAt: Date;
+
+  @Expose()
+  updatedAt: Date;
 }
+  

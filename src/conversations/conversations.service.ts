@@ -87,7 +87,7 @@ export class ConversationsService extends BaseService<Conversation> {
     const conversation = await this.validateUserInConversation(id, userId);
 
     const sortedMessages = conversation.messages.sort((a, b) => {
-      return b.createdAt.getTime() - a.createdAt.getTime();
+      return a.createdAt.getTime() - b.createdAt.getTime();
     });
 
     return {

@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { EntityBase } from '../../base/entities/base.entity';
 import { User } from 'src/users/entities/user.entity';
-import { PostReactionRecord } from 'src/post-reaction-records/entities/post-reaction-record.entity';
+import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-record.entity';
 
 @Entity()
 export class Post extends EntityBase {

@@ -13,7 +13,7 @@ import { Role } from 'src/roles/entities/role.entity';
 import { Message } from 'src/messages/entities/message.entity';
 import { Conversation } from 'src/conversations/entities/conversation.entity';
 import { Post } from 'src/posts/entities/post.entity';
-import { PostReactionRecord } from 'src/post-reaction-records/entities/post-reaction-record.entity';
+import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-record.entity';
 
 @Entity()
 export class User extends EntityBase {

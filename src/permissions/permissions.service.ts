@@ -61,10 +61,9 @@ export class PermissionsService extends BaseService<Permission> {
   }
 
   async create(createPermissionDto: CreatePermissionDto): Promise<Permission> {
-    const { apiPath, method, module } = createPermissionDto;
+    const { apiPath, method } = createPermissionDto;
 
     await this.checkPermissionExists(apiPath, method);
-    await this.checkModuleNameExists(module);
 
     const permission = this.permissionRepository.create(createPermissionDto);
     return this.permissionRepository.save(permission);
