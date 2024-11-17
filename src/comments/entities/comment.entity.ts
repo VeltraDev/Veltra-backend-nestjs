@@ -9,9 +9,9 @@ import {
   TreeParent,
 } from 'typeorm';
 import { EntityBase } from '../../base/entities/base.entity';
-import { User } from 'src/users/entities/user.entity';
 import { Post } from 'src/posts/entities/post.entity';
 import { CommentReactionRecord } from 'src/comment-reactions/entities/comment-reaction-record.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 @Tree('closure-table')
@@ -22,18 +22,18 @@ export class Comment extends EntityBase {
   @Column({ type: 'mediumtext' })
   content: string;
 
-  @ManyToOne(() => User, (user) => user.comments)
-  user: User;
-
-  @ManyToOne(() => Post, (post) => post.comments, { nullable: true })
-  post: Post;
-
   @TreeParent()
   parent: Comment;
 
   @TreeChildren()
   children: Comment[];
 
+  @ManyToOne(() => User, (user) => user.comments, { eager: true })
+  author: User;
+
+  @ManyToOne(() => Post, (post) => post.comments, { nullable: true })
+  post: Post;
+
   @OneToMany(() => CommentReactionRecord, (reaction) => reaction.comment)
-  commentReactions: CommentReactionRecord[];
+  reactions: CommentReactionRecord[];
 }

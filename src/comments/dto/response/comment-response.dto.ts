@@ -1,6 +1,6 @@
 import { Expose, Type } from 'class-transformer';
-import { CommentReactionResponseDto } from 'src/comment-reactions/dto/response/comment-reaction-response.dto';
 import { UserSecureResponseDto } from 'src/users/dto/response/user-secure-response.dto';
+import { CommentReactionResponseDto } from 'src/comment-reactions/dto/response/comment-reaction-response.dto';
 
 export class CommentResponseDto {
   @Expose()
@@ -11,16 +11,16 @@ export class CommentResponseDto {
 
   @Expose()
   @Type(() => UserSecureResponseDto)
-  user: UserSecureResponseDto;
+  author: UserSecureResponseDto;
 
   @Expose()
   createdAt: Date;
 
   @Expose()
-  @Type(() => CommentResponseDto)
-  children: CommentResponseDto[];
+  @Type(() => CommentReactionResponseDto)
+  reactions: CommentReactionResponseDto[];
 
   @Expose()
-  @Type(() => CommentReactionResponseDto)
-  commentReactions: CommentReactionResponseDto[];
+  @Type(() => CommentResponseDto)
+  children: CommentResponseDto[];
 }

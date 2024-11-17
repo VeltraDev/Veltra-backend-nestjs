@@ -540,7 +540,7 @@ export const ErrorMessages = {
   },
   REACTION_RECORD_NOT_FOUND: {
     code: 6518,
-    message: 'Không tìm thấy phản ứng cảm xúc với id {id}',
+    message: 'Người dùng hiện tại chưa thả cảm xúc vào bài viết có ID {id}',
   },
   REACTION_NOT_OWNER: {
     code: 6519,

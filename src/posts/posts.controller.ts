@@ -1,40 +1,31 @@
 import {
   Controller,
   Get,
-  Body,
+  Post as HttpPost,
   Patch,
-  Param,
   Delete,
-  InternalServerErrorException,
+  Param,
   Query,
-  UseGuards,
-  Req,
-  Post,
+  Body,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { CreatePostDto } from './dto/request/create-post.dto';
 import { UpdatePostDto } from './dto/request/update-post.dto';
+import { FilterPostsDto } from './dto/request/filter-posts.dto';
 import { plainToClass } from 'class-transformer';
 import { PaginatedPostsDto } from './dto/response/paginate-posts-response.dto';
 import { PostResponseDto } from './dto/response/post-response.dto';
-import { FilterPostsDto } from './dto/request/filter-posts.dto';
-import { ErrorMessages } from 'src/exception/error-messages.enum';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { Request } from 'express';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
-import { UsersInterface } from 'src/users/users.interface';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
-  @MessageResponse('Tạo mới bài viết thành công')
-  @Post()
-  async create(
-    @Body() createPostDto: CreatePostDto,
-    @AuthUser() user: UsersInterface,
-  ) {
+  @MessageResponse('Tạo bài viết thành công')
+  @HttpPost()
+  async create(@Body() createPostDto: CreatePostDto, @AuthUser() user: User) {
     const post = await this.postsService.create(createPostDto, user);
 
     return plainToClass(PostResponseDto, post, {
@@ -42,33 +33,31 @@ export class PostsController {
     });
   }
 
-  @MessageResponse('Lấy danh sách tất cả bài viết với truy vấn thành công')
+  @MessageResponse('Lấy danh sách bài viết thành công')
   @Get()
   async getAllPosts(@Query() query: FilterPostsDto) {
-    try {
-      const paginatedPosts = await this.postsService.getAllPosts(query);
+    const paginatedPosts = await this.postsService.getAllPosts(query);
 
-      const results = paginatedPosts.results.map((post) =>
-        plainToClass(PostResponseDto, post, {
-          excludeExtraneousValues: true,
-        }),
-      );
+    const results = paginatedPosts.results.map((post) =>
+      plainToClass(PostResponseDto, post, {
+        excludeExtraneousValues: true,
+      }),
+    );
 
-      return plainToClass(PaginatedPostsDto, {
-        total: paginatedPosts.total,
-        page: paginatedPosts.page,
-        limit: paginatedPosts.limit,
-        results,
-      });
-    } catch (error) {
-      throw new InternalServerErrorException(ErrorMessages.FETCH_POSTS_FAILED);
-    }
+    return plainToClass(PaginatedPostsDto, {
+      total: paginatedPosts.total,
+      page: paginatedPosts.page,
+      limit: paginatedPosts.limit,
+      results,
+    });
   }
 
   @MessageResponse('Lấy thông tin bài viết thành công')
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return plainToClass(PostResponseDto, await this.postsService.findOne(id), {
+    const post = await this.postsService.findOne(id);
+
+    return plainToClass(PostResponseDto, post, {
       excludeExtraneousValues: true,
     });
   }
@@ -78,7 +67,7 @@ export class PostsController {
   async update(
     @Param('id') id: string,
     @Body() updatePostDto: UpdatePostDto,
-    @AuthUser() user: UsersInterface,
+    @AuthUser() user: User,
   ) {
     const post = await this.postsService.update(id, updatePostDto, user.id);
 
@@ -89,7 +78,7 @@ export class PostsController {
 
   @MessageResponse('Xóa bài viết thành công')
   @Delete(':id')
-  async remove(@Param('id') id: string, @AuthUser() user: UsersInterface) {
+  async remove(@Param('id') id: string, @AuthUser() user: User) {
     await this.postsService.remove(id, user.id);
   }
 }

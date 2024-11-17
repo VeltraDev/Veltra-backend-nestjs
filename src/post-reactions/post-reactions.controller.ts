@@ -1,49 +1,43 @@
-import { Controller, Delete, Param, Body, Post } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Param,
+  Body,
+  Post as HttpPost,
+} from '@nestjs/common';
 import { PostReactionsService } from './post-reactions.service';
 import { CreatePostReactionDto } from './dto/request/create-post-reaction.dto';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
-import { UsersInterface } from 'src/users/users.interface';
+import { User } from 'src/users/entities/user.entity';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { plainToClass } from 'class-transformer';
-import { ReactionResponseDto } from './dto/response/reaction-response.dto';
+import { PostReactionResponseDto } from './dto/response/post-reaction-response.dto';
 
 @Controller('posts/:id/reactions')
 export class PostReactionsController {
   constructor(private readonly postReactionsService: PostReactionsService) {}
 
   @MessageResponse('Thả phản hồi cảm xúc vào bài viết thành công')
-  @Post()
+  @HttpPost()
   async reactToPost(
     @Param('id') id: string,
     @Body() createPostReactionDto: CreatePostReactionDto,
-    @AuthUser() user: UsersInterface,
+    @AuthUser() user: User,
   ) {
     const result = await this.postReactionsService.reactToPost(
       id,
       createPostReactionDto.reactionTypeId,
-      user,
+      user.id,
     );
 
-    return plainToClass(
-      ReactionResponseDto,
-      {
-        id: result.id,
-        user: result.user,
-        post: result.post,
-        reactionType: result.reactionType,
-      },
-      {
-        excludeExtraneousValues: true,
-      },
-    );
+    return plainToClass(PostReactionResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @MessageResponse('Xóa phản hồi cảm xúc khỏi bài viết thành công')
   @Delete()
-  async removeReaction(
-    @Param('id') id: string,
-    @AuthUser() user: UsersInterface,
-  ) {
-    return await this.postReactionsService.removeReaction(id, user.id);
+  async removeReaction(@Param('id') id: string, @AuthUser() user: User) {
+    await this.postReactionsService.removeReaction(id, user.id);
   }
 }

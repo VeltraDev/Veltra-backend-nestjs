@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Post } from './entities/post.entity';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
@@ -11,7 +11,7 @@ import { CreatePostDto } from './dto/request/create-post.dto';
 import { UpdatePostDto } from './dto/request/update-post.dto';
 import { FilterPostsDto } from './dto/request/filter-posts.dto';
 import { BaseService } from 'src/base/base.service';
-import { UsersInterface } from 'src/users/users.interface';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class PostsService extends BaseService<Post> {
@@ -22,13 +22,10 @@ export class PostsService extends BaseService<Post> {
     super(postRepository);
   }
 
-  async create(
-    createPostDto: CreatePostDto,
-    user: UsersInterface,
-  ): Promise<Post> {
+  async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
     const post = this.postRepository.create({
       ...createPostDto,
-      user,
+      author: user,
     });
     return this.postRepository.save(post);
   }
@@ -36,9 +33,10 @@ export class PostsService extends BaseService<Post> {
   async getAllPosts(query: FilterPostsDto) {
     const validSortFields = ['content', 'createdAt'];
     return this.getAll(query, validSortFields, 'post', [
-      'user',
-      'postReactions.user',
-      'postReactions.reactionType',
+      'author',
+      'reactions',
+      'reactions.reactedBy',
+      'reactions.reactionType',
     ]);
   }
 
@@ -46,10 +44,16 @@ export class PostsService extends BaseService<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
       relations: [
-        'user',
-        'postReactions',
-        'postReactions.user',
-        'postReactions.reactionType',
+        'author',
+        'reactions',
+        'reactions.reactedBy',
+        'reactions.reactionType',
+        'comments',
+        'comments.author',
+        'comments.reactions',
+        'comments.reactions.reactedBy',
+        'comments.reactions.reactionType',
+        'comments.children',
       ],
     });
     if (!post) {
@@ -67,8 +71,9 @@ export class PostsService extends BaseService<Post> {
   ): Promise<Post> {
     const post = await this.findOne(id);
 
-    if (post.user.id !== userId)
+    if (post.author.id !== userId) {
       throw new BadRequestException(ErrorMessages.POST_NOT_OWNER.message);
+    }
 
     Object.assign(post, updatePostDto);
 
@@ -78,8 +83,9 @@ export class PostsService extends BaseService<Post> {
   async remove(id: string, userId: string): Promise<void> {
     const post = await this.findOne(id);
 
-    if (post.user.id !== userId)
+    if (post.author.id !== userId) {
       throw new BadRequestException(ErrorMessages.POST_NOT_OWNER.message);
+    }
 
     await this.postRepository.remove(post);
   }

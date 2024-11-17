@@ -4,19 +4,19 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Comment } from './entities/comment.entity';
-import { Repository, TreeRepository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateCommentDto } from './dto/request/create-comment.dto';
 import { UpdateCommentDto } from './dto/request/update-comment.dto';
-import { UsersInterface } from 'src/users/users.interface';
 import { Post } from 'src/posts/entities/post.entity';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectRepository(Comment)
-    private readonly commentRepository: TreeRepository<Comment>,
+    private readonly commentRepository: Repository<Comment>,
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
   ) {}
@@ -24,7 +24,7 @@ export class CommentsService {
   async create(
     postId: string,
     createCommentDto: CreateCommentDto,
-    user: UsersInterface,
+    user: User,
   ): Promise<Comment> {
     const post = await this.postRepository.findOne({ where: { id: postId } });
     if (!post) {
@@ -35,8 +35,8 @@ export class CommentsService {
 
     const comment = this.commentRepository.create({
       content: createCommentDto.content,
-      user,
       post,
+      author: user,
     });
 
     if (createCommentDto.parentId) {
@@ -61,10 +61,11 @@ export class CommentsService {
     const comment = await this.commentRepository.findOne({
       where: { id },
       relations: [
-        'user',
+        'author',
         'children',
-        'commentReactions',
-        'commentReactions.user',
+        'reactions',
+        'reactions.reactedBy',
+        'reactions.reactionType',
       ],
     });
     if (!comment) {
@@ -82,7 +83,7 @@ export class CommentsService {
   ): Promise<Comment> {
     const comment = await this.findOne(id);
 
-    if (comment.user.id !== userId) {
+    if (comment.author.id !== userId) {
       throw new BadRequestException(ErrorMessages.COMMENT_NOT_OWNER.message);
     }
 
@@ -94,7 +95,7 @@ export class CommentsService {
   async remove(id: string, userId: string): Promise<void> {
     const comment = await this.findOne(id);
 
-    if (comment.user.id !== userId) {
+    if (comment.author.id !== userId) {
       throw new BadRequestException(ErrorMessages.COMMENT_NOT_OWNER.message);
     }
 
@@ -109,14 +110,17 @@ export class CommentsService {
       );
     }
 
-    const comments = await this.commentRepository
-      .createQueryBuilder('comment')
-      .leftJoinAndSelect('comment.user', 'user')
-      .leftJoinAndSelect('comment.commentReactions', 'commentReactions')
-      .leftJoinAndSelect('commentReactions.user', 'reactionUser')
-      .where('comment.postId = :postId', { postId })
-      .orderBy('comment.createdAt', 'ASC')
-      .getMany();
+    const comments = await this.commentRepository.find({
+      where: { post: { id: postId } },
+      relations: [
+        'author',
+        'reactions',
+        'reactions.reactedBy',
+        'reactions.reactionType',
+        'children',
+      ],
+      order: { createdAt: 'ASC' },
+    });
 
     const commentMap = new Map<string, Comment>();
     comments.forEach((comment) => commentMap.set(comment.id, comment));

@@ -2,19 +2,19 @@ import {
   Controller,
   Post as HttpPost,
   Get,
-  Body,
   Patch,
-  Param,
   Delete,
+  Param,
+  Body,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { CreateCommentDto } from './dto/request/create-comment.dto';
 import { UpdateCommentDto } from './dto/request/update-comment.dto';
-import { AuthUser } from 'src/common/decorators/auth-user.decorator';
-import { UsersInterface } from 'src/users/users.interface';
 import { plainToClass } from 'class-transformer';
 import { CommentResponseDto } from './dto/response/comment-response.dto';
+import { AuthUser } from 'src/common/decorators/auth-user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('posts/:postId/comments')
 export class CommentsController {
@@ -25,7 +25,7 @@ export class CommentsController {
   async create(
     @Param('postId') postId: string,
     @Body() createCommentDto: CreateCommentDto,
-    @AuthUser() user: UsersInterface,
+    @AuthUser() user: User,
   ) {
     const comment = await this.commentsService.create(
       postId,
@@ -42,6 +42,7 @@ export class CommentsController {
   @Get()
   async findCommentsByPost(@Param('postId') postId: string) {
     const comments = await this.commentsService.findCommentsByPost(postId);
+
     return comments.map((comment) =>
       plainToClass(CommentResponseDto, comment, {
         excludeExtraneousValues: true,
@@ -53,6 +54,7 @@ export class CommentsController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const comment = await this.commentsService.findOne(id);
+
     return plainToClass(CommentResponseDto, comment, {
       excludeExtraneousValues: true,
     });
@@ -63,7 +65,7 @@ export class CommentsController {
   async update(
     @Param('id') id: string,
     @Body() updateCommentDto: UpdateCommentDto,
-    @AuthUser() user: UsersInterface,
+    @AuthUser() user: User,
   ) {
     const comment = await this.commentsService.update(
       id,
@@ -78,7 +80,7 @@ export class CommentsController {
 
   @MessageResponse('Xóa bình luận thành công')
   @Delete(':id')
-  async remove(@Param('id') id: string, @AuthUser() user: UsersInterface) {
+  async remove(@Param('id') id: string, @AuthUser() user: User) {
     await this.commentsService.remove(id, user.id);
   }
 }

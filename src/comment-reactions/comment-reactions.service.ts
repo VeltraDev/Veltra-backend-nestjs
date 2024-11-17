@@ -4,7 +4,7 @@ import { CommentReactionRecord } from './entities/comment-reaction-record.entity
 import { Repository } from 'typeorm';
 import { ReactionType } from 'src/reaction-types/entities/reaction-type.entity';
 import { Comment } from 'src/comments/entities/comment.entity';
-import { UsersInterface } from 'src/users/users.interface';
+import { User } from 'src/users/entities/user.entity';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Injectable()
@@ -16,12 +16,14 @@ export class CommentReactionsService {
     private readonly reactionTypeRepository: Repository<ReactionType>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async reactToComment(
     commentId: string,
     reactionTypeId: string,
-    user: UsersInterface,
+    userId: string,
   ): Promise<CommentReactionRecord | null> {
     const comment = await this.commentRepository.findOne({
       where: { id: commentId },
@@ -44,9 +46,16 @@ export class CommentReactionsService {
       );
     }
 
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(
+        ErrorMessages.USER_NOT_FOUND_ID.message.replace('{id}', userId),
+      );
+    }
+
     const existingReaction = await this.commentReactionRepository.findOne({
-      where: { user: { id: user.id }, comment: { id: commentId } },
-      relations: ['reactionType', 'user', 'comment'],
+      where: { reactedBy: { id: userId }, comment: { id: commentId } },
+      relations: ['reactionType', 'reactedBy', 'comment'],
     });
 
     if (existingReaction) {
@@ -59,7 +68,7 @@ export class CommentReactionsService {
       }
     } else {
       const newReaction = this.commentReactionRepository.create({
-        user,
+        reactedBy: user,
         comment,
         reactionType,
       });
@@ -69,7 +78,7 @@ export class CommentReactionsService {
 
   async removeReaction(commentId: string, userId: string): Promise<void> {
     const reaction = await this.commentReactionRepository.findOne({
-      where: { user: { id: userId }, comment: { id: commentId } },
+      where: { reactedBy: { id: userId }, comment: { id: commentId } },
     });
 
     if (!reaction) {

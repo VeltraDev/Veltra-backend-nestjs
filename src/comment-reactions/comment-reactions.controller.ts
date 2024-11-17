@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CommentReactionsService } from './comment-reactions.service';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
-import { UsersInterface } from 'src/users/users.interface';
+import { User } from 'src/users/entities/user.entity';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
 import { plainToClass } from 'class-transformer';
 import { CommentReactionResponseDto } from './dto/response/comment-reaction-response.dto';
@@ -24,12 +24,12 @@ export class CommentReactionsController {
   async reactToComment(
     @Param('id') id: string,
     @Body() createCommentReactionDto: CreateCommentReactionDto,
-    @AuthUser() user: UsersInterface,
+    @AuthUser() user: User,
   ) {
     const result = await this.commentReactionsService.reactToComment(
       id,
       createCommentReactionDto.reactionTypeId,
-      user,
+      user.id,
     );
 
     if (result) {
@@ -43,10 +43,7 @@ export class CommentReactionsController {
 
   @MessageResponse('Xóa phản hồi cảm xúc khỏi bình luận thành công')
   @Delete()
-  async removeReaction(
-    @Param('id') id: string,
-    @AuthUser() user: UsersInterface,
-  ) {
+  async removeReaction(@Param('id') id: string, @AuthUser() user: User) {
     await this.commentReactionsService.removeReaction(id, user.id);
   }
 }

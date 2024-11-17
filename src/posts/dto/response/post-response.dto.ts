@@ -1,6 +1,6 @@
 import { Expose, Type } from 'class-transformer';
 import { UserSecureResponseDto } from 'src/users/dto/response/user-secure-response.dto';
-import { ReactionResponseDto } from 'src/post-reactions/dto/response/reaction-response.dto';
+import { PostReactionResponseDto } from 'src/post-reactions/dto/response/post-reaction-response.dto';
 import { CommentResponseDto } from 'src/comments/dto/response/comment-response.dto';
 
 export class AttachmentResponseDto {
@@ -24,16 +24,16 @@ export class PostResponseDto {
 
   @Expose()
   @Type(() => UserSecureResponseDto)
-  user: UserSecureResponseDto;
+  author: UserSecureResponseDto;
 
   @Expose()
   createdAt: Date;
 
   @Expose()
-  @Type(() => ReactionResponseDto)
-  postReactions: ReactionResponseDto[];
+  @Type(() => PostReactionResponseDto)
+  reactions: PostReactionResponseDto[];
 
-  // @Expose()
-  // @Type(() => CommentResponseDto)
-  // comments: CommentResponseDto[];
+  @Expose()
+  @Type(() => CommentResponseDto)
+  comments: CommentResponseDto[];
 }

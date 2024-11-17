@@ -12,10 +12,10 @@ import { Exclude } from 'class-transformer';
 import { Role } from 'src/roles/entities/role.entity';
 import { Message } from 'src/messages/entities/message.entity';
 import { Conversation } from 'src/conversations/entities/conversation.entity';
-import { Post } from 'src/posts/entities/post.entity';
 import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-record.entity';
-import { Comment } from 'src/comments/entities/comment.entity';
 import { CommentReactionRecord } from 'src/comment-reactions/entities/comment-reaction-record.entity';
+import { Post } from 'src/posts/entities/post.entity';
+import { Comment } from 'src/comments/entities/comment.entity';
 
 @Entity()
 export class User extends EntityBase {
@@ -73,15 +73,15 @@ export class User extends EntityBase {
   })
   conversations: Conversation[];
 
-  @OneToMany(() => Post, (post) => post.user)
+  @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 
-  @OneToMany(() => PostReactionRecord, (reactionRecord) => reactionRecord.user)
-  postReactions: PostReactionRecord[];
-
-  @OneToMany(() => Comment, (comment) => comment.user)
+  @OneToMany(() => Comment, (comment) => comment.author)
   comments: Comment[];
 
-  @OneToMany(() => CommentReactionRecord, (reaction) => reaction.user)
-  commentReactions: CommentReactionRecord[];
+  @OneToMany(() => PostReactionRecord, (reaction) => reaction.reactedBy)
+  postReactionsGiven: PostReactionRecord[];
+
+  @OneToMany(() => CommentReactionRecord, (reaction) => reaction.reactedBy)
+  commentReactionsGiven: CommentReactionRecord[];
 }

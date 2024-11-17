@@ -1,14 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PostReactionRecord } from './entities/post-reaction-record.entity';
 import { Repository } from 'typeorm';
 import { ReactionType } from 'src/reaction-types/entities/reaction-type.entity';
 import { Post } from 'src/posts/entities/post.entity';
-import { UsersInterface } from 'src/users/users.interface';
+import { User } from 'src/users/entities/user.entity';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Injectable()
@@ -20,24 +16,21 @@ export class PostReactionsService {
     private readonly reactionTypeRepository: Repository<ReactionType>,
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  private async validatePost(postId: string): Promise<Post> {
+  async reactToPost(
+    postId: string,
+    reactionTypeId: string,
+    userId: string,
+  ): Promise<PostReactionRecord> {
     const post = await this.postRepository.findOne({ where: { id: postId } });
     if (!post) {
       throw new NotFoundException(
         ErrorMessages.POST_NOT_FOUND.message.replace('{id}', postId),
       );
     }
-    return post;
-  }
-
-  async reactToPost(
-    postId: string,
-    reactionTypeId: string,
-    user: UsersInterface,
-  ): Promise<PostReactionRecord> {
-    const post = await this.validatePost(postId);
 
     const reactionType = await this.reactionTypeRepository.findOne({
       where: { id: reactionTypeId },
@@ -51,9 +44,16 @@ export class PostReactionsService {
       );
     }
 
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(
+        ErrorMessages.USER_NOT_FOUND_ID.message.replace('{id}', userId),
+      );
+    }
+
     let reaction = await this.postReactionRepository.findOne({
-      where: { user: { id: user.id }, post: { id: postId } },
-      relations: ['reactionType', 'user', 'post', 'post.user'],
+      where: { reactedBy: { id: userId }, post: { id: postId } },
+      relations: ['reactionType', 'reactedBy', 'post'],
     });
 
     if (reaction) {
@@ -61,7 +61,7 @@ export class PostReactionsService {
       await this.postReactionRepository.save(reaction);
     } else {
       reaction = this.postReactionRepository.create({
-        user,
+        reactedBy: user,
         post,
         reactionType,
       });
@@ -70,20 +70,19 @@ export class PostReactionsService {
 
     return await this.postReactionRepository.findOneOrFail({
       where: { id: reaction.id },
-      relations: ['reactionType', 'user', 'post', 'post.user'],
+      relations: ['reactionType', 'reactedBy', 'post'],
     });
   }
 
   async removeReaction(postId: string, userId: string): Promise<void> {
-    await this.validatePost(postId);
-
     const reaction = await this.postReactionRepository.findOne({
-      where: { user: { id: userId }, post: { id: postId } },
+      where: { reactedBy: { id: userId }, post: { id: postId } },
+      relations: ['reactionType', 'reactedBy', 'post'],
     });
 
     if (!reaction) {
       throw new NotFoundException(
-        ErrorMessages.REACTION_RECORD_NOT_FOUND.message,
+        ErrorMessages.REACTION_RECORD_NOT_FOUND.message.replace('{id}', postId),
       );
     }
 

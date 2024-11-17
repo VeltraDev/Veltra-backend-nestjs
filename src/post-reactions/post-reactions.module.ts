@@ -6,11 +6,13 @@ import { PostReactionRecord } from './entities/post-reaction-record.entity';
 import { ReactionType } from 'src/reaction-types/entities/reaction-type.entity';
 import { Post } from 'src/posts/entities/post.entity';
 import { UsersModule } from 'src/users/users.module';
+import { ReactionTypesModule } from 'src/reaction-types/reaction-types.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PostReactionRecord, ReactionType, Post]),
-    UsersModule,
+    UsersModule, 
+    ReactionTypesModule,
   ],
   controllers: [PostReactionsController],
   providers: [PostReactionsService],
