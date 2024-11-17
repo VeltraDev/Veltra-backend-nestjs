@@ -21,11 +21,7 @@ export class CommentsService {
     private readonly postRepository: Repository<Post>,
   ) {}
 
-  async create(
-    postId: string,
-    createCommentDto: CreateCommentDto,
-    user: User,
-  ): Promise<Comment> {
+  async create( postId: string, createCommentDto: CreateCommentDto, user: User): Promise<Comment> {
     const post = await this.postRepository.findOne({ where: { id: postId } });
     if (!post) {
       throw new NotFoundException(
@@ -33,16 +29,10 @@ export class CommentsService {
       );
     }
 
-    const comment = this.commentRepository.create({
-      content: createCommentDto.content,
-      post,
-      author: user,
-    });
+    const comment = this.commentRepository.create({ content: createCommentDto.content, post, author: user });
 
     if (createCommentDto.parentId) {
-      const parentComment = await this.commentRepository.findOne({
-        where: { id: createCommentDto.parentId },
-      });
+      const parentComment = await this.commentRepository.findOne({where: { id: createCommentDto.parentId }});
       if (!parentComment) {
         throw new NotFoundException(
           ErrorMessages.COMMENT_NOT_FOUND.message.replace(

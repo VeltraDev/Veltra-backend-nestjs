@@ -66,7 +66,7 @@ export class ChatsService {
   async handleForwardMessage(
     user: UsersInterface,
     forwardDto: ForwardMessageDto,
-  ): Promise<{ conversationId: string; messageResponse: MessageResponseDto }> {
+  ): Promise<{ conversationId: string; message: MessageResponseDto }> {
     const newMessage = await this.messagesService.forwardMessage(
       forwardDto,
       user.id,
@@ -76,16 +76,17 @@ export class ChatsService {
       excludeExtraneousValues: true,
     });
 
+    if (newMessage.forwardedMessage) {
+      messageResponse.forwardedMessage = plainToClass(
+        MessageResponseDto,
+        newMessage.forwardedMessage,
+        { excludeExtraneousValues: true },
+      );
+    }
+
     return {
       conversationId: newMessage.conversation.id,
-      messageResponse: {
-        ...messageResponse,
-        forwardedMessage: newMessage.forwardedMessage
-          ? plainToClass(MessageResponseDto, newMessage.forwardedMessage, {
-              excludeExtraneousValues: true,
-            })
-          : null,
-      },
+      message: messageResponse,
     };
   }
 

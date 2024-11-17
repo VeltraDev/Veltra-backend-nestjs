@@ -487,25 +487,19 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() forwardDto: ForwardMessageDto,
   ) {
     try {
-      const newMessage = await this.chatsService.handleForwardMessage(
-        client.user,
-        forwardDto,
-      );
+      const { conversationId, message } =
+        await this.chatsService.handleForwardMessage(client.user, forwardDto);
 
-      const messageResponse = plainToClass(MessageResponseDto, newMessage, {
-        excludeExtraneousValues: true,
-      });
-
-      const conversationId = forwardDto.targetConversationId;
       await this.ensureClientInRoom(client, conversationId);
 
       this.server.to(conversationId).emit('receiveMessage', {
-        ...messageResponse,
+        ...message,
         message: 'Tin nhắn đã được chuyển tiếp.',
       });
 
       client.emit('messageForwarded', {
-        ...messageResponse,
+        ...message,
+        conversationId,
         message: 'Bạn đã chuyển tiếp tin nhắn thành công.',
       });
     } catch (error) {

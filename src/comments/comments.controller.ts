@@ -1,11 +1,11 @@
 import {
   Controller,
-  Post as HttpPost,
   Get,
   Patch,
   Delete,
   Param,
   Body,
+  Post,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
@@ -21,7 +21,7 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @MessageResponse('Tạo mới bình luận thành công')
-  @HttpPost()
+  @Post()
   async create(
     @Param('postId') postId: string,
     @Body() createCommentDto: CreateCommentDto,

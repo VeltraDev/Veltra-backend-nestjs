@@ -40,7 +40,13 @@ export class ConversationsService extends BaseService<Conversation> {
   ): Promise<Conversation> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
-      relations: ['users', 'admin', 'messages', 'messages.sender'],
+      relations: [
+        'users',
+        'messages',
+        'messages.sender',
+        'messages.forwardedMessage',
+        'messages.forwardedMessage.sender',
+      ],
     });
 
     if (!conversation) {
@@ -84,7 +90,16 @@ export class ConversationsService extends BaseService<Conversation> {
   }
 
   async getConversationById(id: string, userId: string): Promise<Conversation> {
-    const conversation = await this.validateUserInConversation(id, userId);
+    const conversation = await this.conversationRepository.findOne({
+      where: { id },
+      relations: [
+        'users',
+        'messages',
+        'messages.sender',
+        'messages.forwardedMessage',
+        'messages.forwardedMessage.sender',
+      ],
+    });
 
     const sortedMessages = conversation.messages.sort((a, b) => {
       return a.createdAt.getTime() - b.createdAt.getTime();

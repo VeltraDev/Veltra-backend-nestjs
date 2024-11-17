@@ -173,7 +173,7 @@ export class ConversationsController {
       GetOneConversationResponseDto,
       {
         ...conversation,
-        messages: messageDtos, 
+        messages: messageDtos,
       },
       {
         excludeExtraneousValues: true,
