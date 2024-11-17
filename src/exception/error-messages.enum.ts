@@ -538,7 +538,7 @@ export const ErrorMessages = {
     code: 6517,
     message: 'Bạn đã phản ứng cảm xúc với bài viết này',
   },
-  REACTION_RECORD_NOT_FOUND: {
+  POST_REACTION_RECORD_NOT_FOUND: {
     code: 6518,
     message: 'Người dùng hiện tại chưa thả cảm xúc vào bài viết có ID {id}',
   },
@@ -549,6 +549,10 @@ export const ErrorMessages = {
   POST_REACTION_UUID: {
     code: 6520,
     message: 'ID của loại phản ứng cảm xúc trên bài viết phải là UUID hợp lệ',
+  },
+  DELETE_POST_REACTION_DEFAULT_LOVE: {
+    code: 6521,
+    message: 'Không thể xóa cảm xúc mặc định: love (thả tim)',
   },
 
   // Comment and Reactions Errors (7000 - 7499)
@@ -567,5 +571,17 @@ export const ErrorMessages = {
   PARENT_INVALID_UUID: {
     code: 7003,
     message: 'ID của bình luận gốc phải là UUID hợp lệ',
+  },
+  COMMENT_REACTION_RECORD_NOT_FOUND: {
+    code: 7004,
+    message: 'Người dùng hiện tại chưa thả cảm xúc vào bình luận có ID {id}',
+  },
+  COMMENT_NOT_FOUND_IN_POST: {
+    code: 7005,
+    message: 'Không tìm thấy bình luận gốc với id {id} trong bài viết này',
+  },
+  COMMENT_DATA_INVALID: {
+    code: 7006,
+    message: 'Không thể xóa bình luận vì không có dữ liệu hợp lệ',
   },
 };

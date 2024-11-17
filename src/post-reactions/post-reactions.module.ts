@@ -11,7 +11,7 @@ import { ReactionTypesModule } from 'src/reaction-types/reaction-types.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([PostReactionRecord, ReactionType, Post]),
-    UsersModule, 
+    UsersModule,
     ReactionTypesModule,
   ],
   controllers: [PostReactionsController],

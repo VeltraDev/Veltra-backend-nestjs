@@ -75,6 +75,13 @@ export class PostReactionsService {
   }
 
   async removeReaction(postId: string, userId: string): Promise<void> {
+    const post = await this.postRepository.findOne({ where: { id: postId } });
+    if (!post) {
+      throw new NotFoundException(
+        ErrorMessages.POST_NOT_FOUND.message.replace('{id}', postId),
+      );
+    }
+
     const reaction = await this.postReactionRepository.findOne({
       where: { reactedBy: { id: userId }, post: { id: postId } },
       relations: ['reactionType', 'reactedBy', 'post'],
@@ -82,7 +89,10 @@ export class PostReactionsService {
 
     if (!reaction) {
       throw new NotFoundException(
-        ErrorMessages.REACTION_RECORD_NOT_FOUND.message.replace('{id}', postId),
+        ErrorMessages.POST_REACTION_RECORD_NOT_FOUND.message.replace(
+          '{id}',
+          postId,
+        ),
       );
     }
 

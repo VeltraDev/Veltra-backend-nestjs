@@ -3,12 +3,20 @@ import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
-import { CommentsModule } from 'src/comments/comments.module'; // Liên kết với CommentsModule
-import { PostReactionsModule } from 'src/post-reactions/post-reactions.module'; // Liên kết với PostReactionsModule
+import { Comment } from 'src/comments/entities/comment.entity';
+import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-record.entity';
+import { CommentReactionRecord } from 'src/comment-reactions/entities/comment-reaction-record.entity';
+import { CommentsModule } from 'src/comments/comments.module';
+import { PostReactionsModule } from 'src/post-reactions/post-reactions.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post]),
+    TypeOrmModule.forFeature([
+      Post,
+      Comment,
+      PostReactionRecord,
+      CommentReactionRecord,
+    ]),
     CommentsModule,
     PostReactionsModule,
   ],

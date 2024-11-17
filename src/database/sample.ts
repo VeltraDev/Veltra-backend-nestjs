@@ -336,11 +336,56 @@ const PERMISSIONS = {
       'REACTION TYPES',
     ),
   ],
+  COMMENTS: [
+    createPermission(
+      'Lấy thông tin của một bình luận',
+      '/api/v1/comments/:id',
+      'GET',
+      'COMMENTS',
+    ),
+    createPermission(
+      'Cập nhật thông tin của một bình luận',
+      '/api/v1/comments/:id',
+      'PATCH',
+      'COMMENTS',
+    ),
+    createPermission(
+      'Xóa thông tin của một bình luận',
+      '/api/v1/comments/:id',
+      'DELETE',
+      'COMMENTS',
+    ),
+    createPermission(
+      'Tạo mới một bình luận',
+      '/api/v1/posts/:postId/comments',
+      'POST',
+      'COMMENTS',
+    ),
+    createPermission(
+      'Lấy danh sách bình luận của một bài viết',
+      '/api/v1/posts/:postId/comments',
+      'GET',
+      'COMMENTS',
+    ),
+    createPermission(
+      'Thả phản hồi cảm xúc vào bình luận',
+      '/api/v1/comments/:id/reactions',
+      'POST',
+      'COMMENTS',
+    ),
+    createPermission(
+      'Xóa phản hồi cảm xúc khỏi bình luận',
+      '/api/v1/comments/:id/reactions',
+      'DELETE',
+      'COMMENTS',
+    ),
+  ],
 };
 
 export const INIT_USER_LOGIN_PERMISSIONS = [
   PERMISSIONS.AUTH.find((p) => p.name === 'Đăng xuất người dùng'),
   PERMISSIONS.AUTH.find((p) => p.name === 'Lấy thông tin tài khoản của tôi'),
+
   PERMISSIONS.USERS.find(
     (p) => p.name === 'Cập nhật thông tin hồ sơ người dùng',
   ),
@@ -351,6 +396,7 @@ export const INIT_USER_LOGIN_PERMISSIONS = [
   PERMISSIONS.USERS.find(
     (p) => p.name === 'Lấy danh sách người dùng với phân trang, lọc và sắp xếp',
   ),
+
   PERMISSIONS.CONVERSATIONS.find((p) => p.name === 'Tạo mới cuộc trò chuyện'),
   PERMISSIONS.CONVERSATIONS.find(
     (p) => p.name === 'Lấy một cuộc trò chuyện theo ID',
@@ -376,10 +422,13 @@ export const INIT_USER_LOGIN_PERMISSIONS = [
     (p) => p.name === 'Người dùng đang đăng nhập rời khỏi một cuộc trò chuyện',
   ),
   PERMISSIONS.CONVERSATIONS.find((p) => p.name === 'Xóa một cuộc trò chuyện'),
+
   PERMISSIONS.MESSAGES.find((p) => p.name === 'Xóa một tin nhắn'),
   PERMISSIONS.MESSAGES.find((p) => p.name === 'Lấy thông tin một tin nhắn'),
   PERMISSIONS.MESSAGES.find((p) => p.name === 'Tạo một tin nhắn mới'),
+
   PERMISSIONS.FILE.find((p) => p.name === 'Tải file lên AWS S3'),
+
   PERMISSIONS.POSTS.find((p) => p.name === 'Tạo một bài viết mới'),
   PERMISSIONS.POSTS.find(
     (p) => p.name === 'Lấy tất cả bài viết với điều kiện truy vấn',
@@ -391,6 +440,26 @@ export const INIT_USER_LOGIN_PERMISSIONS = [
     (p) => p.name === 'Xóa phản hồi cảm xúc khỏi bài viết',
   ),
   PERMISSIONS.POSTS.find((p) => p.name === 'Lấy một bài viết theo ID'),
+
+  PERMISSIONS.COMMENTS.find(
+    (p) => p.name === 'Lấy thông tin của một bình luận',
+  ),
+  PERMISSIONS.COMMENTS.find(
+    (p) => p.name === 'Cập nhật thông tin của một bình luận',
+  ),
+  PERMISSIONS.COMMENTS.find(
+    (p) => p.name === 'Xóa thông tin của một bình luận',
+  ),
+  PERMISSIONS.COMMENTS.find((p) => p.name === 'Tạo mới một bình luận'),
+  PERMISSIONS.COMMENTS.find(
+    (p) => p.name === 'Lấy danh sách bình luận của một bài viết',
+  ),
+  PERMISSIONS.COMMENTS.find(
+    (p) => p.name === 'Thả phản hồi cảm xúc vào bình luận',
+  ),
+  PERMISSIONS.COMMENTS.find(
+    (p) => p.name === 'Xóa phản hồi cảm xúc khỏi bình luận',
+  ),
 ];
 
 export const INIT_ADMIN_PERMISSIONS = [
@@ -403,4 +472,5 @@ export const INIT_ADMIN_PERMISSIONS = [
   ...PERMISSIONS.MESSAGES,
   ...PERMISSIONS.POSTS,
   ...PERMISSIONS.REACTION_TYPES,
+  ...PERMISSIONS.COMMENTS,
 ];

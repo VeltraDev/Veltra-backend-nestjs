@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Post as HttpPost,
-  Delete,
-  Param,
-  Body,
-} from '@nestjs/common';
+import { Controller, Delete, Param, Body, Post } from '@nestjs/common';
 import { CommentReactionsService } from './comment-reactions.service';
 import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 import { User } from 'src/users/entities/user.entity';
@@ -19,8 +13,8 @@ export class CommentReactionsController {
     private readonly commentReactionsService: CommentReactionsService,
   ) {}
 
-  @MessageResponse('Thao tác phản hồi cảm xúc vào bình luận thành công')
-  @HttpPost()
+  @MessageResponse('Thả phản hồi cảm xúc vào bình luận thành công')
+  @Post()
   async reactToComment(
     @Param('id') id: string,
     @Body() createCommentReactionDto: CreateCommentReactionDto,
@@ -32,13 +26,9 @@ export class CommentReactionsController {
       user.id,
     );
 
-    if (result) {
-      return plainToClass(CommentReactionResponseDto, result, {
-        excludeExtraneousValues: true,
-      });
-    } else {
-      return { message: 'Đã xóa phản hồi cảm xúc của bạn khỏi bình luận' };
-    }
+    return plainToClass(CommentReactionResponseDto, result, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @MessageResponse('Xóa phản hồi cảm xúc khỏi bình luận thành công')

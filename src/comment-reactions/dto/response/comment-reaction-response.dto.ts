@@ -13,4 +13,7 @@ export class CommentReactionResponseDto {
   @Expose()
   @Type(() => ReactionTypeResponseDto)
   reactionType: ReactionTypeResponseDto;
+
+  @Expose()
+  createdAt: Date;
 }

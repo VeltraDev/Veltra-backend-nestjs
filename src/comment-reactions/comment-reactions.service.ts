@@ -24,7 +24,7 @@ export class CommentReactionsService {
     commentId: string,
     reactionTypeId: string,
     userId: string,
-  ): Promise<CommentReactionRecord | null> {
+  ): Promise<CommentReactionRecord> {
     const comment = await this.commentRepository.findOne({
       where: { id: commentId },
     });
@@ -53,37 +53,50 @@ export class CommentReactionsService {
       );
     }
 
-    const existingReaction = await this.commentReactionRepository.findOne({
+    let reaction = await this.commentReactionRepository.findOne({
       where: { reactedBy: { id: userId }, comment: { id: commentId } },
       relations: ['reactionType', 'reactedBy', 'comment'],
     });
 
-    if (existingReaction) {
-      if (existingReaction.reactionType.id === reactionTypeId) {
-        await this.commentReactionRepository.remove(existingReaction);
-        return null;
-      } else {
-        existingReaction.reactionType = reactionType;
-        return await this.commentReactionRepository.save(existingReaction);
-      }
+    if (reaction) {
+      reaction.reactionType = reactionType;
+      await this.commentReactionRepository.save(reaction);
     } else {
-      const newReaction = this.commentReactionRepository.create({
+      reaction = this.commentReactionRepository.create({
         reactedBy: user,
         comment,
         reactionType,
       });
-      return await this.commentReactionRepository.save(newReaction);
+      await this.commentReactionRepository.save(reaction);
     }
+
+    return await this.commentReactionRepository.findOneOrFail({
+      where: { id: reaction.id },
+      relations: ['reactionType', 'reactedBy', 'comment'],
+    });
   }
 
   async removeReaction(commentId: string, userId: string): Promise<void> {
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId },
+    });
+    if (!comment) {
+      throw new NotFoundException(
+        ErrorMessages.COMMENT_NOT_FOUND.message.replace('{id}', commentId),
+      );
+    }
+
     const reaction = await this.commentReactionRepository.findOne({
       where: { reactedBy: { id: userId }, comment: { id: commentId } },
+      relations: ['reactionType', 'reactedBy', 'comment'],
     });
 
     if (!reaction) {
       throw new NotFoundException(
-        ErrorMessages.REACTION_RECORD_NOT_FOUND.message,
+        ErrorMessages.COMMENT_REACTION_RECORD_NOT_FOUND.message.replace(
+          '{id}',
+          commentId,
+        ),
       );
     }
 

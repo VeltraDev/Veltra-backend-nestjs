@@ -13,18 +13,36 @@ import {
   USER_ROLE,
 } from './sample';
 import { getHashPassword } from 'src/common/utils/hashPassword';
+import { ReactionType } from 'src/reaction-types/entities/reaction-type.entity';
 
 @Injectable()
 export class DatabasesService implements OnModuleInit {
   private readonly logger = new Logger(DatabasesService.name);
 
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Permission)
-    private permissionRepository: Repository<Permission>,
-    @InjectRepository(Role) private roleRepository: Repository<Role>,
+    private readonly permissionRepository: Repository<Permission>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(ReactionType)
+    private readonly reactionTypeRepository: Repository<ReactionType>,
     private readonly configService: ConfigService,
   ) {}
+
+  private async createReactionTypes() {
+    const reactionTypes = ['love', 'like', 'angry', 'sad', 'haha', 'wow'];
+    for (const type of reactionTypes) {
+      const existingReactionType = await this.reactionTypeRepository.findOne({
+        where: { type },
+      });
+      if (!existingReactionType) {
+        const reactionType = this.reactionTypeRepository.create({ type });
+        await this.reactionTypeRepository.save(reactionType);
+      }
+    }
+  }
 
   private async createOrGetPermissions(
     permissionsArray: any[],
@@ -135,6 +153,7 @@ export class DatabasesService implements OnModuleInit {
       const countUser = await this.userRepository.count();
       const countPermission = await this.permissionRepository.count();
       const countRole = await this.roleRepository.count();
+      const countReactionType = await this.reactionTypeRepository.count();
 
       if (countPermission === 0) {
         const adminPermissions = await this.createOrGetPermissions(
@@ -159,7 +178,16 @@ export class DatabasesService implements OnModuleInit {
         await this.createUsers(adminRole, userRole);
       }
 
-      if (countUser > 0 && countRole > 0 && countPermission > 0) {
+      if (countReactionType === 0) {
+        await this.createReactionTypes();
+      }
+
+      if (
+        countUser > 0 &&
+        countRole > 0 &&
+        countPermission > 0 &&
+        countReactionType > 0
+      ) {
         this.logger.log('>>> ALREADY INIT SAMPLE DATA...');
       }
     }

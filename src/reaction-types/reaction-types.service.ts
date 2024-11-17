@@ -11,12 +11,18 @@ import { CreateReactionTypeDto } from './dto/request/create-reaction-type.dto';
 import { UpdateReactionTypeDto } from './dto/request/update-reaction-type.dto';
 import { BaseService } from 'src/base/base.service';
 import { FilterReactionTypesDto } from './dto/request/filter-reaction-types.dto';
+import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-record.entity';
+import { CommentReactionRecord } from 'src/comment-reactions/entities/comment-reaction-record.entity';
 
 @Injectable()
 export class ReactionTypesService extends BaseService<ReactionType> {
   constructor(
     @InjectRepository(ReactionType)
     private readonly reactionTypeRepository: Repository<ReactionType>,
+    @InjectRepository(PostReactionRecord)
+    private readonly postReactionRepository: Repository<PostReactionRecord>,
+    @InjectRepository(CommentReactionRecord)
+    private readonly commentReactionRepository: Repository<CommentReactionRecord>,
   ) {
     super(reactionTypeRepository);
   }
@@ -90,6 +96,32 @@ export class ReactionTypesService extends BaseService<ReactionType> {
 
   async remove(id: string): Promise<void> {
     const reactionType = await this.findOne(id);
+
+    if (reactionType.type === 'love')
+      throw new BadRequestException(
+        ErrorMessages.DELETE_POST_REACTION_DEFAULT_LOVE.message,
+      );
+
+    await this.postReactionRepository
+      .createQueryBuilder()
+      .update(PostReactionRecord)
+      .set({
+        reactionType: () =>
+          `(SELECT id FROM reaction_types WHERE type = 'love')`,
+      })
+      .where('reactionTypeId = :reactionTypeId', { reactionTypeId: id })
+      .execute();
+
+    await this.commentReactionRepository
+      .createQueryBuilder()
+      .update(CommentReactionRecord)
+      .set({
+        reactionType: () =>
+          `(SELECT id FROM reaction_types WHERE type = 'love')`,
+      })
+      .where('reactionTypeId = :reactionTypeId', { reactionTypeId: id })
+      .execute();
+
     await this.reactionTypeRepository.remove(reactionType);
   }
 }

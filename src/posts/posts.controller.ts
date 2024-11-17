@@ -1,12 +1,12 @@
 import {
   Controller,
   Get,
-  Post as HttpPost,
   Patch,
   Delete,
   Param,
   Query,
   Body,
+  Post,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { MessageResponse } from 'src/common/decorators/message-response.decorator';
@@ -24,7 +24,7 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @MessageResponse('Tạo bài viết thành công')
-  @HttpPost()
+  @Post()
   async create(@Body() createPostDto: CreatePostDto, @AuthUser() user: User) {
     const post = await this.postsService.create(createPostDto, user);
 
@@ -56,7 +56,6 @@ export class PostsController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const post = await this.postsService.findOne(id);
-
     return plainToClass(PostResponseDto, post, {
       excludeExtraneousValues: true,
     });
