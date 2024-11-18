@@ -22,7 +22,6 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Conversation } from 'src/conversations/entities/conversation.entity';
 import { User } from 'src/users/entities/user.entity';
 import { ConversationResponseDto } from 'src/conversations/dto/response/conversation-response.dto';
-import { MessageResponseDto } from 'src/messages/dto/response/message-response.dto';
 
 @WebSocketGateway(8081, {
   cors: {
@@ -43,7 +42,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
   private onlineUsers: Map<string, Set<AuthenticatedSocket>> = new Map();
-  private activeCalls1To1: Map<string, string> = new Map();
+  private activeCalls: Map<string, Set<string>> = new Map();
 
   async handleConnection(client: AuthenticatedSocket) {
     const userId = client.user.id;
@@ -146,29 +145,15 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  private isUserInCall(userId: string): boolean {
-    return this.activeCalls1To1.has(userId);
+  private isUserInCall(conversationId: string, userId: string): boolean {
+    if (this.activeCalls.has(conversationId)) {
+      return this.activeCalls.get(conversationId).has(userId);
+    }
+    return false;
   }
 
   private isUserOnline(userId: string): boolean {
     return this.onlineUsers.has(userId);
-  }
-
-  private async handleCallTermination(userId: string, reason: string) {
-    if (this.activeCalls1To1.has(userId)) {
-      const partnerId = this.activeCalls1To1.get(userId);
-
-      if (partnerId && this.activeCalls1To1.get(partnerId) === userId) {
-        this.server.to(partnerId).emit('end-call', {
-          from: userId,
-          reason,
-          message: `Cuộc gọi đã kết thúc: ${reason}`,
-        });
-        this.activeCalls1To1.delete(partnerId);
-      }
-
-      this.activeCalls1To1.delete(userId);
-    }
   }
 
   private async joinUserConversations(
@@ -181,6 +166,30 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     conversations.forEach((conversation) => {
       socket.join(conversation.id);
     });
+  }
+
+  private async handleCallTermination(userId: string, reason: string) {
+    for (const [conversationId, userSet] of this.activeCalls.entries()) {
+      if (userSet.has(userId)) {
+        const userInfo = await this.getFullUserInfo(userId);
+        userSet.forEach(async (participantId) => {
+          if (participantId !== userId) {
+            const participantInfo = await this.getFullUserInfo(participantId);
+            this.server.to(participantId).emit('end-call', {
+              from: {
+                id: userId,
+                firstName: userInfo.firstName,
+                lastName: userInfo.lastName,
+              },
+              conversationId,
+              reason: reason,
+              message: `Người dùng ${userInfo.firstName} ${userInfo.lastName} đã ${reason === 'partner-disconnected' ? 'ngắt kết nối' : 'kết thúc cuộc gọi'}, cuộc gọi đã kết thúc.`,
+            });
+          }
+        });
+        this.activeCalls.delete(conversationId);
+      }
+    }
   }
 
   // ----- Server self-event -----
@@ -552,10 +561,9 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   // ----- Video call real time features -----
 
   @SubscribeMessage('call-user')
-  async handleCallUser(
+  async handleCallUsers(
     @MessageBody()
     data: {
-      to: string;
       conversationId: string;
       offer: RTCSessionDescriptionInit;
     },
@@ -563,42 +571,87 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     try {
       const callerId = client.user.id;
-      const { to, conversationId, offer } = data;
+      const { conversationId, offer } = data;
 
-      if (this.isUserInCall(callerId)) {
+      await this.ensureClientInRoom(client, conversationId);
+
+      const conversation = await this.chatsService.getConversationById(
+        conversationId,
+        callerId,
+      );
+
+      if (!conversation) {
         client.emit('call-error', {
-          message: ErrorMessages.USER_EXISTED_VIDEO_CALL.message,
+          message: 'Cuộc trò chuyện không tồn tại',
         });
         return;
       }
 
-      if (!this.isUserOnline(to)) {
-        client.emit('call-error', {
-          message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
-        });
-        return;
-      }
+      const participantIds = conversation.users
+        .map((user) => user.id)
+        .filter((id) => id !== callerId);
 
-      if (this.isUserInCall(to)) {
+      const invalidParticipants = participantIds.filter(
+        (id) => !conversation.users.some((user) => user.id === id),
+      );
+      if (invalidParticipants.length > 0) {
         client.emit('call-error', {
-          message: ErrorMessages.USER_CALL_ANOTHER_PEOPLE.message,
+          message: 'Một hoặc nhiều người nhận không thuộc cuộc trò chuyện này',
         });
         return;
       }
 
       const callerInfo = await this.getFullUserInfo(callerId);
 
-      this.activeCalls1To1.set(callerId, to);
-      this.activeCalls1To1.set(to, callerId);
+      if (conversation.isGroup) {
+        participantIds.forEach(async (participantId) => {
+          if (this.isUserOnline(participantId)) {
+            const participantInfo = await this.getFullUserInfo(participantId);
+            this.server.to(participantId).emit('receive-call', {
+              from: {
+                id: callerId,
+                firstName: callerInfo.firstName,
+                lastName: callerInfo.lastName,
+              },
+              conversationId,
+              offer,
+              message: `Bạn có một cuộc gọi nhóm từ người dùng ${callerInfo.firstName} ${callerInfo.lastName}`,
+            });
+          }
+        });
 
-      const message = `${callerInfo.firstName} đang gọi cho bạn trong cuộc trò chuyện ${conversationId}.`;
+        this.activeCalls.set(
+          conversationId,
+          new Set([callerId, ...participantIds]),
+        );
+      } else {
+        const targetId = participantIds[0];
+        if (targetId) {
+          if (this.isUserOnline(targetId)) {
+            const targetInfo = await this.getFullUserInfo(targetId);
+            this.server.to(targetId).emit('receive-call', {
+              from: {
+                id: callerId,
+                firstName: callerInfo.firstName,
+                lastName: callerInfo.lastName,
+              },
+              conversationId,
+              offer,
+              message: `Bạn có một cuộc gọi từ người dùng ${callerInfo.firstName} ${callerInfo.lastName}`,
+            });
 
-      this.server.to(to).emit('receive-call', {
-        from: callerInfo,
-        conversationId,
-        offer,
-        message,
-      });
+            this.activeCalls.set(conversationId, new Set([callerId, targetId]));
+          } else {
+            client.emit('call-error', {
+              message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
+            });
+          }
+        } else {
+          client.emit('call-error', {
+            message: 'Không tìm thấy người nhận cuộc gọi',
+          });
+        }
+      }
     } catch (error) {
       client.emit('error', { message: error.message });
     }
@@ -608,7 +661,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleAnswerCall(
     @MessageBody()
     data: {
-      to: string;
       conversationId: string;
       answer: RTCSessionDescriptionInit;
     },
@@ -616,25 +668,66 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     try {
       const answererId = client.user.id;
-      const { to, conversationId, answer } = data;
+      const { conversationId, answer } = data;
 
-      if (this.activeCalls1To1.get(answererId) !== to) {
+      await this.ensureClientInRoom(client, conversationId);
+
+      const conversation = await this.chatsService.getConversationById(
+        conversationId,
+        answererId,
+      );
+
+      if (!conversation) {
         client.emit('call-error', {
-          message: ErrorMessages.NO_CALL_TO_ANSWER.message,
+          message: 'Cuộc trò chuyện không tồn tại',
         });
         return;
       }
 
       const answererInfo = await this.getFullUserInfo(answererId);
+      const participantIds = conversation.users.map((user) => user.id);
 
-      const message = `${answererInfo.firstName} đã trả lời cuộc gọi trong cuộc trò chuyện ${conversationId}.`;
+      const activeCall = this.activeCalls.get(conversationId);
+      if (!activeCall) {
+        client.emit('call-error', {
+          message: 'Cuộc gọi không tồn tại hoặc đã kết thúc',
+        });
+        return;
+      }
 
-      this.server.to(to).emit('call-answered', {
-        from: answererInfo,
+      const callerId = Array.from(activeCall).find((id) => id !== answererId);
+      if (!callerId) {
+        client.emit('call-error', {
+          message: 'Không tìm thấy người gọi trong cuộc gọi này',
+        });
+        return;
+      }
+
+      const callerInfo = await this.getFullUserInfo(callerId);
+
+      this.server.to(callerId).emit('call-answered', {
+        from: {
+          id: answererId,
+          firstName: answererInfo.firstName,
+          lastName: answererInfo.lastName,
+        },
         conversationId,
         answer,
-        message,
+        message: `Người dùng ${answererInfo.firstName} ${answererInfo.lastName} đã trả lời cuộc gọi`,
       });
+
+      if (conversation.isGroup) {
+        this.server.to(conversationId).emit('call-answered', {
+          from: {
+            id: answererId,
+            firstName: answererInfo.firstName,
+            lastName: answererInfo.lastName,
+          },
+          conversationId,
+          answer,
+          message: `Người dùng ${answererInfo.firstName} ${answererInfo.lastName} đã trả lời cuộc gọi nhóm`,
+        });
+      }
     } catch (error) {
       client.emit('error', { message: error.message });
     }
@@ -643,23 +736,78 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('send-ice-candidate')
   async handleSendIceCandidate(
     @MessageBody()
-    data: { to: string; conversationId: string; candidate: RTCIceCandidate },
+    data: { conversationId: string; candidate: RTCIceCandidate },
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     try {
       const senderId = client.user.id;
-      const { to, conversationId, candidate } = data;
+      const { conversationId, candidate } = data;
+
+      await this.ensureClientInRoom(client, conversationId);
+
+      const conversation = await this.chatsService.getConversationById(
+        conversationId,
+        senderId,
+      );
+
+      if (!conversation) {
+        client.emit('call-error', {
+          message: 'Cuộc trò chuyện không tồn tại.',
+        });
+        return;
+      }
 
       const senderInfo = await this.getFullUserInfo(senderId);
 
-      const message = `Đã nhận được ICE candidate từ ${senderInfo.firstName} trong cuộc trò chuyện ${conversationId}.`;
+      const activeCall = this.activeCalls.get(conversationId);
+      if (!activeCall) {
+        client.emit('call-error', {
+          message: 'Cuộc gọi không tồn tại hoặc đã kết thúc.',
+        });
+        return;
+      }
 
-      this.server.to(to).emit('ice-candidate', {
-        from: senderInfo,
-        conversationId,
-        candidate,
-        message,
-      });
+      if (conversation.isGroup) {
+        this.server.to(conversationId).emit('ice-candidate', {
+          from: {
+            id: senderId,
+            firstName: senderInfo.firstName,
+            lastName: senderInfo.lastName,
+          },
+          conversationId,
+          candidate,
+          message: `ICE candidate từ người dùng ${senderInfo.firstName} ${senderInfo.lastName} trong cuộc gọi nhóm.`,
+        });
+      } else {
+        const participantIds = Array.from(activeCall).filter(
+          (id) => id !== senderId,
+        );
+        if (participantIds.length === 0) {
+          client.emit('call-error', {
+            message: 'Không tìm thấy người nhận cuộc gọi.',
+          });
+          return;
+        }
+
+        const targetId = participantIds[0];
+        if (this.isUserOnline(targetId)) {
+          const targetInfo = await this.getFullUserInfo(targetId);
+          this.server.to(targetId).emit('ice-candidate', {
+            from: {
+              id: senderId,
+              firstName: senderInfo.firstName,
+              lastName: senderInfo.lastName,
+            },
+            conversationId,
+            candidate,
+            message: `ICE candidate từ người dùng ${senderInfo.firstName} ${senderInfo.lastName}.`,
+          });
+        } else {
+          client.emit('call-error', {
+            message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
+          });
+        }
+      }
     } catch (error) {
       client.emit('error', { message: error.message });
     }
@@ -667,31 +815,65 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('end-call')
   async handleEndCall(
-    @MessageBody() data: { to: string; conversationId: string },
+    @MessageBody() data: { conversationId: string },
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     try {
       const userId = client.user.id;
-      const { to, conversationId } = data;
+      const { conversationId } = data;
 
-      if (this.activeCalls1To1.get(userId) !== to) {
+      await this.ensureClientInRoom(client, conversationId);
+
+      const conversation = await this.chatsService.getConversationById(
+        conversationId,
+        userId,
+      );
+
+      if (!conversation) {
         client.emit('call-error', {
-          message: ErrorMessages.NO_CALL_TO_END.message,
+          message: 'Cuộc trò chuyện không tồn tại',
         });
         return;
       }
 
-      this.activeCalls1To1.delete(userId);
-      this.activeCalls1To1.delete(to);
+      const participantIds = conversation.users
+        .map((user) => user.id)
+        .filter((id) => id !== userId);
 
-      const message = `Người dùng đã kết thúc cuộc gọi trong cuộc trò chuyện ${conversationId}.`;
+      const userInfo = await this.getFullUserInfo(userId);
 
-      this.server.to(to).emit('end-call', {
-        from: userId,
-        conversationId,
-        reason: 'user-ended-call',
-        message,
-      });
+      if (conversation.isGroup) {
+        participantIds.forEach(async (participantId) => {
+          const participantInfo = await this.getFullUserInfo(participantId);
+          this.server.to(participantId).emit('end-call', {
+            from: {
+              id: userId,
+              firstName: userInfo.firstName,
+              lastName: userInfo.lastName,
+            },
+            conversationId,
+            reason: 'user-ended-call',
+            message: `Người dùng ${userInfo.firstName} ${userInfo.lastName} đã kết thúc cuộc gọi nhóm`,
+          });
+        });
+      } else {
+        const targetId = participantIds[0];
+        if (targetId) {
+          const targetInfo = await this.getFullUserInfo(targetId);
+          this.server.to(targetId).emit('end-call', {
+            from: {
+              id: userId,
+              firstName: userInfo.firstName,
+              lastName: userInfo.lastName,
+            },
+            conversationId,
+            reason: 'user-ended-call',
+            message: `Người dùng ${userInfo.firstName} ${userInfo.lastName} đã kết thúc cuộc gọi`,
+          });
+        }
+      }
+
+      this.activeCalls.delete(conversationId);
     } catch (error) {
       client.emit('error', { message: error.message });
     }

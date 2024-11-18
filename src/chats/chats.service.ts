@@ -93,4 +93,8 @@ export class ChatsService {
   async getUserConversations(userId: string): Promise<Conversation[]> {
     return await this.conversationService.getUserConversations(userId);
   }
+
+  async getConversationById(id: string, userId: string): Promise<Conversation> {
+    return await this.conversationService.getConversationById(id, userId);
+  }
 }
