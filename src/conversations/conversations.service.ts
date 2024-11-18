@@ -128,8 +128,14 @@ export class ConversationsService extends BaseService<Conversation> {
       ['users', 'admin', 'messages'],
     );
 
+    const userConversations = paginatedConversations.results.filter(
+      (conversation) => conversation.users.some((user) => user.id === userId),
+    );
+
+    const total = userConversations.length;
+
     const conversationsWithLatestMessage = await Promise.all(
-      paginatedConversations.results.map(async (conversation) => {
+      userConversations.map(async (conversation) => {
         const latestMessage = await this.messageRepository.findOne({
           where: { conversation: { id: conversation.id } },
           order: { createdAt: 'DESC' },
@@ -169,9 +175,9 @@ export class ConversationsService extends BaseService<Conversation> {
     });
 
     return {
-      total: paginatedConversations.total,
-      page: paginatedConversations.page,
-      limit: paginatedConversations.limit,
+      total,
+      page: Number(query.page) || 1,
+      limit: Number(query.limit) || 10,
       results: conversationsWithLatestMessage,
     };
   }
