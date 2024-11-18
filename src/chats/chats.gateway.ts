@@ -752,7 +752,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       if (!conversation) {
         client.emit('call-error', {
-          message: 'Cuộc trò chuyện không tồn tại.',
+          message: 'Cuộc trò chuyện không tồn tại',
         });
         return;
       }
@@ -762,7 +762,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const activeCall = this.activeCalls.get(conversationId);
       if (!activeCall) {
         client.emit('call-error', {
-          message: 'Cuộc gọi không tồn tại hoặc đã kết thúc.',
+          message: 'Cuộc gọi không tồn tại hoặc đã kết thúc',
         });
         return;
       }
@@ -776,7 +776,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           },
           conversationId,
           candidate,
-          message: `ICE candidate từ người dùng ${senderInfo.firstName} ${senderInfo.lastName} trong cuộc gọi nhóm.`,
+          message: `ICE candidate từ người dùng ${senderInfo.firstName} ${senderInfo.lastName} trong cuộc gọi nhóm`,
         });
       } else {
         const participantIds = Array.from(activeCall).filter(
@@ -784,7 +784,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         );
         if (participantIds.length === 0) {
           client.emit('call-error', {
-            message: 'Không tìm thấy người nhận cuộc gọi.',
+            message: 'Không tìm thấy người nhận cuộc gọi',
           });
           return;
         }
@@ -800,7 +800,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
             },
             conversationId,
             candidate,
-            message: `ICE candidate từ người dùng ${senderInfo.firstName} ${senderInfo.lastName}.`,
+            message: `ICE candidate từ người dùng ${senderInfo.firstName} ${senderInfo.lastName}`,
           });
         } else {
           client.emit('call-error', {
