@@ -150,37 +150,47 @@ export class CommentsService {
       );
     }
 
-    if (comment.author.id !== userId)
+    if (comment.author.id !== userId) {
       throw new BadRequestException(ErrorMessages.COMMENT_NOT_OWNER.message);
-
-    const allComments = await this.commentRepository.findDescendants(comment);
-
-    const commentIds = allComments.map((c) => c.id);
-
-    if (commentIds.length === 0) {
-      throw new BadRequestException(ErrorMessages.COMMENT_DATA_INVALID.message);
     }
 
-    await this.commentRepository
-      .createQueryBuilder()
-      .delete()
-      .from('comment_closure')
-      .where('id_descendant IN (:...commentIds)', { commentIds })
-      .execute();
+    const rawDescendants = await this.commentRepository.query(
+      `
+    WITH RECURSIVE descendants AS (
+      SELECT id
+      FROM comment
+      WHERE id = ?
+      UNION ALL
+      SELECT c.id
+      FROM comment c
+      INNER JOIN descendants d ON c.parentId = d.id
+    )
+    SELECT id FROM descendants;
+    `,
+      [id],
+    );
 
-    await this.commentReactionRepository
-      .createQueryBuilder()
-      .delete()
-      .from(CommentReactionRecord)
-      .where('commentId IN (:...commentIds)', { commentIds })
-      .execute();
+    const commentIds = rawDescendants.map((record) => record.id);
+    if (commentIds.length === 0)
+      throw new BadRequestException(ErrorMessages.COMMENT_DATA_INVALID.message);
 
-    await this.commentRepository
-      .createQueryBuilder()
-      .delete()
-      .from(Comment)
-      .where('id IN (:...commentIds)', { commentIds })
-      .execute();
+    for (const commentId of commentIds) {
+      await this.commentReactionRepository
+        .createQueryBuilder()
+        .delete()
+        .from(CommentReactionRecord)
+        .where('commentId = :commentId', { commentId })
+        .execute();
+    }
+
+    for (const commentId of [...commentIds].reverse()) {
+      await this.commentRepository
+        .createQueryBuilder()
+        .delete()
+        .from(Comment)
+        .where('id = :commentId', { commentId })
+        .execute();
+    }
   }
 
   private buildCommentTree(comments: Comment[]): Comment[] {

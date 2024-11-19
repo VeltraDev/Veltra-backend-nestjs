@@ -121,21 +121,48 @@ export class ConversationsService extends BaseService<Conversation> {
     results: any[];
   }> {
     const validSortFields = ['name', 'createdAt'];
+
+    const userConversations = await this.repository
+      .createQueryBuilder('conversation')
+      .innerJoinAndSelect('conversation.users', 'user', 'user.id = :userId', {
+        userId,
+      })
+      .leftJoinAndSelect('conversation.admin', 'admin')
+      .leftJoinAndSelect('conversation.messages', 'messages')
+      .select([
+        'conversation.id',
+        'conversation.name',
+        'conversation.isGroup',
+        'conversation.createdAt',
+        'conversation.updatedAt',
+      ])
+      .getMany();
+
+    const conversationIds = userConversations.map((c) => c.id);
+
+    if (conversationIds.length === 0) {
+      return {
+        total: 0,
+        page: Number(query.page) || 1,
+        limit: Number(query.limit) || 10,
+        results: [],
+      };
+    }
+
     const paginatedConversations = await this.getAll(
-      query,
+      {
+        ...query,
+        conversationIds,
+      },
       validSortFields,
       'conversation',
       ['users', 'admin', 'messages'],
     );
 
-    const userConversations = paginatedConversations.results.filter(
-      (conversation) => conversation.users.some((user) => user.id === userId),
-    );
-
-    const total = userConversations.length;
+    const total = paginatedConversations.total;
 
     const conversationsWithLatestMessage = await Promise.all(
-      userConversations.map(async (conversation) => {
+      paginatedConversations.results.map(async (conversation) => {
         const latestMessage = await this.messageRepository.findOne({
           where: { conversation: { id: conversation.id } },
           order: { createdAt: 'DESC' },
@@ -514,13 +541,13 @@ export class ConversationsService extends BaseService<Conversation> {
 
     await this.conversationRepository.remove(conversation);
 
-    const deleter = await this.userRepository.findOne({
+    const userDelete = await this.userRepository.findOne({
       where: { id: adminId },
     });
 
     this.eventEmitter.emit('conversation.deleted', {
       conversationId: id,
-      deleter,
+      userDelete,
     });
   }
 

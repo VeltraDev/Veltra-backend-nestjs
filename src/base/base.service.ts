@@ -85,7 +85,11 @@ export class BaseService<T> {
       const value = filters[key];
 
       if (value !== undefined && value !== null) {
-        if (typeof value === 'string') {
+        if (key === 'conversationIds' && Array.isArray(value)) {
+          queryBuilder.andWhere(`${alias}.id IN (:...conversationIds)`, {
+            conversationIds: value,
+          });
+        } else if (typeof value === 'string') {
           queryBuilder.andWhere(`LOWER(${alias}.${key}) LIKE LOWER(:${key})`, {
             [key]: `%${value}%`,
           });
