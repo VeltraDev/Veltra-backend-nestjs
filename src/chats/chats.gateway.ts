@@ -613,8 +613,8 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (!this.activeCalls.has(conversationId)) {
           this.activeCalls.set(conversationId, new Set());
         }
-        this.activeCalls.get(conversationId).add(callerId);
-        this.activeCalls.get(conversationId).add(to);
+        this.activeCalls.get(conversationId)!.add(callerId);
+        this.activeCalls.get(conversationId)!.add(to);
       } else {
         client.emit('call-error', {
           message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
@@ -749,9 +749,9 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       if (this.activeCalls.has(conversationId)) {
-        this.activeCalls.get(conversationId).delete(userId);
-        this.activeCalls.get(conversationId).delete(to);
-        if (this.activeCalls.get(conversationId).size === 0) {
+        this.activeCalls.get(conversationId)!.delete(userId);
+        this.activeCalls.get(conversationId)!.delete(to);
+        if (this.activeCalls.get(conversationId)!.size === 0) {
           this.activeCalls.delete(conversationId);
         }
       }
