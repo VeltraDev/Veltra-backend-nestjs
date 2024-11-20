@@ -22,6 +22,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Conversation } from 'src/conversations/entities/conversation.entity';
 import { User } from 'src/users/entities/user.entity';
 import { ConversationResponseDto } from 'src/conversations/dto/response/conversation-response.dto';
+import { MessageResponseDto } from 'src/messages/dto/response/message-response.dto';
 
 @WebSocketGateway(8081, {
   cors: {
@@ -144,13 +145,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } catch (error) {
       client.emit('error', { message: error.message });
     }
-  }
-
-  private isUserInCall(conversationId: string, userId: string): boolean {
-    if (this.activeCalls.has(conversationId)) {
-      return this.activeCalls.get(conversationId).has(userId);
-    }
-    return false;
   }
 
   private isUserOnline(userId: string): boolean {
@@ -343,9 +337,9 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     conversationId: string;
     deleter: User;
   }) {
-    const deleterPlain = await this.getUserPlainInfo(payload.deleter.id);
+    const deletedBy = await this.getUserPlainInfo(payload.deleter.id);
 
-    const message = `Cuộc trò chuyện với id ${payload.conversationId} đã bị xóa bởi ${deleterPlain.firstName} ${deleterPlain.lastName}`;
+    const message = `Cuộc trò chuyện với id ${payload.conversationId} đã bị xóa bởi ${deletedBy.firstName} ${deletedBy.lastName}`;
 
     this.server.to(payload.conversationId).emit('conversationDeleted', {
       conversationId: payload.conversationId,
@@ -429,6 +423,21 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
+  @OnEvent('message.deleted')
+  async handleMessageDeleted(payload: {
+    deletedMessageInfo: MessageResponseDto;
+    conversationId: string;
+    userId: string;
+  }) {
+    const message = `Tin nhắn với ID ${payload.deletedMessageInfo.id} đã bị xóa bởi ${payload.deletedMessageInfo.sender.firstName} ${payload.deletedMessageInfo.sender.lastName}`;
+
+    this.server.to(payload.conversationId).emit('deletedMessage', {
+      deletedMessageInfo: payload.deletedMessageInfo,
+      conversationId: payload.conversationId,
+      message,
+    });
+  }
+
   // ----- Chat real time features -----
 
   @SubscribeMessage('joinConversation')
@@ -449,12 +458,12 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.server.to(conversation.id).emit('userJoined', {
         user: userInfo,
-        message: `Người dùng ${userInfo.firstName} đã tham gia cuộc trò chuyện.`,
+        message: `Người dùng ${userInfo.firstName} đã tham gia cuộc trò chuyện`,
       });
 
       client.emit('joinedConversation', {
         conversation,
-        message: 'Bạn đã tham gia cuộc trò chuyện.',
+        message: 'Bạn đã tham gia cuộc trò chuyện',
       });
     } catch (error) {
       client.emit('error', { message: error.message });
@@ -467,24 +476,22 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() request: CreateMessageDto,
   ) {
     try {
-      const conversationId = request.conversationId;
+      await this.ensureClientInRoom(client, request.conversationId);
 
-      await this.ensureClientInRoom(client, conversationId);
+      const { conversationId, messageResponse } =
+        await this.chatsService.handleSendMessages(client.user, request);
 
-      const { messageResponse } = await this.chatsService.handleSendMessages(
-        client.user,
-        request,
-      );
-
-      const message = 'Tin nhắn mới.';
+      const message = `Bạn đã gửi tin nhắn ${messageResponse.content}`;
       this.server.to(conversationId).emit('receiveMessage', {
         ...messageResponse,
+        conversationId,
         message: message,
       });
 
       client.emit('messageSent', {
         ...messageResponse,
-        message: 'Tin nhắn đã gửi thành công.',
+        conversationId,
+        message: 'Tin nhắn đã gửi thành công',
       });
     } catch (error) {
       client.emit('error', { message: error.message });
@@ -504,13 +511,13 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.server.to(conversationId).emit('receiveMessage', {
         ...message,
-        message: 'Tin nhắn đã được chuyển tiếp.',
+        message: `Tin nhắn của bạn đã được chuyển tiếp đến cuộc trò chuyện ID ${conversationId}`,
       });
 
       client.emit('messageForwarded', {
         ...message,
         conversationId,
-        message: 'Bạn đã chuyển tiếp tin nhắn thành công.',
+        message: 'Bạn đã chuyển tiếp tin nhắn thành công',
       });
     } catch (error) {
       client.emit('error', { message: error.message });
@@ -548,7 +555,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const userInfo = await this.getFullUserInfo(updatedUser.id);
 
-      const message = `Trạng thái của người dùng đã được cập nhật thành "${status}".`;
+      const message = `Trạng thái của người dùng đã được cập nhật thành "${status}"`;
       this.server.emit('displayStatusChanged', {
         user: userInfo,
         status,

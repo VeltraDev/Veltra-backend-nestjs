@@ -13,7 +13,9 @@ import { CreateMessageDto } from './dto/request/create-message.dto';
 import { ErrorMessages } from 'src/exception/error-messages.enum';
 import { BaseService } from 'src/base/base.service';
 import { ForwardMessageDto } from './dto/request/forward-message.dto';
-import { Conversation } from 'src/conversations/entities/conversation.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { plainToClass } from 'class-transformer';
+import { MessageResponseDto } from './dto/response/message-response.dto';
 
 @Injectable()
 export class MessagesService extends BaseService<Message> {
@@ -23,6 +25,7 @@ export class MessagesService extends BaseService<Message> {
     private readonly conversationService: ConversationsService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly eventEmitter: EventEmitter2,
   ) {
     super(messageRepository);
   }
@@ -156,6 +159,16 @@ export class MessagesService extends BaseService<Message> {
       throw new ForbiddenException(
         ErrorMessages.MESSAGE_DELETE_FORBIDDEN.message,
       );
+
+    const messageResponse = plainToClass(MessageResponseDto, message, {
+      excludeExtraneousValues: true,
+    });
+
+    this.eventEmitter.emit('message.deleted', {
+      deletedMessageInfo: messageResponse,
+      conversationId: message.conversation.id,
+      userId,
+    });
 
     await this.messageRepository.remove(message);
   }

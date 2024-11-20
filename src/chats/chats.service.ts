@@ -42,7 +42,10 @@ export class ChatsService {
     };
   }
 
-  async handleSendMessages(user: UsersInterface, request: CreateMessageDto) {
+  async handleSendMessages(
+    user: UsersInterface,
+    request: CreateMessageDto,
+   ) {
     const { conversationId } = request;
 
     const conversation =
