@@ -705,17 +705,23 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const senderInfo = await this.getFullUserInfo(senderId);
 
-      if (this.isUserOnline(to)) {
-        this.server.to(to).emit('ice-candidate', {
-          from: senderInfo,
-          conversationId,
-          candidate,
-        });
-      } else {
-        client.emit('call-error', {
-          message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
-        });
-      }
+      // if (this.isUserOnline(to)) {
+      //   this.server.to(to).emit('ice-candidate', {
+      //     from: senderInfo,
+      //     conversationId,
+      //     candidate,
+      //   });
+      // } else {
+      //   client.emit('call-error', {
+      //     message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
+      //   });
+      // }
+
+      this.server.to(to).emit('ice-candidate', {
+        from: senderInfo,
+        conversationId,
+        candidate,
+      });
     } catch (error) {
       client.emit('error', { message: error.message });
     }
