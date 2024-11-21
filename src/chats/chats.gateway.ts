@@ -609,24 +609,37 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const callerInfo = await this.getFullUserInfo(callerId);
 
-      if (this.isUserOnline(to)) {
-        this.server.to(to).emit('receive-call', {
-          from: callerInfo,
-          conversationId,
-          offer,
-          message: `Bạn có một cuộc gọi từ ${callerInfo.firstName} ${callerInfo.lastName}`,
-        });
+      // if (this.isUserOnline(to)) {
+      //   this.server.to(to).emit('receive-call', {
+      //     from: callerInfo,
+      //     conversationId,
+      //     offer,
+      //     message: `Bạn có một cuộc gọi từ ${callerInfo.firstName} ${callerInfo.lastName}`,
+      //   });
 
-        if (!this.activeCalls.has(conversationId)) {
-          this.activeCalls.set(conversationId, new Set());
-        }
-        this.activeCalls.get(conversationId)!.add(callerId);
-        this.activeCalls.get(conversationId)!.add(to);
-      } else {
-        client.emit('call-error', {
-          message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
-        });
+      //   if (!this.activeCalls.has(conversationId)) {
+      //     this.activeCalls.set(conversationId, new Set());
+      //   }
+      //   this.activeCalls.get(conversationId)!.add(callerId);
+      //   this.activeCalls.get(conversationId)!.add(to);
+      // } else {
+      //   client.emit('call-error', {
+      //     message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
+      //   });
+      // }
+
+      this.server.to(to).emit('receive-call', {
+        from: callerInfo,
+        conversationId,
+        offer,
+        message: `Bạn có một cuộc gọi từ ${callerInfo.firstName} ${callerInfo.lastName}`,
+      });
+
+      if (!this.activeCalls.has(conversationId)) {
+        this.activeCalls.set(conversationId, new Set());
       }
+      this.activeCalls.get(conversationId)!.add(callerId);
+      this.activeCalls.get(conversationId)!.add(to);
     } catch (error) {
       client.emit('error', { message: error.message });
     }
@@ -662,18 +675,25 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const answererInfo = await this.getFullUserInfo(answererId);
 
-      if (this.isUserOnline(to)) {
-        this.server.to(to).emit('call-answered', {
-          from: answererInfo,
-          conversationId,
-          answer,
-          message: `Người dùng ${answererInfo.firstName} ${answererInfo.lastName} đã trả lời cuộc gọi`,
-        });
-      } else {
-        client.emit('call-error', {
-          message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
-        });
-      }
+      // if (this.isUserOnline(to)) {
+      //   this.server.to(to).emit('call-answered', {
+      //     from: answererInfo,
+      //     conversationId,
+      //     answer,
+      //     message: `Người dùng ${answererInfo.firstName} ${answererInfo.lastName} đã trả lời cuộc gọi`,
+      //   });
+      // } else {
+      //   client.emit('call-error', {
+      //     message: ErrorMessages.USER_NOT_ONLINE_STATUS.message,
+      //   });
+      // }
+
+      this.server.to(to).emit('call-answered', {
+        from: answererInfo,
+        conversationId,
+        answer,
+        message: `Người dùng ${answererInfo.firstName} ${answererInfo.lastName} đã trả lời cuộc gọi`,
+      });
     } catch (error) {
       client.emit('error', { message: error.message });
     }
@@ -752,14 +772,21 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const userInfo = await this.getFullUserInfo(userId);
 
-      if (this.isUserOnline(to)) {
-        this.server.to(to).emit('end-call', {
-          from: userInfo,
-          conversationId,
-          reason: 'user-ended-call',
-          message: `Người dùng ${userInfo.firstName} ${userInfo.lastName} đã kết thúc cuộc gọi`,
-        });
-      }
+      // if (this.isUserOnline(to)) {
+      //   this.server.to(to).emit('end-call', {
+      //     from: userInfo,
+      //     conversationId,
+      //     reason: 'user-ended-call',
+      //     message: `Người dùng ${userInfo.firstName} ${userInfo.lastName} đã kết thúc cuộc gọi`,
+      //   });
+      // }
+
+      this.server.to(to).emit('end-call', {
+        from: userInfo,
+        conversationId,
+        reason: 'user-ended-call',
+        message: `Người dùng ${userInfo.firstName} ${userInfo.lastName} đã kết thúc cuộc gọi`,
+      });
 
       if (this.activeCalls.has(conversationId)) {
         this.activeCalls.get(conversationId)!.delete(userId);
