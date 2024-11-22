@@ -303,6 +303,12 @@ const PERMISSIONS = {
       'DELETE',
       'POSTS',
     ),
+    createPermission(
+      'Lấy tất cả thông tin thông số dashboard',
+      '/api/v1/dashboards',
+      'GET',
+      'POSTS',
+    ),
   ],
   REACTION_TYPES: [
     createPermission(
@@ -440,6 +446,9 @@ export const INIT_USER_LOGIN_PERMISSIONS = [
     (p) => p.name === 'Xóa phản hồi cảm xúc khỏi bài viết',
   ),
   PERMISSIONS.POSTS.find((p) => p.name === 'Lấy một bài viết theo ID'),
+  PERMISSIONS.POSTS.find(
+    (p) => p.name === 'Lấy tất cả thông tin thông số dashboard',
+  ),
 
   PERMISSIONS.COMMENTS.find(
     (p) => p.name === 'Lấy thông tin của một bình luận',

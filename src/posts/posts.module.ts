@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { PostsController } from './posts.controller';
+import { DashboardController, PostsController } from './posts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
 import { Comment } from 'src/comments/entities/comment.entity';
@@ -8,6 +8,8 @@ import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-re
 import { CommentReactionRecord } from 'src/comment-reactions/entities/comment-reaction-record.entity';
 import { CommentsModule } from 'src/comments/comments.module';
 import { PostReactionsModule } from 'src/post-reactions/post-reactions.module';
+import { User } from 'src/users/entities/user.entity';
+import { Message } from 'src/messages/entities/message.entity';
 
 @Module({
   imports: [
@@ -16,11 +18,13 @@ import { PostReactionsModule } from 'src/post-reactions/post-reactions.module';
       Comment,
       PostReactionRecord,
       CommentReactionRecord,
+      User,
+      Message,
     ]),
     CommentsModule,
     PostReactionsModule,
   ],
-  controllers: [PostsController],
+  controllers: [PostsController, DashboardController],
   providers: [PostsService],
   exports: [PostsService],
 })

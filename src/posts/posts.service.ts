@@ -11,11 +11,13 @@ import { CreatePostDto } from './dto/request/create-post.dto';
 import { UpdatePostDto } from './dto/request/update-post.dto';
 import { FilterPostsDto } from './dto/request/filter-posts.dto';
 import { BaseService } from 'src/base/base.service';
-import { User } from 'src/users/entities/user.entity';
 import { CommentsService } from 'src/comments/comments.service';
 import { PostReactionRecord } from 'src/post-reactions/entities/post-reaction-record.entity';
 import { CommentReactionRecord } from 'src/comment-reactions/entities/comment-reaction-record.entity';
 import { Comment } from 'src/comments/entities/comment.entity';
+import { UsersInterface } from 'src/users/users.interface';
+import { User } from 'src/users/entities/user.entity';
+import { Message } from 'src/messages/entities/message.entity';
 
 @Injectable()
 export class PostsService extends BaseService<Post> {
@@ -28,12 +30,19 @@ export class PostsService extends BaseService<Post> {
     private readonly commentRepository: Repository<Comment>,
     @InjectRepository(CommentReactionRecord)
     private readonly commentReactionRepository: Repository<CommentReactionRecord>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(Message)
+    private readonly messageRepository: Repository<Message>,
     private readonly commentsService: CommentsService,
   ) {
     super(postRepository);
   }
 
-  async create(createPostDto: CreatePostDto, user: User): Promise<Post> {
+  async create(
+    createPostDto: CreatePostDto,
+    user: UsersInterface,
+  ): Promise<Post> {
     const post = this.postRepository.create({
       ...createPostDto,
       author: user,
@@ -76,11 +85,11 @@ export class PostsService extends BaseService<Post> {
   async update(
     id: string,
     updatePostDto: UpdatePostDto,
-    userId: string,
+    user: UsersInterface,
   ): Promise<Post> {
     const post = await this.findOne(id);
 
-    if (post.author.id !== userId) {
+    if (post.author.id !== user.id || user.role.name === 'ADMIN') {
       throw new BadRequestException(ErrorMessages.POST_NOT_OWNER.message);
     }
 
@@ -89,7 +98,7 @@ export class PostsService extends BaseService<Post> {
     return this.postRepository.save(post);
   }
 
-  async remove(id: string, userId: string): Promise<void> {
+  async remove(id: string, user: UsersInterface): Promise<void> {
     const post = await this.postRepository.findOne({
       where: { id },
       relations: ['author'],
@@ -101,7 +110,7 @@ export class PostsService extends BaseService<Post> {
       );
     }
 
-    if (post.author.id !== userId) {
+    if (post.author.id !== user.id || user.role.name === 'ADMIN') {
       throw new BadRequestException(ErrorMessages.POST_NOT_OWNER.message);
     }
 
@@ -137,5 +146,67 @@ export class PostsService extends BaseService<Post> {
     }
 
     await this.postRepository.remove(post);
+  }
+
+  // Dashboard admin (total)
+  async getDashboardData(): Promise<any> {
+    const totalPosts = await this.postRepository.count();
+    const totalComments = await this.commentRepository.count();
+    const totalUsers = await this.userRepository.count();
+    const totalReactions = await this.postReactionRepository.count();
+
+    const reactionsOverTime = await this.postReactionRepository
+      .createQueryBuilder('reaction')
+      .leftJoinAndSelect('reaction.reactionType', 'reactionType')
+      .select("DATE_FORMAT(reaction.createdAt, '%Y-%m-%d') as date")
+      .addSelect('reactionType.type', 'reactionType')
+      .addSelect('COUNT(*) as count')
+      .groupBy('date')
+      .addGroupBy('reactionType.type')
+      .orderBy('date', 'ASC')
+      .getRawMany();
+
+    const reactionRatePerPost =
+      totalPosts > 0 ? totalReactions / totalPosts : 0;
+
+    const postsOverTime = await this.postRepository
+      .createQueryBuilder('post')
+      .select("DATE_FORMAT(post.createdAt, '%Y-%m-%d') as date")
+      .addSelect('COUNT(*) as count')
+      .groupBy('date')
+      .orderBy('date', 'ASC')
+      .getRawMany();
+
+    const commentsOverTime = await this.commentRepository
+      .createQueryBuilder('comment')
+      .select("DATE_FORMAT(comment.createdAt, '%Y-%m-%d') as date")
+      .addSelect('COUNT(*) as count')
+      .groupBy('date')
+      .orderBy('date', 'ASC')
+      .getRawMany();
+
+    const messagesOverTime = await this.messageRepository
+      .createQueryBuilder('message')
+      .select("DATE_FORMAT(message.createdAt, '%H:00') as hour")
+      .addSelect('COUNT(*) as count')
+      .groupBy('hour')
+      .orderBy('hour', 'ASC')
+      .getRawMany();
+
+    return {
+      total: {
+        posts: totalPosts,
+        comments: totalComments,
+        users: totalUsers,
+        reactions: totalReactions,
+      },
+      charts: {
+        reactionsOverTime,
+        reactionRatePerPost,
+        postsOverTime,
+        commentsOverTime,
+        messagesOverTime,
+      },
+    };
   }
 }
