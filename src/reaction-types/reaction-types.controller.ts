@@ -1,4 +1,3 @@
-// src/reaction-types/reaction-types.controller.ts
 import {
   Controller,
   Get,
@@ -6,7 +5,6 @@ import {
   Patch,
   Param,
   Delete,
-  InternalServerErrorException,
   Query,
   Post,
 } from '@nestjs/common';
@@ -18,7 +16,6 @@ import { plainToClass } from 'class-transformer';
 import { PaginatedReactionTypesDto } from './dto/response/paginate-reaction-types-response.dto';
 import { ReactionTypeResponseDto } from './dto/response/reaction-type-response.dto';
 import { FilterReactionTypesDto } from './dto/request/filter-reaction-types.dto';
-import { ErrorMessages } from 'src/exception/error-messages.enum';
 
 @Controller('reaction-types')
 export class ReactionTypesController {

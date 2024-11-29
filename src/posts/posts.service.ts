@@ -89,7 +89,7 @@ export class PostsService extends BaseService<Post> {
   ): Promise<Post> {
     const post = await this.findOne(id);
 
-    if (post.author.id !== user.id || user.role.name === 'ADMIN') {
+    if (post.author.id !== user.id) {
       throw new BadRequestException(ErrorMessages.POST_NOT_OWNER.message);
     }
 
@@ -110,7 +110,7 @@ export class PostsService extends BaseService<Post> {
       );
     }
 
-    if (post.author.id !== user.id || user.role.name === 'ADMIN') {
+    if (post.author.id !== user.id) {
       throw new BadRequestException(ErrorMessages.POST_NOT_OWNER.message);
     }
 
@@ -135,6 +135,13 @@ export class PostsService extends BaseService<Post> {
         .delete()
         .from(CommentReactionRecord)
         .where('commentId IN (:...commentIds)', { commentIds })
+        .execute();
+
+      await this.commentRepository
+        .createQueryBuilder()
+        .delete()
+        .from(Comment)
+        .where('parentId IS NOT NULL AND postId = :postId', { postId: id })
         .execute();
 
       await this.commentRepository
