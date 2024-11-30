@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: UsersInterface) {
-    const { id, email, firstName, lastName, role } = payload;
+    const { id, email, firstName, lastName, role, avatar } = payload;
 
     const userRole = role as unknown as { id: string; name: string };
 
@@ -32,6 +32,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       email,
       firstName,
       lastName,
+      avatar,
       role: {
         id: userRole.id,
         name: userRole.name,

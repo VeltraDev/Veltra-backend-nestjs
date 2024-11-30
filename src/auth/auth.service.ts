@@ -127,12 +127,13 @@ export class AuthService {
     });
 
     // Create access token
-    const { id, email, firstName, lastName, role } = currentUser;
+    const { id, email, firstName, lastName, avatar, role } = currentUser;
     const payload: UsersInterface = {
       id,
       email,
       firstName,
       lastName,
+      avatar,
       role: { id: role.id, name: role.name },
     };
 
